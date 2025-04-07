@@ -9,7 +9,7 @@ function App() {
   return (
     <>
       <div className="bg-blue-500 text-white text-2xl p-4 rounded-lg shadow-lg">
-        Tailwind 적용 완료!
+        Tailwind 적용 완료!!
       </div>
       <div>
         <a href="https://vite.dev" target="_blank">
