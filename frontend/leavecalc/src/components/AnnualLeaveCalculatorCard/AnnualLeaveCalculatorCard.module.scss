@@ -1,6 +1,7 @@
 @use '../../styles/variables' as vars;
 
 .card {
-  @apply max-w-sm;
   background-color: vars.$card-bg-main;
+  width: 1000px;
+  max-width: 100%;
 }
