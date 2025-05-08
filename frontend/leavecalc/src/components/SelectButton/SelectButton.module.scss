@@ -1,0 +1,47 @@
+@use '../../styles/variables' as vars;
+
+.button {
+  // 기본 스타일
+  padding: 0.5rem 1rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  background-color: white;
+  border: 1px solid #e5e7eb;
+
+  // 둥근 모서리 (왼쪽만)
+  border-top-left-radius: 0.5rem;
+  border-bottom-left-radius: 0.5rem;
+
+  // 텍스트 색상
+  color: #111827; // text-gray-900에 해당
+
+  // 호버 상태
+  &:hover {
+    background-color: #f3f4f6; // hover:bg-gray-100에 해당
+    border-color: vars.$button-primary;
+  }
+
+  // 포커스 상태
+  &:focus {
+    position: relative;
+    z-index: 10;
+    outline: none;
+    border-color: vars.$button-primary;
+    box-shadow: 0 0 0 2px rgba(vars.$button-primary, 0.25);
+  }
+}
+
+// 선택된 상태 클래스
+.selected {
+  border-color: vars.$button-primary;
+  border-width: 2px;
+  background-color: rgba(vars.$button-primary, 0.05);
+}
+
+// 오른쪽 버튼을 위한 클래스 (필요 시)
+.rightButton {
+  border-top-left-radius: 0;
+  border-bottom-left-radius: 0;
+  border-top-right-radius: 0.5rem;
+  border-bottom-right-radius: 0.5rem;
+}
