@@ -1,0 +1,126 @@
+@use '../../styles/variables' as vars;
+
+.calculatorCard {
+  background-color: #eef0ff;
+  border-radius: 1rem;
+  padding: 1.5rem;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+  width: 100%;
+  max-width: 500px;
+  margin: 0 auto;
+}
+
+.header {
+  text-align: center;
+  margin-bottom: 1.5rem;
+}
+
+.title {
+  font-size: 1.5rem;
+  font-weight: 700;
+  margin-bottom: 0.5rem;
+  color: #333;
+}
+
+.subtitle {
+  font-size: 1rem;
+  margin-bottom: 0.5rem;
+  color: #555;
+}
+
+.description {
+  font-size: 0.875rem;
+  margin-bottom: 0.25rem;
+  color: #666;
+}
+
+.notice {
+  font-size: 0.75rem;
+  color: #888;
+  margin-bottom: 1rem;
+}
+
+.formContent {
+  background-color: white;
+  border-radius: 0.75rem;
+  padding: 1.5rem;
+}
+
+.methodSelector {
+  display: flex;
+  gap: 0.5rem;
+  margin-bottom: 1.25rem;
+}
+
+.methodButton {
+  flex: 1;
+  padding: 0.5rem 1rem;
+  font-size: 0.875rem;
+  background-color: white;
+  border: 1px solid #ccc;
+  border-radius: 0.25rem;
+  transition: all 0.2s;
+
+  &:hover {
+    background-color: #f8f9fa;
+  }
+
+  &.selected {
+    background-color: vars.$button-primary;
+    color: white;
+    border-color: vars.$button-primary;
+  }
+}
+
+.dateField {
+  display: flex;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+.dateLabel {
+  width: 30%;
+  text-align: right;
+  padding-right: 1rem;
+  font-size: 0.875rem;
+  color: #555;
+}
+
+.datePickerWrapper {
+  width: 70%;
+}
+
+.checkboxField {
+  display: flex;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+.checkbox {
+  margin-right: 0.5rem;
+}
+
+.checkboxLabel {
+  font-size: 0.875rem;
+  margin-right: 0.25rem;
+}
+
+.calculateButton {
+  width: 100%;
+  background-color: vars.$button-primary;
+  color: white;
+  padding: 0.75rem;
+  border-radius: 0.25rem;
+  font-weight: 500;
+  margin-top: 1rem;
+  transition: background-color 0.2s;
+
+  &:hover {
+    background-color: darken(vars.$button-primary, 10%);
+  }
+
+  &:focus {
+    outline: none;
+    box-shadow: 0 0 0 2px rgba(vars.$button-primary, 0.4);
+  }
+}

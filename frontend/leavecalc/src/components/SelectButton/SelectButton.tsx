@@ -1,27 +1,23 @@
-import styles from './SelectButton.module.scss';
+import React from 'react';
 
 interface SelectButtonProps {
-  label: string;
-  value: string;
-  isRight?: boolean;
   isSelected: boolean;
-  onClick: (value: string) => void;
+  onClick: () => void;
+  children: React.ReactNode;
 }
 
-export default function SelectButton({
-  label,
-  value,
-  isRight = false,
-  isSelected,
-  onClick,
-}: Readonly<SelectButtonProps>) {
+const SelectButton: React.FC<SelectButtonProps> = ({ isSelected, onClick, children }) => {
   return (
     <button
       type="button"
-      className={`${styles.button} ${isSelected ? styles.selected : ''} ${isRight ? styles.rightButton : ''}`}
-      onClick={() => onClick(value)}
+      onClick={onClick}
+      className={`flex-1 py-2 px-4 rounded-md transition-colors ${
+        isSelected ? 'bg-blue-500 text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+      }`}
     >
-      {label}
+      {children}
     </button>
   );
-}
+};
+
+export default SelectButton;

@@ -27,7 +27,8 @@
       "@pages/*": ["pages/*"],
       "@routes/*": ["routes/*"],
       "@interfaces/*": ["types/*"],
-      "@styles/*": ["styles/*"]
+      "@styles/*": ["styles/*"],
+      "@contexts/*": ["contexts/*"]
     }
   },
   "include": ["vite.config.ts"]

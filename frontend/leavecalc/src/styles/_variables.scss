@@ -3,3 +3,11 @@ $card-bg-main: #dcdbff; // 메인 카드
 $card-bg-sub: #eef7ff; // 서브 카드
 $button-primary: #506bfa; // 메인 버튼, 메인 클릭 테두리
 $required: #ee1212; // 필수 입력값 표시
+
+:root {
+  --bg-main: #{$bg-main};
+  --card-bg-main: #{$card-bg-main};
+  --card-bg-sub: #{$card-bg-sub};
+  --button-primary: #{$button-primary};
+  --required: #{$required};
+}

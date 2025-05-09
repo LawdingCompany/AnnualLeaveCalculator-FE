@@ -1,0 +1,15 @@
+@use '../../styles/variables' as vars;
+
+.card {
+  background-color: vars.$card-bg-main;
+  max-width: 100%;
+}
+
+.button {
+  background-color: vars.$button-primary;
+  color: white;
+
+  &:hover {
+    background-color: darken(vars.$button-primary, 10%);
+  }
+}
