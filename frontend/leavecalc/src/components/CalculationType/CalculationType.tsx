@@ -1,6 +1,7 @@
 // CalculationType.tsx
 import { CalculationMethod } from '@interfaces/calculator';
 import CustomDatePicker from '@components/CustomDatePicker/CustomDatePicker';
+import MonthDayInput from '@components/MonthDayInput/MonthDayInput';
 import styles from './CalculationType.module.scss';
 
 interface CalculationTypeProps {
@@ -27,7 +28,7 @@ export default function CalculationType({
   return (
     <div className="mb-6">
       {/* 첫 번째 행: 산정 방식 + 버튼 (왼쪽) / 회계연도 (오른쪽) */}
-      <div className="grid grid-cols-2 gap-4 mb-4">
+      <div className="grid grid-cols-2 gap-4 mt-5 mb-11">
         {/* 왼쪽: 산정 방식 버튼 - gap-3 추가로 간격 조절 */}
         <div className="flex items-center gap-3">
           <div className="w-20 text-right text-sm font-medium text-gray-700">산정 방식</div>
@@ -59,10 +60,10 @@ export default function CalculationType({
 
         {/* 오른쪽: 회계연도 필드 (조건부 표시) - gap-3 추가로 간격 조절 */}
         {method === 'fiscalYear' && (
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-3 ">
             <div className="w-20 text-right text-sm font-medium text-gray-700">회계연도</div>
             <div className="w-27">
-              <CustomDatePicker
+              <MonthDayInput
                 selected={fiscalYearDate}
                 onChange={onFiscalYearDateChange}
                 placeholderText="MM.DD"
@@ -73,7 +74,7 @@ export default function CalculationType({
       </div>
 
       {/* 두 번째 행: 입사일 (왼쪽) / 계산 기준일 (오른쪽) */}
-      <div className="grid grid-cols-2 gap-4">
+      <div className="grid grid-cols-2 gap-4 mb-11">
         {/* 왼쪽: 입사일 필드 - gap-3 추가로 간격 조절 */}
         <div className="flex items-center gap-3">
           <div className="w-20 text-right text-sm font-medium text-gray-700">입사일</div>
