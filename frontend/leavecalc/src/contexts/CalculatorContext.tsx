@@ -32,6 +32,7 @@ interface CalculatorContextProps {
   toggleHolidays: () => void;
   // 특이사항 관련 함수 추가
   addSpecialPeriod: (period: Omit<SpecialPeriod, 'id'>) => void;
+  updateSpecialPeriod: (period: SpecialPeriod) => void;
   removeSpecialPeriod: (id: string) => void;
   // 휴일 관련 함수 추가
   addHoliday: (holiday: Omit<Holiday, 'id'>) => void;
@@ -102,6 +103,16 @@ export default function CalculatorProvider({ children }: Readonly<{ children: Re
     }));
   }, []);
 
+  // 특이사항 편집 함수
+  const updateSpecialPeriod = useCallback((updatedPeriod: SpecialPeriod) => {
+    setFormData((prev) => ({
+      ...prev,
+      specialPeriods: prev.specialPeriods.map((period) =>
+        period.id === updatedPeriod.id ? updatedPeriod : period,
+      ),
+    }));
+  }, []);
+
   // 특이사항 제거 함수
   const removeSpecialPeriod = useCallback((id: string) => {
     setFormData((prev) => ({
@@ -150,8 +161,8 @@ export default function CalculatorProvider({ children }: Readonly<{ children: Re
     setReferenceDate,
     toggleSpecialPeriod,
     toggleHolidays,
-    // 새로 추가된 함수들
     addSpecialPeriod,
+    updateSpecialPeriod,
     removeSpecialPeriod,
     addHoliday,
     removeHoliday,

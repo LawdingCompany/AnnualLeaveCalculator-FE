@@ -1,0 +1,43 @@
+:root {
+  --bg-main: #536bf8;
+  --card-bg-main: #dcdbff;
+  --card-bg-sub: #eef7ff;
+  --button-primary: #506bfa;
+  --required: #ee1212;
+}
+
+.button {
+  padding: 0.5rem 1rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  background-color: white;
+  border: 1px solid #e5e7eb;
+  min-width: 95px;
+  border-top-left-radius: 0.5rem;
+  border-bottom-left-radius: 0.5rem;
+  color: #111827;
+}
+.button:hover {
+  background-color: #f3f4f6;
+  border-color: #506bfa;
+}
+.button:focus {
+  position: relative;
+  z-index: 10;
+  outline: none;
+  border-color: #506bfa;
+  box-shadow: 0 0 0 2px rgba(80, 107, 250, 0.25);
+}
+
+.selected {
+  border-color: #506bfa;
+  border-width: 2px;
+  background-color: rgba(80, 107, 250, 0.05);
+}
+
+.rightButton {
+  border-top-left-radius: 0;
+  border-bottom-left-radius: 0;
+  border-top-right-radius: 0.5rem;
+  border-bottom-right-radius: 0.5rem;
+}/*# sourceMappingURL=SelectButton.module.css.map */

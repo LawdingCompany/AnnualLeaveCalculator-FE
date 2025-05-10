@@ -1,3 +1,4 @@
+// CalcaulatorForm.tsx
 import React, { lazy, Suspense } from 'react';
 import CalculatorProvider, { useCalculator } from '@contexts/CalculatorContext';
 import CalculationType from '@components/CalculationType/CalculationType';
