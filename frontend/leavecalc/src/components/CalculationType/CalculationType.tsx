@@ -65,8 +65,6 @@ export default function CalculationType({
               <CustomDatePicker
                 selected={fiscalYearDate}
                 onChange={onFiscalYearDateChange}
-                monthDayOnly={true}
-                dateFormat="MM.dd"
                 placeholderText="MM.DD"
               />
             </div>

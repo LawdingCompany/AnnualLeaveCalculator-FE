@@ -10,8 +10,6 @@ type CalendarView = 'day' | 'month' | 'year';
 interface CustomDatePickerProps {
   selected: Date | null;
   onChange: (date: Date | null) => void;
-  monthDayOnly?: boolean;
-  Only?: boolean;
   dateFormat?: string;
   placeholderText?: string;
   className?: string;
@@ -39,7 +37,6 @@ const MONTHS = [
 export default function CustomDatePicker({
   selected,
   onChange,
-  monthDayOnly = false,
   dateFormat = 'YYYY.MM.DD',
   placeholderText = 'YYYY.MM.DD',
   className = '',
@@ -54,7 +51,7 @@ export default function CustomDatePicker({
   const [selectedDate, setSelectedDate] = useState<Date | null>(selected);
 
   // 캘린더 뷰 상태 (일/월/연도)
-  const [view, setView] = useState<CalendarView>(monthDayOnly ? 'month' : 'day');
+  const [view, setView] = useState<CalendarView>('day');
 
   // 수동 입력을 위한 상태
   const [inputValue, setInputValue] = useState<string>('');
@@ -132,22 +129,11 @@ export default function CustomDatePicker({
 
   // 날짜를 지정된 포맷에 맞게 표시하는 함수
   const formatDate = (date: Date): string => {
-    if (monthDayOnly) {
-      const month = (date.getMonth() + 1).toString().padStart(2, '0');
-      const day = date.getDate().toString().padStart(2, '0');
+    const year = date.getFullYear();
+    const month = (date.getMonth() + 1).toString().padStart(2, '0');
+    const day = date.getDate().toString().padStart(2, '0');
 
-      if (dateFormat === 'MM.DD') {
-        return `${month}.${day}`;
-      } else {
-        return `${month}월 ${day}일`;
-      }
-    } else {
-      const year = date.getFullYear();
-      const month = (date.getMonth() + 1).toString().padStart(2, '0');
-      const day = date.getDate().toString().padStart(2, '0');
-
-      return `${year}.${month}.${day}`;
-    }
+    return `${year}.${month}.${day}`;
   };
 
   // 날짜 변경 시 input 값 포맷팅 및 설정
@@ -188,9 +174,6 @@ export default function CustomDatePicker({
         }
 
         formatted += monthNum.toString().padStart(monthPart.length, '0');
-
-        // 월 포맷으로만 사용하는 경우는 여기서 종료
-        if (monthDayOnly) return formatted;
 
         // 월이 완성되고 추가 숫자가 있으면 일 처리
         if (numbers.length > 6) {
@@ -245,19 +228,10 @@ export default function CustomDatePicker({
       // 입력된 날짜 검증
       const parts = inputValue.split('.');
 
-      let year: number, month: number, day: number;
-
-      if (monthDayOnly) {
-        // 월/일만 있는 경우 현재 연도 사용
-        year = currentYear;
-        month = parts.length > 0 && parts[0] ? parseInt(parts[0].trim(), 10) - 1 : 0;
-        day = parts.length > 1 && parts[1] ? parseInt(parts[1].trim(), 10) : 1;
-      } else {
-        // 연/월/일 모두 처리
-        year = parts[0] ? parseInt(parts[0].trim(), 10) : currentYear;
-        month = parts.length > 1 && parts[1] ? parseInt(parts[1].trim(), 10) - 1 : 0;
-        day = parts.length > 2 && parts[2] ? parseInt(parts[2].trim(), 10) : 1;
-      }
+      // 연/월/일 모두 처리
+      let year = parts[0] ? parseInt(parts[0].trim(), 10) : currentYear;
+      let month = parts.length > 1 && parts[1] ? parseInt(parts[1].trim(), 10) - 1 : 0;
+      let day = parts.length > 2 && parts[2] ? parseInt(parts[2].trim(), 10) : 1;
 
       // 값 범위 검증
       if (year < 2017 || year > currentYear + 5) year = currentYear;
@@ -305,14 +279,8 @@ export default function CustomDatePicker({
     // 콜백 함수 호출
     if (onChange) onChange(date);
 
-    // 날짜를 선택하면 monthDayOnly가 아닌 경우에만 캘린더 닫기
-    if (view === 'day') {
-      // setTimeout으로 상태 업데이트 후 닫기 실행
-      setTimeout(() => {
-        setIsOpen(false);
-      }, 0);
-      setIsOpen(false);
-    }
+    // 날짜를 선택하면 즉시 캘린더 닫기
+    setIsOpen(false);
   };
 
   // 월 선택 처리
@@ -320,15 +288,9 @@ export default function CustomDatePicker({
     const newDate = new Date(currentDate);
     newDate.setMonth(monthIndex);
 
-    if (monthDayOnly) {
-      // 월만 선택하는 모드인 경우 현재 날짜에 1일로 설정
-      setCurrentDate(newDate);
-      setView('day');
-    } else {
-      // 일반 모드에서는 일 선택 뷰로 전환
-      setCurrentDate(newDate);
-      setView('day');
-    }
+    // 일반 모드에서는 일 선택 뷰로 전환
+    setCurrentDate(newDate);
+    setView('day');
   };
 
   // 연도 선택 처리
