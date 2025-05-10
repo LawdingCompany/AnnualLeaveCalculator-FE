@@ -79,6 +79,23 @@
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
   overflow: hidden;
   width: 280px;
+
+  /* 애니메이션 초기 상태 및 실행 설정 */
+  opacity: 0;
+  transform: translateY(-10px);
+  animation: fadeIn 0.2s ease forwards;
+}
+
+/* 페이드인 애니메이션 정의 */
+@keyframes fadeIn {
+  0% {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .month-day-container {

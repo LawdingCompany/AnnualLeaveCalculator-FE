@@ -405,7 +405,7 @@ export default function CustomDatePicker({
     const month = currentDate.getMonth();
 
     if (view === 'day') {
-      return `${year}. ${month + 1}.`;
+      return `${year}년 ${month + 1}월`;
     } else if (view === 'month') {
       return `${year}`;
     } else {

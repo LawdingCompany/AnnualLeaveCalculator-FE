@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useEffect } from 'react';
 import { useCalculator, SpecialPeriod } from '@contexts/CalculatorContext';
 import InfoTooltip from '@components/InfoTooltip/InfoTooltip';
 import CustomDatePicker from '@components/CustomDatePicker/CustomDatePicker';
@@ -44,15 +44,37 @@ const SpecialPeriodSection: React.FC = () => {
     setCurrentPeriod((prev) => ({ ...prev, type: e.target.value }));
   }, []);
 
-  // 시작일 변경 핸들러
+  // 시작일 변경 핸들러 - 유효성 검증 로직 추가
   const handleStartDateChange = useCallback((date: Date | null) => {
-    setCurrentPeriod((prev) => ({ ...prev, startDate: date }));
+    setCurrentPeriod((prev) => {
+      // 새 시작일이 종료일보다 뒤에 있는 경우, 종료일 초기화
+      if (date && prev.endDate && date > prev.endDate) {
+        return {
+          ...prev,
+          startDate: date,
+          endDate: null, // 종료일 초기화
+        };
+      }
+      // 그렇지 않으면 시작일만 업데이트
+      return {
+        ...prev,
+        startDate: date,
+      };
+    });
   }, []);
 
   // 종료일 변경 핸들러
-  const handleEndDateChange = useCallback((date: Date | null) => {
-    setCurrentPeriod((prev) => ({ ...prev, endDate: date }));
-  }, []);
+  const handleEndDateChange = useCallback(
+    (date: Date | null) => {
+      // 시작일이 있고, 새 종료일이 시작일보다 이전이면 무시
+      if (currentPeriod.startDate && date && date < currentPeriod.startDate) {
+        return;
+      }
+
+      setCurrentPeriod((prev) => ({ ...prev, endDate: date }));
+    },
+    [currentPeriod.startDate],
+  );
 
   // 특이사항 삭제 핸들러
   const handleRemovePeriod = useCallback(
@@ -61,6 +83,22 @@ const SpecialPeriodSection: React.FC = () => {
     },
     [removeSpecialPeriod],
   );
+
+  // 날짜 변경 시 유효성 검증을 위한 useEffect
+  useEffect(() => {
+    // 시작일과 종료일이 모두 있고, 시작일이 종료일보다 뒤라면
+    if (
+      currentPeriod.startDate &&
+      currentPeriod.endDate &&
+      currentPeriod.startDate > currentPeriod.endDate
+    ) {
+      // 종료일 초기화
+      setCurrentPeriod((prev) => ({
+        ...prev,
+        endDate: null,
+      }));
+    }
+  }, [currentPeriod.startDate, currentPeriod.endDate]);
 
   // 추가 버튼 비활성화 여부
   const isAddDisabled =
@@ -156,7 +194,7 @@ const SpecialPeriodSection: React.FC = () => {
               </div>
 
               <div className="col-span-4">
-                <DatePicker
+                <CustomDatePicker
                   selected={currentPeriod.endDate}
                   onChange={handleEndDateChange}
                   placeholderText="종료일"
