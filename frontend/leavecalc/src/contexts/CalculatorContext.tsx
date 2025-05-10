@@ -36,6 +36,7 @@ interface CalculatorContextProps {
   removeSpecialPeriod: (id: string) => void;
   // 휴일 관련 함수 추가
   addHoliday: (holiday: Omit<Holiday, 'id'>) => void;
+  updateHoliday: (holiday: Holiday) => void;
   removeHoliday: (id: string) => void;
   calculateVacation: () => void;
 }
@@ -134,6 +135,14 @@ export default function CalculatorProvider({ children }: Readonly<{ children: Re
     }));
   }, []);
 
+  // 휴일 편집 함수
+  const updateHoliday = (updated: Holiday) => {
+    setFormData((prev) => ({
+      ...prev,
+      holidays: prev.holidays.map((holiday) => (holiday.id === updated.id ? updated : holiday)),
+    }));
+  };
+
   // 휴일 제거 함수
   const removeHoliday = useCallback((id: string) => {
     setFormData((prev) => ({
@@ -165,6 +174,7 @@ export default function CalculatorProvider({ children }: Readonly<{ children: Re
     updateSpecialPeriod,
     removeSpecialPeriod,
     addHoliday,
+    updateHoliday,
     removeHoliday,
     calculateVacation,
   };

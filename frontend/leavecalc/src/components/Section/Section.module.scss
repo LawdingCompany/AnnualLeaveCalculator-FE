@@ -6,6 +6,12 @@
   &:hover {
     opacity: 0.9;
   }
+  &:disabled {
+    background-color: #d1d5db; // Tailwind gray-300
+    color: white;
+    cursor: not-allowed;
+    opacity: 1;
+  }
 }
 
 .button-outline-primary {

@@ -5,7 +5,7 @@ import CustomDatePicker from '@components/CustomDatePicker/CustomDatePicker';
 import ChevronDown from '@assets/Chevron down.svg';
 import PlusButton from '@assets/Plus Icon.svg';
 import { TrashIcon, PencilIcon } from '@heroicons/react/24/outline';
-import styles from './SpecialPeriodSection.module.scss';
+import styles from '../Section.module.scss';
 
 const PERIOD_TYPES = [
   { value: 'workday', label: '출근 처리' },
@@ -239,26 +239,38 @@ function SpecialPeriodSection() {
                   }`}
                 >
                   {editMode === period.id && editingPeriod ? (
-                    <div className="space-y-3">
-                      {/* 편집 입력 폼 */}
-                      <div className="flex items-center gap-2">
-                        <label className="text-sm font-medium text-gray-700">사유</label>
-                        <div className="relative w-40">
-                          <select
-                            value={editingPeriod.type}
-                            onChange={(e) => handleTypeChange(e, true)}
-                            className="w-full px-3 py-2 pr-10 text-sm border border-gray-300 rounded-md appearance-none focus:outline-none"
-                          >
-                            {PERIOD_TYPES.map((type) => (
-                              <option key={type.value} value={type.value}>
-                                {type.label}
-                              </option>
-                            ))}
-                          </select>
-                          <div className="pointer-events-none absolute inset-y-0 right-2 flex items-center">
-                            <img src={ChevronDown} alt="화살표" className="w-4 h-4 text-gray-500" />
+                    <div className="border border-dashed border-gray-300 rounded-lg p-4 mb-2 space-y-3 bg-white">
+                      <div className="flex justify-between items-center gap-2">
+                        <div className="flex items-center gap-2">
+                          <label className="text-sm font-medium text-gray-700">사유</label>
+                          <div className="relative w-40">
+                            <select
+                              value={editingPeriod.type}
+                              onChange={(e) => handleTypeChange(e, true)}
+                              className="w-full px-3 py-2 pr-10 text-sm border border-gray-300 rounded-md appearance-none focus:outline-none"
+                            >
+                              {PERIOD_TYPES.map((type) => (
+                                <option key={type.value} value={type.value}>
+                                  {type.label}
+                                </option>
+                              ))}
+                            </select>
+                            <div className="pointer-events-none absolute inset-y-0 right-2 flex items-center">
+                              <img
+                                src={ChevronDown}
+                                alt="화살표"
+                                className="w-4 h-4 text-gray-500"
+                              />
+                            </div>
                           </div>
                         </div>
+                        <button
+                          type="button"
+                          onClick={() => handleRemovePeriod(period.id)}
+                          className="text-red-500 hover:text-red-700"
+                        >
+                          <TrashIcon className="w-5 h-5" />
+                        </button>
                       </div>
 
                       <div className="grid grid-cols-2 gap-3">
@@ -276,16 +288,15 @@ function SpecialPeriodSection() {
                           minDate={editingPeriod.startDate || undefined}
                         />
                       </div>
-                      <div>
-                        <button
-                          type="button"
-                          onClick={handleSaveEdit}
-                          disabled={!editingPeriod?.startDate || !editingPeriod?.endDate}
-                          className={`${styles['button-primary']} w-full px-3 py-2 text-sm rounded-md disabled:bg-gray-300 transition`}
-                        >
-                          추가
-                        </button>
-                      </div>
+
+                      <button
+                        type="button"
+                        onClick={handleSaveEdit}
+                        disabled={!editingPeriod?.startDate || !editingPeriod?.endDate}
+                        className={`${styles['button-primary']} w-full px-3 py-2 text-sm rounded-md disabled:bg-gray-300 transition`}
+                      >
+                        추가
+                      </button>
                     </div>
                   ) : (
                     <div className="flex items-center">
@@ -328,31 +339,40 @@ function SpecialPeriodSection() {
               className={`${styles['button-outline-primary']} w-full mb-2 flex items-center justify-center gap-2 py-2 rounded-md transition`}
             >
               <img src={PlusButton} alt="추가하기 아이콘" className="w-6 h-6" />
-              <span>추가하기</span>
+              <span className="text-base">추가하기</span>
             </button>
           )}
 
           {/* 폼은 + 버튼 클릭 시 나타남 */}
           {formData.specialPeriods.length < 5 && showForm && (
-            <div className="border border-dashed border-gray-300 rounded-lg p-4 mb-2 space-y-3">
-              <div className="flex items-center gap-2">
-                <label className="text-sm font-medium text-gray-700">사유</label>
-                <div className="relative w-40">
-                  <select
-                    value={currentPeriod.type}
-                    onChange={(e) => handleTypeChange(e)}
-                    className="w-full px-3 py-2 pr-10 text-sm border border-gray-300 rounded-md appearance-none focus:outline-none"
-                  >
-                    {PERIOD_TYPES.map((type) => (
-                      <option key={type.value} value={type.value}>
-                        {type.label}
-                      </option>
-                    ))}
-                  </select>
-                  <div className="pointer-events-none absolute inset-y-0 right-2 flex items-center">
-                    <img src={ChevronDown} alt="화살표" className="w-4 h-4 text-gray-500" />
+            <div className="border border-dashed border-gray-300 rounded-lg p-4 mb-2 space-y-3 bg-white">
+              <div className="flex justify-between items-center gap-2">
+                <div className="flex items-center gap-2">
+                  <label className="text-sm font-medium text-gray-700">사유</label>
+                  <div className="relative w-40">
+                    <select
+                      value={currentPeriod.type}
+                      onChange={(e) => handleTypeChange(e)}
+                      className="w-full px-3 py-2 pr-10 text-sm border border-gray-300 rounded-md appearance-none focus:outline-none"
+                    >
+                      {PERIOD_TYPES.map((type) => (
+                        <option key={type.value} value={type.value}>
+                          {type.label}
+                        </option>
+                      ))}
+                    </select>
+                    <div className="pointer-events-none absolute inset-y-0 right-2 flex items-center">
+                      <img src={ChevronDown} alt="화살표" className="w-4 h-4 text-gray-500" />
+                    </div>
                   </div>
                 </div>
+                <button
+                  type="button"
+                  onClick={() => setShowForm(false)}
+                  className="text-red-500 hover:text-red-700"
+                >
+                  <TrashIcon className="w-5 h-5" />
+                </button>
               </div>
 
               <div className="grid grid-cols-2 gap-3">
@@ -371,19 +391,17 @@ function SpecialPeriodSection() {
                 />
               </div>
 
-              <div>
-                <button
-                  type="button"
-                  onClick={() => {
-                    handleAddPeriod();
-                    setShowForm(false);
-                  }}
-                  disabled={isAddDisabled}
-                  className={`${styles['button-primary']} w-full px-3 py-2 text-sm rounded-md disabled:bg-gray-300 transition`}
-                >
-                  추가
-                </button>
-              </div>
+              <button
+                type="button"
+                onClick={() => {
+                  handleAddPeriod();
+                  setShowForm(false);
+                }}
+                disabled={isAddDisabled}
+                className={`${styles['button-primary']} w-full px-3 py-2 text-sm rounded-md disabled:bg-gray-300 transition`}
+              >
+                추가
+              </button>
             </div>
           )}
         </>

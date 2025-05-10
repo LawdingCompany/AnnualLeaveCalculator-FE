@@ -6,9 +6,9 @@ import styles from './CalculatorForm.module.scss';
 
 // 지연 로딩을 통한 성능 최적화
 const SpecialPeriodSection = lazy(
-  () => import('@components/SpecialPeriodSection/SpecialPeriodSection'),
+  () => import('@components/Section/SpecialPeriodSection/SpecialPeriodSection'),
 );
-const HolidaySection = lazy(() => import('@components/HolidaySection/HolidaySection'));
+const HolidaySection = lazy(() => import('@components/Section/HolidaySection/HolidaySection'));
 
 // 결과 표시 컴포넌트 - 별도로 분리하여 리렌더링 최적화
 const CalculationResult = React.memo(() => {
