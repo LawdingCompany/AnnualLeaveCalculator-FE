@@ -1,4 +1,5 @@
 // CalculationType.tsx
+import { useEffect } from 'react';
 import { CalculationMethod } from '@interfaces/calculator';
 import CustomDatePicker from '@components/CustomDatePicker/CustomDatePicker';
 import MonthDayInput from '@components/MonthDayInput/MonthDayInput';
@@ -25,6 +26,37 @@ export default function CalculationType({
   referenceDate,
   onReferenceDateChange,
 }: Readonly<CalculationTypeProps>) {
+  // 입사일 변경 핸들러 래퍼 함수
+  const handleHireDateChange = (date: Date | null) => {
+    // 새로운 입사일을 상태에 업데이트
+    onHireDateChange(date);
+
+    // 만약 새 입사일이 현재 계산 기준일보다 뒤라면 계산 기준일 초기화
+    if (date && referenceDate && date > referenceDate) {
+      onReferenceDateChange(null);
+    }
+  };
+
+  // 계산 기준일 변경 핸들러 래퍼 함수
+  const handleReferenceDateChange = (date: Date | null) => {
+    // 만약 새 계산 기준일이 현재 입사일보다 앞이면 저장하지 않음
+    if (date && hireDate && date < hireDate) {
+      return;
+    }
+
+    // 유효한 계산 기준일을 상태에 업데이트
+    onReferenceDateChange(date);
+  };
+
+  // 사용자가 산정 방식을 변경할 때도 날짜 유효성 검증
+  useEffect(() => {
+    // 입사일과 계산 기준일이 모두 있고, 입사일이 계산 기준일보다 뒤라면
+    if (hireDate && referenceDate && hireDate > referenceDate) {
+      // 계산 기준일 초기화
+      onReferenceDateChange(null);
+    }
+  }, [method, hireDate, referenceDate, onReferenceDateChange]);
+
   return (
     <div className="mb-6">
       {/* 첫 번째 행: 산정 방식 + 버튼 (왼쪽) / 회계연도 (오른쪽) */}
@@ -81,8 +113,9 @@ export default function CalculationType({
           <div className="w-36">
             <CustomDatePicker
               selected={hireDate}
-              onChange={onHireDateChange}
+              onChange={handleHireDateChange} // 새로운 핸들러 사용
               placeholderText="YYYY.MM.DD"
+              minDate={new Date(2017, 4, 31)} // 2017년 5월 31일 이후만 선택 가능
             />
           </div>
         </div>
@@ -93,8 +126,9 @@ export default function CalculationType({
           <div className="w-36">
             <CustomDatePicker
               selected={referenceDate}
-              onChange={onReferenceDateChange}
+              onChange={handleReferenceDateChange} // 새로운 핸들러 사용
               placeholderText="YYYY.MM.DD"
+              minDate={hireDate} // 입사일 이후만 선택 가능
             />
           </div>
         </div>

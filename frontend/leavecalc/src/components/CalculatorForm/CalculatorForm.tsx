@@ -1,8 +1,30 @@
-// CalculatorForm.tsx
+import React, { lazy, Suspense } from 'react';
 import CalculatorProvider, { useCalculator } from '@contexts/CalculatorContext';
-import InfoTooltip from '@components/InfoTooltip/InfoTooltip';
 import CalculationType from '@components/CalculationType/CalculationType';
 import styles from './CalculatorForm.module.scss';
+
+// 지연 로딩을 통한 성능 최적화
+const SpecialPeriodSection = lazy(
+  () => import('@components/SpecialPeriodSection/SpecialPeriodSection'),
+);
+const HolidaySection = lazy(() => import('@components/HolidaySection/HolidaySection'));
+
+// 결과 표시 컴포넌트 - 별도로 분리하여 리렌더링 최적화
+const CalculationResult = React.memo(() => {
+  const { formData } = useCalculator();
+
+  // 결과가 없으면 렌더링하지 않음
+  if (!formData.result) return null;
+
+  return (
+    <div className="mt-6 p-4 bg-blue-50 rounded-xl border border-blue-100">
+      <h2 className="text-lg font-medium text-blue-800 mb-2">계산 결과</h2>
+      <p className="text-2xl font-bold text-blue-900">
+        총 연차일수: <span className="text-3xl">{formData.result}</span>일
+      </p>
+    </div>
+  );
+});
 
 function CalculatorFormContent() {
   const {
@@ -11,8 +33,6 @@ function CalculatorFormContent() {
     setHireDate,
     setFiscalYearDate,
     setReferenceDate,
-    toggleSpecialPeriod,
-    toggleHolidays,
     calculateVacation,
   } = useCalculator();
 
@@ -32,7 +52,7 @@ function CalculatorFormContent() {
       </div>
 
       {/* 흰색 폼 영역에 고정 높이와 스크롤 추가 */}
-      <div className="bg-white rounded-xl p-5 max-h-[450px] overflow-y-auto ">
+      <div className="bg-white rounded-xl p-5 max-h-[450px] overflow-y-auto overscroll-contain scroll-smooth">
         {/* 내부 콘텐츠를 감싸는 컨테이너 - 좌우 여백 일관성 유지 */}
         <div className="mx-auto w-[95%]">
           {/* 산정 방식 선택 컴포넌트 */}
@@ -50,68 +70,24 @@ function CalculatorFormContent() {
           {/* 구분선 */}
           <hr className="my-5 border-gray-200" />
 
-          {/* 특이사항이 있는 기간 체크박스 */}
-          <div className="flex items-center mb-4">
-            <input
-              type="checkbox"
-              id="specialPeriod"
-              checked={formData.hasSpecialPeriod}
-              onChange={toggleSpecialPeriod}
-              className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500"
-            />
-            <label htmlFor="specialPeriod" className="ml-2 text-sm font-medium text-gray-700">
-              특이사항이 있는 기간(최대 5개 입력)
-            </label>
-            <InfoTooltip
-              title="특이사항 안내"
-              content={
-                <div>
-                  <p>특이사항이 있는 기간에 대한 자세한 설명</p>
-                  <ul className="list-disc pl-5 mt-2">
-                    <li>출근 처리</li>
-                    <li>출산전후휴가</li>
-                    <li>유산전후휴가</li>
-                    <li>배우자출산</li>
-                    <li>기타 특이사항</li>
-                  </ul>
-                </div>
-              }
-            />
-          </div>
+          {/* 특이사항 섹션 - Suspense로 감싸서 지연 로딩 */}
+          <Suspense fallback={<div className="py-4 text-center text-gray-500">로딩 중...</div>}>
+            <SpecialPeriodSection />
+          </Suspense>
 
-          {/* 휴일 체크박스 */}
-          <div className="flex items-center mb-4">
-            <input
-              type="checkbox"
-              id="holidays"
-              checked={formData.includeHolidays}
-              onChange={toggleHolidays}
-              className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500"
-            />
-            <label htmlFor="holidays" className="ml-2 text-sm font-medium text-gray-700">
-              휴일(휴가, 법정 공휴일 外, 최대 7개 입력)
-            </label>
-            <InfoTooltip
-              title="휴일 안내"
-              content={
-                <div>
-                  <p>휴일에 대한 자세한 설명</p>
-                  <p className="mt-2">
-                    법정공휴일을 제외하고, 회사규정, 징계규정 등에서 정한 의무 휴일에 한함.
-                  </p>
-                </div>
-              }
-            />
-          </div>
+          {/* 휴일 섹션 - Suspense로 감싸서 지연 로딩 */}
+          <Suspense fallback={<div className="py-4 text-center text-gray-500">로딩 중...</div>}>
+            <HolidaySection />
+          </Suspense>
 
-          {/* 휴일 추가 목록 */}
-          {/* 생략 ... */}
+          {/* 계산 결과 표시 */}
+          <CalculationResult />
 
           {/* 계산하기 버튼 */}
           <button
             type="button"
             onClick={calculateVacation}
-            className={`${styles.button} w-full py-2 px-4 mt-4 font-medium rounded-md transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2`}
+            className={`${styles.button} w-full py-2 px-4 mt-4 font-medium rounded-md transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 active:scale-98`}
           >
             계산하기
           </button>
@@ -121,10 +97,13 @@ function CalculatorFormContent() {
   );
 }
 
-export default function CalculatorForm() {
+// 메인 컴포넌트 - 불필요한 리렌더링 방지
+const CalculatorForm = React.memo(() => {
   return (
     <CalculatorProvider>
       <CalculatorFormContent />
     </CalculatorProvider>
   );
-}
+});
+
+export default CalculatorForm;

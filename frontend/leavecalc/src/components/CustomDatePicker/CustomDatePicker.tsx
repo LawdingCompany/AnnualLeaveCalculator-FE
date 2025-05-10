@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { createPortal } from 'react-dom';
-import { ChevronLeft, ChevronRight, Calendar } from 'lucide-react'; // Calendar 아이콘 추가
+import { ChevronLeft, ChevronRight, Calendar } from 'lucide-react';
 import './CustomDatePicker.css';
 
 // 뷰 타입 정의
@@ -13,6 +13,8 @@ interface CustomDatePickerProps {
   dateFormat?: string;
   placeholderText?: string;
   className?: string;
+  minDate?: Date | null; // minDate 속성 추가
+  maxDate?: Date | null; // 선택적으로 maxDate도 추가
 }
 
 // 요일 라벨 (한국어)
@@ -37,9 +39,10 @@ const MONTHS = [
 export default function CustomDatePicker({
   selected,
   onChange,
-  dateFormat = 'YYYY.MM.DD',
   placeholderText = 'YYYY.MM.DD',
   className = '',
+  minDate = null, // minDate 기본값 설정
+  maxDate = null, // maxDate 기본값 설정
 }: CustomDatePickerProps) {
   // 현재 연도 계산
   const currentYear = new Date().getFullYear();
@@ -250,14 +253,34 @@ export default function CustomDatePicker({
 
       // 유효한 날짜인지 확인
       if (!isNaN(newDate.getTime())) {
-        setSelectedDate(newDate);
-        setCurrentDate(newDate);
+        // minDate 및 maxDate 검증 추가
+        if (isDateInRange(newDate)) {
+          setSelectedDate(newDate);
+          setCurrentDate(newDate);
 
-        // 콜백 함수 호출
-        if (onChange) onChange(newDate);
+          // 콜백 함수 호출
+          if (onChange) onChange(newDate);
 
-        // 형식화된 날짜 문자열로 입력값 업데이트
-        formatAndSetInputValue(newDate);
+          // 형식화된 날짜 문자열로 입력값 업데이트
+          formatAndSetInputValue(newDate);
+        } else {
+          // 범위를 벗어난 날짜는 기존 선택으로 되돌리거나 최소/최대 날짜로 설정
+          if (minDate && newDate < minDate) {
+            setSelectedDate(minDate);
+            setCurrentDate(minDate);
+            if (onChange) onChange(minDate);
+            formatAndSetInputValue(minDate);
+          } else if (maxDate && newDate > maxDate) {
+            setSelectedDate(maxDate);
+            setCurrentDate(maxDate);
+            if (onChange) onChange(maxDate);
+            formatAndSetInputValue(maxDate);
+          } else if (selectedDate) {
+            formatAndSetInputValue(selectedDate);
+          } else {
+            setInputValue('');
+          }
+        }
       } else {
         // 유효하지 않은 날짜인 경우 선택된 날짜가 있으면 그 값으로 복원, 아니면 비움
         if (selectedDate) {
@@ -276,8 +299,29 @@ export default function CustomDatePicker({
     }
   };
 
+  // minDate와 maxDate를 고려한 날짜 범위 체크 함수
+  const isDateInRange = (date: Date): boolean => {
+    if (minDate && date < minDate) {
+      return false;
+    }
+    if (maxDate && date > maxDate) {
+      return false;
+    }
+    return true;
+  };
+
+  // 날짜가 선택 불가능한지 확인하는 함수
+  const isDateDisabled = (date: Date): boolean => {
+    return !isDateInRange(date);
+  };
+
   // 특정 날짜 선택 처리
   const handleDateSelect = (date: Date) => {
+    // 선택 불가능한 날짜는 무시
+    if (isDateDisabled(date)) {
+      return;
+    }
+
     setSelectedDate(date);
     setCurrentDate(date);
     formatAndSetInputValue(date);
@@ -452,6 +496,8 @@ export default function CustomDatePicker({
             const today = isSameDay(day.date, new Date());
             const sel = isSameDay(day.date, selectedDate);
             const dow = day.date.getDay();
+            const disabled = isDateDisabled(day.date);
+
             return (
               <div
                 key={idx}
@@ -462,10 +508,18 @@ export default function CustomDatePicker({
                   sel && 'selected',
                   dow === 0 && 'sunday',
                   dow === 6 && 'saturday',
+                  disabled && 'disabled', // 비활성화된 날짜에 대한 클래스 추가
                 ]
                   .filter(Boolean)
                   .join(' ')}
                 onMouseDown={(e) => {
+                  // 비활성화된 날짜는 선택할 수 없음
+                  if (disabled) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    return;
+                  }
+
                   // onClick 대신 onMouseDown 사용
                   e.preventDefault();
                   e.stopPropagation();
@@ -485,21 +539,40 @@ export default function CustomDatePicker({
   const renderMonthView = () => {
     return (
       <div className="months-grid">
-        {MONTHS.map((m, i) => (
-          <div
-            key={i}
-            className={['month', currentDate.getMonth() === i && 'selected']
-              .filter(Boolean)
-              .join(' ')}
-            onMouseDown={(e) => {
-              e.preventDefault();
-              e.stopPropagation();
-              handleMonthSelect(i);
-            }}
-          >
-            {m}
-          </div>
-        ))}
+        {MONTHS.map((m, i) => {
+          // 해당 월의 첫날이 minDate보다 이전이거나 maxDate보다 이후인 경우 비활성화
+          const monthFirstDay = new Date(currentDate.getFullYear(), i, 1);
+          const monthLastDay = new Date(currentDate.getFullYear(), i + 1, 0);
+          const disabled =
+            (minDate && monthLastDay < minDate) || (maxDate && monthFirstDay > maxDate);
+
+          return (
+            <div
+              key={i}
+              className={[
+                'month',
+                currentDate.getMonth() === i && 'selected',
+                disabled && 'disabled',
+              ]
+                .filter(Boolean)
+                .join(' ')}
+              onMouseDown={(e) => {
+                // 비활성화된 월은 선택할 수 없음
+                if (disabled) {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  return;
+                }
+
+                e.preventDefault();
+                e.stopPropagation();
+                handleMonthSelect(i);
+              }}
+            >
+              {m}
+            </div>
+          );
+        })}
       </div>
     );
   };
@@ -515,25 +588,41 @@ export default function CustomDatePicker({
     const actualEndYear = Math.min(currentYear + 5, endYear);
 
     for (let year = actualStartYear; year <= actualEndYear; year++) {
-      years.push(year);
+      // 해당 연도가 선택 가능한지 확인
+      const yearFirstDay = new Date(year, 0, 1);
+      const yearLastDay = new Date(year, 11, 31);
+      const disabled = (minDate && yearLastDay < minDate) || (maxDate && yearFirstDay > maxDate);
+
+      years.push({ year, disabled });
     }
 
     return (
       <div className="years-grid">
-        {years.map((y, i) => (
+        {years.map((yearObj, i) => (
           <div
             key={i}
-            className={['year', currentDate.getFullYear() === y && 'selected']
+            className={[
+              'year',
+              currentDate.getFullYear() === yearObj.year && 'selected',
+              yearObj.disabled && 'disabled',
+            ]
               .filter(Boolean)
               .join(' ')}
             onMouseDown={(e) => {
+              // 비활성화된 연도는 선택할 수 없음
+              if (yearObj.disabled) {
+                e.preventDefault();
+                e.stopPropagation();
+                return;
+              }
+
               // onClick 대신 onMouseDown 사용
               e.preventDefault(); // 이벤트 기본 동작 방지
               e.stopPropagation(); // 이벤트 버블링 방지
-              handleYearSelect(y);
+              handleYearSelect(yearObj.year);
             }}
           >
-            {y}
+            {yearObj.year}
           </div>
         ))}
       </div>

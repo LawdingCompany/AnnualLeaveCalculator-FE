@@ -1,306 +1,275 @@
 /* CustomDatePicker.css */
-
-/* 변수 대체: */
-/* $button-primary: #4169ff; */
-/* $day-width: 40px; */
-/* $day-height: 40px; */
-/* $weekday-width: 40px; */
-/* $weekday-height: 30px; */
-/* $calendar-text: #333; */
-/* $sunday-color: #e74c3c; */
-/* $saturday-color: #3498db; */
-/* $other-month-color: #bbb; */
-/* $border-color: #e0e0e0; */
-/* $hover-bg: #f5f5f5; */
-
-/* 데이트피커 컨테이너 */
 .datepicker-container {
   position: relative;
   width: 100%;
-  overflow: visible !important;
 }
 
-/* 입력 필드 - text-align 제거 */
-.datepicker-container .calendar-input {
-  width: 100%;
-}
-.datepicker-container .calendar-input input {
-  width: 100%;
-  padding: 8px 12px;
-  /* text-align: center; 중앙 정렬 제거 */
-  border: 1px solid #e0e0e0;
-  border-radius: 4px;
-  outline: none;
-  font-size: 14px;
-}
-.datepicker-container .calendar-input input:focus {
-  border-color: #4169ff;
-}
-
-.calendar-dropdown {
-  position: absolute;
-  top: calc(100% + 5px);
-  left: 0;
-  z-index: 9999;
-  width: 300px;
-  background-color: #fff;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-  border-radius: 8px;
-  overflow: hidden;
-  opacity: 0;
-  transform: translateY(-10px);
-  animation: fadeIn 0.2s ease forwards;
-}
-
-@keyframes fadeIn {
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-/* 캘린더 본체 */
-.calendar-container {
-  width: 100%;
-  font-family: 'Noto Sans KR', sans-serif;
-  overflow: hidden;
-  background-color: #fff;
-}
-
-/* 헤더 */
-.calendar-container .calendar-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 12px 16px;
-  border-bottom: 1px solid #e0e0e0;
-}
-
-.calendar-container .calendar-header .nav-button {
-  background: none;
-  border: none;
-  color: #333;
-  cursor: pointer;
-  width: 32px;
-  height: 32px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: 50%;
-}
-
-.calendar-container .calendar-header .nav-button:hover {
-  background-color: #f5f5f5;
-}
-.calendar-container .calendar-header .title-button {
-  background: none;
-  border: none;
-  font-size: 16px;
-  font-weight: 500;
-  color: #333;
-  cursor: pointer;
-  padding: 8px 12px;
-  border-radius: 20px;
-}
-.calendar-container .calendar-header .title-button:hover {
-  background-color: #f5f5f5;
-}
-
-/* 컨텐츠 패딩 */
-.calendar-container .calendar-content {
-  padding: 8px;
-}
-
-/* 일 뷰 */
-.calendar-container .calendar-day-view {
-  width: 100%;
-}
-/* 요일 헤더 */
-.calendar-container .calendar-day-view .weekdays {
-  display: grid;
-  grid-template-columns: repeat(7, 1fr);
-  margin-bottom: 8px;
-}
-.calendar-container .calendar-day-view .weekday {
-  width: 40px;
-  height: 30px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-.calendar-container .calendar-day-view .weekday.sunday {
-  color: #e74c3c;
-}
-.calendar-container .calendar-day-view .weekday.saturday {
-  color: #3498db;
-}
-
-/* 날짜 그리드 */
-.calendar-container .days-grid {
-  display: grid;
-  grid-template-columns: repeat(7, 1fr);
-  grid-auto-rows: 40px;
-  gap: 2px;
-}
-.calendar-container .days-grid .day {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  position: relative;
-  font-size: 14px;
-}
-.calendar-container .days-grid .day .day-number {
-  width: 30px;
-  height: 30px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: 50%;
-  transition: all 0.2s ease;
-}
-.calendar-container .days-grid .day.other-month .day-number {
-  color: #bbb;
-}
-.calendar-container .days-grid .day.sunday .day-number {
-  color: #e74c3c;
-}
-.calendar-container .days-grid .day.saturday .day-number {
-  color: #3498db;
-}
-.calendar-container .days-grid .day:hover .day-number {
-  background-color: #f5f5f5;
-}
-.calendar-container .days-grid .day.today .day-number {
-  font-weight: 700;
-}
-.calendar-container .days-grid .day.selected .day-number {
-  background-color: #4169ff;
-  color: #fff;
-}
-
-/* 월 뷰 */
-.calendar-container .months-grid {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  grid-template-rows: repeat(4, 60px);
-  gap: 8px;
-  padding: 8px;
-}
-.calendar-container .months-grid .month {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  border-radius: 8px;
-  transition: all 0.2s ease;
-}
-.calendar-container .months-grid .month:hover {
-  background-color: #f5f5f5;
-}
-.calendar-container .months-grid .month.selected {
-  background-color: #4169ff;
-  color: #fff;
-}
-
-/* 연도 뷰 */
-.calendar-container .years-grid {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  grid-gap: 8px;
-  padding: 8px;
-}
-
-.calendar-container .years-grid .year {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  height: 50px;
-  cursor: pointer;
-  border-radius: 8px;
-  transition: all 0.2s ease;
-}
-
-.calendar-container .years-grid .year:hover {
-  background-color: #f5f5f5;
-}
-
-.calendar-container .years-grid .year.selected {
-  background-color: #4169ff;
-  color: #fff;
-}
-
-.calendar-header button {
-  -webkit-tap-highlight-color: transparent;
-  touch-action: manipulation;
-}
-
-/* 입력 필드와 아이콘 래퍼 - 수정 */
 .calendar-input-wrapper {
+  position: relative;
   display: flex;
   align-items: center;
-  position: relative;
+}
+
+.calendar-input-field {
   width: 100%;
+  padding: 0.5rem 2.5rem 0.5rem 0.75rem;
   border: 1px solid #e2e8f0;
   border-radius: 0.375rem;
-  background-color: #fff;
+  font-size: 0.875rem;
+  outline: none;
   transition:
     border-color 0.2s,
     box-shadow 0.2s;
-  overflow: hidden;
 }
 
-.calendar-input-wrapper:hover {
-  border-color: #cbd5e0;
-}
-
-.calendar-input-wrapper:focus-within {
+.calendar-input-field:focus {
   border-color: #3b82f6;
-  box-shadow: 0 0 0 1px rgba(59, 130, 246, 0.5);
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
 }
 
-/* 입력 필드 스타일 수정 - 패딩 조정 */
-.calendar-input-field {
-  flex: 1;
-  padding: 0.5rem 0.75rem;
-  padding-right: 2.5rem; /* 아이콘 공간을 위해 오른쪽 패딩 증가 */
-  border: none;
-  outline: none;
-  background: transparent;
-  font-size: 0.875rem;
-  color: #1a202c;
-  text-align: left; /* 왼쪽 정렬 명시적 지정 */
-  width: 100%; /* 너비 100%로 설정 */
-}
-
-.calendar-input-field::placeholder {
-  color: #a0aec0;
-}
-
-/* 달력 아이콘 버튼 스타일 - 위치 조정 */
 .calendar-icon-button {
+  position: absolute;
+  right: 0.5rem;
+  width: 2rem;
+  height: 2rem;
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 40px;
-  height: 100%;
-  padding: 0;
   border: none;
   background: transparent;
   color: #64748b;
   cursor: pointer;
-  transition:
-    color 0.2s,
-    background-color 0.2s;
-  position: absolute; /* 절대 위치로 변경 */
-  right: 0; /* 오른쪽 정렬 */
-  top: 0; /* 상단 정렬 */
 }
 
 .calendar-icon-button:hover {
   color: #3b82f6;
-  background-color: rgba(59, 130, 246, 0.05);
 }
 
-.calendar-icon-button:active {
-  background-color: rgba(59, 130, 246, 0.1);
+/* 캘린더 드롭다운 스타일 */
+.calendar-dropdown {
+  position: fixed;
+  z-index: 1000;
+  background-color: #fff;
+  border-radius: 0.5rem;
+  box-shadow:
+    0 4px 6px -1px rgba(0, 0, 0, 0.1),
+    0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  user-select: none;
+  max-width: 300px;
+  min-width: 250px;
+  overflow: hidden;
+}
+
+.calendar-container {
+  padding: 0.5rem;
+}
+
+.calendar-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.5rem;
+  padding: 0.25rem 0;
+}
+
+.title-button {
+  flex: 1;
+  text-align: center;
+  font-weight: 500;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0.25rem;
+  color: #1e293b;
+}
+
+.title-button:hover {
+  color: #3b82f6;
+}
+
+.nav-button {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0.25rem;
+  color: #64748b;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 0.25rem;
+}
+
+.nav-button:hover {
+  background-color: #f1f5f9;
+  color: #3b82f6;
+}
+
+/* 요일 헤더 */
+.weekdays {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  margin-bottom: 0.25rem;
+}
+
+.weekday {
+  text-align: center;
+  font-size: 0.75rem;
+  font-weight: 500;
+  padding: 0.5rem 0;
+  color: #64748b;
+}
+
+.weekday.sunday {
+  color: #ef4444; /* 일요일은 빨간색 */
+}
+
+.weekday.saturday {
+  color: #3b82f6; /* 토요일은 파란색 */
+}
+
+/* 일 그리드 */
+.days-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 2px;
+}
+
+.day {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 2rem;
+  font-size: 0.875rem;
+  border-radius: 0.25rem;
+  cursor: pointer;
+  transition: background-color 0.1s;
+}
+
+.day:hover:not(.disabled) {
+  background-color: #e2e8f0;
+}
+
+.day.other-month {
+  color: #94a3b8;
+}
+
+.day.today {
+  font-weight: 600;
+  background-color: #f1f5f9;
+}
+
+.day.selected {
+  background-color: #3b82f6;
+  color: white;
+}
+
+.day.selected:hover {
+  background-color: #2563eb;
+}
+
+.day.sunday {
+  color: #ef4444;
+}
+
+.day.saturday {
+  color: #3b82f6;
+}
+
+.day.sunday.other-month {
+  color: #fca5a5;
+}
+
+.day.saturday.other-month {
+  color: #93c5fd;
+}
+
+/* 비활성화된 날짜 스타일 추가 */
+.day.disabled {
+  color: #cbd5e1;
+  background-color: #f8fafc;
+  cursor: not-allowed;
+  text-decoration: line-through;
+  opacity: 0.5;
+}
+
+.day.disabled:hover {
+  background-color: #f8fafc;
+}
+
+/* 월 그리드 */
+.months-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0.5rem;
+}
+
+.month {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 3rem;
+  font-size: 0.875rem;
+  border-radius: 0.25rem;
+  cursor: pointer;
+  transition: background-color 0.1s;
+}
+
+.month:hover:not(.disabled) {
+  background-color: #e2e8f0;
+}
+
+.month.selected {
+  background-color: #3b82f6;
+  color: white;
+}
+
+/* 비활성화된 월 스타일 추가 */
+.month.disabled {
+  color: #cbd5e1;
+  background-color: #f8fafc;
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
+.month.disabled:hover {
+  background-color: #f8fafc;
+}
+
+/* 연도 그리드 */
+.years-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0.5rem;
+}
+
+.year {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 3rem;
+  font-size: 0.875rem;
+  border-radius: 0.25rem;
+  cursor: pointer;
+  transition: background-color 0.1s;
+}
+
+.year:hover:not(.disabled) {
+  background-color: #e2e8f0;
+}
+
+.year.selected {
+  background-color: #3b82f6;
+  color: white;
+}
+
+/* 비활성화된 연도 스타일 추가 */
+.year.disabled {
+  color: #cbd5e1;
+  background-color: #f8fafc;
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
+.year.disabled:hover {
+  background-color: #f8fafc;
 }
