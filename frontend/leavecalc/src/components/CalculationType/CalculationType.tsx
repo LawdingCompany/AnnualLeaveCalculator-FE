@@ -1,5 +1,6 @@
+// CalculationType.tsx
 import { CalculationMethod } from '@interfaces/calculator';
-import CustomDatePicker from '@components/DatePicker/CustomDatePicker';
+import CustomDatePicker from '@components/CustomDatePicker/CustomDatePicker';
 import styles from './CalculationType.module.scss';
 
 interface CalculationTypeProps {
@@ -92,10 +93,9 @@ export default function CalculationType({
           <div className="w-20 text-right text-sm font-medium text-gray-700">계산 기준일</div>
           <div className="w-36">
             <CustomDatePicker
-              selected={referenceDate}
-              onChange={onReferenceDateChange}
+              selected={hireDate}
+              onChange={onHireDateChange}
               placeholderText="YYYY.MM.DD"
-              className={styles.referenceDatePicker}
             />
           </div>
         </div>

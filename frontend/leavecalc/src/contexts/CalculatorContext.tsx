@@ -15,7 +15,7 @@ interface CalculatorContextProps {
 const initialFormData: CalculatorFormData = {
   calculationMethod: 'hireDate',
   hireDate: null,
-  fiscalYearDate: null,
+  fiscalYearDate: new Date(new Date().getFullYear(), 0, 1),
   referenceDate: null,
   hasSpecialPeriod: false,
   includeHolidays: false,

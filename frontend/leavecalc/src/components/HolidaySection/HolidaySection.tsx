@@ -1,6 +1,6 @@
 // components/HolidaySection/HolidaySection.tsx
 import React from 'react';
-import CustomDatePicker from '@components/DatePicker/CustomDatePicker';
+import CustomDatePicker from '@components/CustomDatePicker/CustomDatePicker';
 
 interface Holiday {
   id: string;

@@ -1,3 +1,4 @@
+// CalculatorForm.tsx
 import CalculatorProvider, { useCalculator } from '@contexts/CalculatorContext';
 import InfoTooltip from '@components/InfoTooltip/InfoTooltip';
 import CalculationType from '@components/CalculationType/CalculationType';

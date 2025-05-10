@@ -2,4 +2,3 @@
 @plugin 'flowbite-react/plugin/tailwindcss';
 @source "./node_modules/flowbite-react/dist/esm/**/*.mjs";
 @source '../.flowbite-react/class-list.json';
-@source "../node_modules/flowbite-datepicker";

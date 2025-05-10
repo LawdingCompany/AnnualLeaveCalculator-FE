@@ -1,0 +1,216 @@
+/* CustomDatePicker.css */
+
+/* 변수 대체: */
+/* $button-primary: #4169ff; */
+/* $day-width: 40px; */
+/* $day-height: 40px; */
+/* $weekday-width: 40px; */
+/* $weekday-height: 30px; */
+/* $calendar-text: #333; */
+/* $sunday-color: #e74c3c; */
+/* $saturday-color: #3498db; */
+/* $other-month-color: #bbb; */
+/* $border-color: #e0e0e0; */
+/* $hover-bg: #f5f5f5; */
+
+/* 데이트피커 컨테이너 */
+.datepicker-container {
+  position: relative;
+  width: 100%;
+}
+
+/* 입력 필드 */
+.datepicker-container .calendar-input {
+  width: 100%;
+}
+.datepicker-container .calendar-input input {
+  width: 100%;
+  padding: 8px 12px;
+  text-align: center;
+  border: 1px solid #e0e0e0;
+  border-radius: 4px;
+  outline: none;
+  font-size: 14px;
+}
+.datepicker-container .calendar-input input:focus {
+  border-color: #4169ff;
+}
+
+/* 드롭다운 */
+.datepicker-container .calendar-dropdown {
+  position: absolute;
+  top: calc(100% + 5px);
+  left: 0;
+  z-index: 1000;
+  width: 300px;
+  background-color: #fff;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+/* 캘린더 본체 */
+.calendar-container {
+  width: 100%;
+  font-family: 'Noto Sans KR', sans-serif;
+  overflow: hidden;
+  background-color: #fff;
+}
+
+/* 헤더 */
+.calendar-container .calendar-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 16px;
+  border-bottom: 1px solid #e0e0e0;
+}
+.calendar-container .calendar-header .nav-button {
+  background: none;
+  border: none;
+  color: #333;
+  cursor: pointer;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+}
+.calendar-container .calendar-header .nav-button:hover {
+  background-color: #f5f5f5;
+}
+.calendar-container .calendar-header .title-button {
+  background: none;
+  border: none;
+  font-size: 16px;
+  font-weight: 500;
+  color: #333;
+  cursor: pointer;
+  padding: 8px 12px;
+  border-radius: 20px;
+}
+.calendar-container .calendar-header .title-button:hover {
+  background-color: #f5f5f5;
+}
+
+/* 컨텐츠 패딩 */
+.calendar-container .calendar-content {
+  padding: 8px;
+}
+
+/* 일 뷰 */
+.calendar-container .calendar-day-view {
+  width: 100%;
+}
+/* 요일 헤더 */
+.calendar-container .calendar-day-view .weekdays {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  margin-bottom: 8px;
+}
+.calendar-container .calendar-day-view .weekday {
+  width: 40px;
+  height: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.calendar-container .calendar-day-view .weekday.sunday {
+  color: #e74c3c;
+}
+.calendar-container .calendar-day-view .weekday.saturday {
+  color: #3498db;
+}
+
+/* 날짜 그리드 */
+.calendar-container .days-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  grid-auto-rows: 40px;
+  gap: 2px;
+}
+.calendar-container .days-grid .day {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  position: relative;
+  font-size: 14px;
+}
+.calendar-container .days-grid .day .day-number {
+  width: 30px;
+  height: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  transition: all 0.2s ease;
+}
+.calendar-container .days-grid .day.other-month .day-number {
+  color: #bbb;
+}
+.calendar-container .days-grid .day.sunday .day-number {
+  color: #e74c3c;
+}
+.calendar-container .days-grid .day.saturday .day-number {
+  color: #3498db;
+}
+.calendar-container .days-grid .day:hover .day-number {
+  background-color: #f5f5f5;
+}
+.calendar-container .days-grid .day.today .day-number {
+  font-weight: 700;
+}
+.calendar-container .days-grid .day.selected .day-number {
+  background-color: #4169ff;
+  color: #fff;
+}
+
+/* 월 뷰 */
+.calendar-container .months-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  grid-template-rows: repeat(4, 60px);
+  gap: 8px;
+  padding: 8px;
+}
+.calendar-container .months-grid .month {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  border-radius: 8px;
+  transition: all 0.2s ease;
+}
+.calendar-container .months-grid .month:hover {
+  background-color: #f5f5f5;
+}
+.calendar-container .months-grid .month.selected {
+  background-color: #4169ff;
+  color: #fff;
+}
+
+/* 연도 뷰 */
+.calendar-container .years-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  grid-gap: 8px;
+  padding: 8px;
+}
+.calendar-container .years-grid .year {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 50px;
+  cursor: pointer;
+  border-radius: 8px;
+  transition: all 0.2s ease;
+}
+.calendar-container .years-grid .year:hover {
+  background-color: #f5f5f5;
+}
+.calendar-container .years-grid .year.selected {
+  background-color: #4169ff;
+  color: #fff;
+}
