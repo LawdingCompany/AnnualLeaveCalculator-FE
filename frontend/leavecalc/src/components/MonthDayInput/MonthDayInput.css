@@ -1,0 +1,182 @@
+/* MonthDayInput 컴포넌트 스타일 */
+.month-day-input-container {
+  position: relative;
+  width: 100%;
+}
+
+/* 입력 필드와 아이콘 랩퍼 스타일 */
+.month-day-input-wrapper {
+  display: flex;
+  align-items: center;
+  position: relative;
+  width: 100%;
+  border: 1px solid #e2e8f0;
+  border-radius: 0.375rem;
+  background-color: #fff;
+  transition:
+    border-color 0.2s,
+    box-shadow 0.2s;
+  overflow: hidden;
+}
+
+.month-day-input-wrapper:hover {
+  border-color: #cbd5e0;
+}
+
+.month-day-input-wrapper:focus-within {
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 1px rgba(59, 130, 246, 0.5);
+}
+
+/* 입력 필드 스타일 */
+.month-day-input-field {
+  flex: 1;
+  padding: 0.5rem 0.75rem;
+  border: none;
+  outline: none;
+  background: transparent;
+  font-size: 0.875rem;
+  color: #1a202c;
+  width: calc(100% - 40px); /* 아이콘 공간 확보 */
+}
+
+.month-day-input-field::placeholder {
+  color: #a0aec0;
+}
+
+/* 달력 아이콘 버튼 스타일 */
+.calendar-icon-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 100%;
+  padding: 0;
+  border: none;
+  background: transparent;
+  color: #64748b;
+  cursor: pointer;
+  transition:
+    color 0.2s,
+    background-color 0.2s;
+}
+
+.calendar-icon-button:hover {
+  color: #3b82f6;
+  background-color: rgba(59, 130, 246, 0.05);
+}
+
+.calendar-icon-button:active {
+  background-color: rgba(59, 130, 246, 0.1);
+}
+
+/* 드롭다운 달력 스타일 */
+.month-day-dropdown {
+  position: absolute;
+  z-index: 1000;
+  background-color: white;
+  border-radius: 8px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+  width: 280px;
+}
+
+.month-day-container {
+  padding: 8px;
+}
+
+.month-day-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 4px;
+  margin-bottom: 8px;
+}
+
+.current-month {
+  font-weight: 600;
+  font-size: 14px;
+}
+
+.nav-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border: none;
+  border-radius: 50%;
+  background-color: transparent;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.nav-button:hover {
+  background-color: rgba(0, 0, 0, 0.05);
+}
+
+.weekdays-header {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 2px;
+  margin-bottom: 4px;
+}
+
+.weekday {
+  text-align: center;
+  font-size: 12px;
+  font-weight: 600;
+  padding: 4px 0;
+  color: #718096;
+}
+
+.sunday {
+  color: #e53e3e;
+}
+
+.saturday {
+  color: #3182ce;
+}
+
+.days-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 2px;
+}
+
+.day {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 32px;
+  border-radius: 50%;
+  cursor: pointer;
+  font-size: 13px;
+  transition: background-color 0.2s;
+}
+
+.day:hover {
+  background-color: rgba(0, 0, 0, 0.05);
+}
+
+.day.selected {
+  background-color: #3b82f6;
+  color: white;
+}
+
+.day.empty {
+  cursor: default;
+}
+
+.day.sunday {
+  color: #e53e3e;
+}
+
+.day.saturday {
+  color: #3182ce;
+}
+
+.day.selected.sunday,
+.day.selected.saturday {
+  color: white;
+}

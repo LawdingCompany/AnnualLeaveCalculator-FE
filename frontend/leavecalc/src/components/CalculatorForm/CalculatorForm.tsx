@@ -60,7 +60,7 @@ function CalculatorFormContent() {
               className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500"
             />
             <label htmlFor="specialPeriod" className="ml-2 text-sm font-medium text-gray-700">
-              특이사항이 있는 기간
+              특이사항이 있는 기간(최대 5개 입력)
             </label>
             <InfoTooltip
               title="특이사항 안내"
@@ -79,9 +79,6 @@ function CalculatorFormContent() {
             />
           </div>
 
-          {/* 여기에 특이사항 추가 목록이 들어갑니다 */}
-          {/* 생략 ... */}
-
           {/* 휴일 체크박스 */}
           <div className="flex items-center mb-4">
             <input
@@ -92,7 +89,7 @@ function CalculatorFormContent() {
               className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500"
             />
             <label htmlFor="holidays" className="ml-2 text-sm font-medium text-gray-700">
-              휴일(휴가, 법정 공휴일 外)
+              휴일(휴가, 법정 공휴일 外, 최대 7개 입력)
             </label>
             <InfoTooltip
               title="휴일 안내"

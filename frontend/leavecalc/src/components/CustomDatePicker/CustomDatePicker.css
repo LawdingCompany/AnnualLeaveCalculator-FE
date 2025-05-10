@@ -20,14 +20,14 @@
   overflow: visible !important;
 }
 
-/* 입력 필드 */
+/* 입력 필드 - text-align 제거 */
 .datepicker-container .calendar-input {
   width: 100%;
 }
 .datepicker-container .calendar-input input {
   width: 100%;
   padding: 8px 12px;
-  text-align: center;
+  /* text-align: center; 중앙 정렬 제거 */
   border: 1px solid #e0e0e0;
   border-radius: 4px;
   outline: none;
@@ -38,7 +38,7 @@
 }
 
 .calendar-dropdown {
-  position: fixed;
+  position: absolute;
   top: calc(100% + 5px);
   left: 0;
   z-index: 9999;
@@ -232,4 +232,75 @@
 .calendar-header button {
   -webkit-tap-highlight-color: transparent;
   touch-action: manipulation;
+}
+
+/* 입력 필드와 아이콘 래퍼 - 수정 */
+.calendar-input-wrapper {
+  display: flex;
+  align-items: center;
+  position: relative;
+  width: 100%;
+  border: 1px solid #e2e8f0;
+  border-radius: 0.375rem;
+  background-color: #fff;
+  transition:
+    border-color 0.2s,
+    box-shadow 0.2s;
+  overflow: hidden;
+}
+
+.calendar-input-wrapper:hover {
+  border-color: #cbd5e0;
+}
+
+.calendar-input-wrapper:focus-within {
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 1px rgba(59, 130, 246, 0.5);
+}
+
+/* 입력 필드 스타일 수정 - 패딩 조정 */
+.calendar-input-field {
+  flex: 1;
+  padding: 0.5rem 0.75rem;
+  padding-right: 2.5rem; /* 아이콘 공간을 위해 오른쪽 패딩 증가 */
+  border: none;
+  outline: none;
+  background: transparent;
+  font-size: 0.875rem;
+  color: #1a202c;
+  text-align: left; /* 왼쪽 정렬 명시적 지정 */
+  width: 100%; /* 너비 100%로 설정 */
+}
+
+.calendar-input-field::placeholder {
+  color: #a0aec0;
+}
+
+/* 달력 아이콘 버튼 스타일 - 위치 조정 */
+.calendar-icon-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 100%;
+  padding: 0;
+  border: none;
+  background: transparent;
+  color: #64748b;
+  cursor: pointer;
+  transition:
+    color 0.2s,
+    background-color 0.2s;
+  position: absolute; /* 절대 위치로 변경 */
+  right: 0; /* 오른쪽 정렬 */
+  top: 0; /* 상단 정렬 */
+}
+
+.calendar-icon-button:hover {
+  color: #3b82f6;
+  background-color: rgba(59, 130, 246, 0.05);
+}
+
+.calendar-icon-button:active {
+  background-color: rgba(59, 130, 246, 0.1);
 }

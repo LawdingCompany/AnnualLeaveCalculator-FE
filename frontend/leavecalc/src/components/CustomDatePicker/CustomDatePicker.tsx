@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { createPortal } from 'react-dom';
-import { ChevronLeft, ChevronRight } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Calendar } from 'lucide-react'; // Calendar 아이콘 추가
 import './CustomDatePicker.css';
 
 // 뷰 타입 정의
@@ -68,6 +68,7 @@ export default function CustomDatePicker({
   // 수동 입력 필드 및 캘린더 컨테이너 참조
   const inputRef = useRef<HTMLInputElement>(null);
   const calendarRef = useRef<HTMLDivElement>(null);
+  const inputContainerRef = useRef<HTMLDivElement>(null);
 
   // selected prop이 변경되면 내부 상태 업데이트
   useEffect(() => {
@@ -93,8 +94,8 @@ export default function CustomDatePicker({
 
   // 드롭다운 위치 계산을 위한 useEffect 추가
   useEffect(() => {
-    if (isOpen && inputRef.current) {
-      const rect = inputRef.current.getBoundingClientRect();
+    if (isOpen && inputContainerRef.current) {
+      const rect = inputContainerRef.current.getBoundingClientRect();
       setPosition({
         top: rect.bottom + 5,
         left: rect.left,
@@ -111,8 +112,8 @@ export default function CustomDatePicker({
       if (
         dropdown &&
         !dropdown.contains(event.target as Node) &&
-        inputRef.current &&
-        !inputRef.current.contains(event.target as Node)
+        inputContainerRef.current &&
+        !inputContainerRef.current.contains(event.target as Node)
       ) {
         setIsOpen(false);
       }
@@ -210,9 +211,14 @@ export default function CustomDatePicker({
     setInputValue(formattedValue);
   };
 
+  // 캘린더 토글 함수
+  const toggleCalendar = () => {
+    setIsOpen(!isOpen);
+  };
+
   // 입력 필드 클릭 시 캘린더 토글
   const handleInputClick = () => {
-    setIsOpen(!isOpen);
+    toggleCalendar();
   };
 
   // 입력에서 포커스가 벗어났을 때 입력값 검증 및 완성
@@ -622,7 +628,7 @@ export default function CustomDatePicker({
 
   return (
     <div className={`datepicker-container ${className}`} ref={calendarRef}>
-      <div className="calendar-input">
+      <div className="calendar-input-wrapper" ref={inputContainerRef}>
         <input
           ref={inputRef}
           type="text"
@@ -632,7 +638,16 @@ export default function CustomDatePicker({
           onClick={handleInputClick}
           placeholder={placeholderText}
           inputMode="numeric"
+          className="calendar-input-field"
         />
+        <button
+          type="button"
+          className="calendar-icon-button"
+          onClick={toggleCalendar}
+          aria-label="달력 열기"
+        >
+          <Calendar size={20} />
+        </button>
       </div>
       {isOpen && createPortal(<CalendarDropdown />, document.body)}
     </div>
