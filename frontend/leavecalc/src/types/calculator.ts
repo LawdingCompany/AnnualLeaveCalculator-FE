@@ -1,4 +1,4 @@
-export type CalculationMethod = 'hireDate' | 'fiscalYear' | null;
+export type CalculationMethod = 'hireDate' | 'fiscalYear';
 
 export interface CalculatorFormData {
   calculationMethod: CalculationMethod;

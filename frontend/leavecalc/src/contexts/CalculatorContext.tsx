@@ -13,7 +13,7 @@ interface CalculatorContextProps {
 }
 
 const initialFormData: CalculatorFormData = {
-  calculationMethod: null,
+  calculationMethod: 'hireDate',
   hireDate: null,
   fiscalYearDate: null,
   referenceDate: null,

@@ -1,6 +1,6 @@
 import CalculatorProvider, { useCalculator } from '@contexts/CalculatorContext';
 import InfoTooltip from '@components/InfoTooltip/InfoTooltip';
-import CustomDatePicker from '@components/DatePicker/CustomDatePicker';
+import CalculationType from '@components/CalculationType/CalculationType';
 import styles from './CalculatorForm.module.scss';
 
 function CalculatorFormContent() {
@@ -34,79 +34,20 @@ function CalculatorFormContent() {
       <div className="bg-white rounded-xl p-5 max-h-[450px] overflow-y-auto">
         {/* 내부 콘텐츠를 감싸는 컨테이너 - 좌우 여백 일관성 유지 */}
         <div className="mx-auto w-[95%]">
-          {/* 산정 방식 */}
-          <div className="flex space-x-2 mb-5">
-            <button
-              type="button"
-              onClick={() => setCalculationMethod('hireDate')}
-              className={`flex-1 py-2 px-4 text-sm border rounded-md transition-colors ${
-                formData.calculationMethod === 'hireDate'
-                  ? 'bg-blue-600 text-white border-blue-600'
-                  : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50'
-              }`}
-            >
-              입사일
-            </button>
-            <button
-              type="button"
-              onClick={() => setCalculationMethod('fiscalYear')}
-              className={`flex-1 py-2 px-4 text-sm border rounded-md transition-colors ${
-                formData.calculationMethod === 'fiscalYear'
-                  ? 'bg-blue-600 text-white border-blue-600'
-                  : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50'
-              }`}
-            >
-              회계연도
-            </button>
-          </div>
+          {/* 산정 방식 선택 컴포넌트 */}
+          <CalculationType
+            method={formData.calculationMethod}
+            onMethodChange={setCalculationMethod}
+            hireDate={formData.hireDate}
+            onHireDateChange={setHireDate}
+            fiscalYearDate={formData.fiscalYearDate}
+            onFiscalYearDateChange={setFiscalYearDate}
+            referenceDate={formData.referenceDate}
+            onReferenceDateChange={setReferenceDate}
+          />
 
-          {/* 입사일 */}
-          {formData.calculationMethod === 'hireDate' && (
-            <div className="grid grid-cols-3 items-center mb-4">
-              <div className="text-right pr-4">
-                <span className="text-sm font-medium text-gray-700">입사일</span>
-              </div>
-              <div className="col-span-2">
-                <CustomDatePicker
-                  selected={formData.hireDate}
-                  onChange={setHireDate}
-                  placeholderText="YYYY.MM.DD"
-                />
-              </div>
-            </div>
-          )}
-
-          {/* 회계연도 */}
-          {formData.calculationMethod === 'fiscalYear' && (
-            <div className="grid grid-cols-3 items-center mb-4">
-              <div className="text-right pr-4">
-                <span className="text-sm font-medium text-gray-700">회계연도</span>
-              </div>
-              <div className="col-span-2">
-                <CustomDatePicker
-                  selected={formData.fiscalYearDate}
-                  onChange={setFiscalYearDate}
-                  monthYearOnly={true}
-                  dateFormat="MM.dd"
-                  placeholderText="MM.DD"
-                />
-              </div>
-            </div>
-          )}
-
-          {/* 계산 기준일 */}
-          <div className="grid grid-cols-3 items-center mb-4">
-            <div className="text-right pr-4">
-              <span className="text-sm font-medium text-gray-700">계산 기준일</span>
-            </div>
-            <div className="col-span-2">
-              <CustomDatePicker
-                selected={formData.referenceDate}
-                onChange={setReferenceDate}
-                placeholderText="YYYY.MM.DD"
-              />
-            </div>
-          </div>
+          {/* 구분선 */}
+          <hr className="my-5 border-gray-200" />
 
           {/* 특이사항이 있는 기간 체크박스 */}
           <div className="flex items-center mb-4">
@@ -137,63 +78,8 @@ function CalculatorFormContent() {
             />
           </div>
 
-          {/* 여기에 특이사항 추가 목록이 들어갑니다 - 필요시 스크롤될 부분 */}
-          {formData.hasSpecialPeriod && (
-            <div className="mb-4">
-              <div className="border border-gray-200 rounded-md p-3 space-y-3">
-                <h3 className="text-sm font-medium text-gray-700">특이사항 목록</h3>
-
-                {/* 예시 특이사항 항목들 - 실제 구현 시 동적으로 생성 */}
-                <div className="grid grid-cols-3 gap-2">
-                  <div className="col-span-1">
-                    <select className="w-full text-sm border border-gray-300 rounded-md p-1">
-                      <option>출근 처리</option>
-                      <option>출산전후휴가</option>
-                      <option>유산전후휴가</option>
-                    </select>
-                  </div>
-                  <div className="col-span-2 flex space-x-2">
-                    <CustomDatePicker
-                      selected={null}
-                      onChange={() => {}}
-                      placeholderText="시작일"
-                    />
-                    <CustomDatePicker
-                      selected={null}
-                      onChange={() => {}}
-                      placeholderText="종료일"
-                    />
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-3 gap-2">
-                  <div className="col-span-1">
-                    <select className="w-full text-sm border border-gray-300 rounded-md p-1">
-                      <option>배우자출산</option>
-                      <option>연장계약</option>
-                      <option>공가</option>
-                    </select>
-                  </div>
-                  <div className="col-span-2 flex space-x-2">
-                    <CustomDatePicker
-                      selected={null}
-                      onChange={() => {}}
-                      placeholderText="시작일"
-                    />
-                    <CustomDatePicker
-                      selected={null}
-                      onChange={() => {}}
-                      placeholderText="종료일"
-                    />
-                  </div>
-                </div>
-
-                <button type="button" className="text-xs text-blue-600 hover:text-blue-800">
-                  + 특이사항 추가
-                </button>
-              </div>
-            </div>
-          )}
+          {/* 여기에 특이사항 추가 목록이 들어갑니다 */}
+          {/* 생략 ... */}
 
           {/* 휴일 체크박스 */}
           <div className="flex items-center mb-4">
@@ -220,45 +106,8 @@ function CalculatorFormContent() {
             />
           </div>
 
-          {/* 휴일 추가 목록 - 필요시 스크롤될 부분 */}
-          {formData.includeHolidays && (
-            <div className="mb-4">
-              <div className="border border-gray-200 rounded-md p-3 space-y-3">
-                <h3 className="text-sm font-medium text-gray-700">휴일 목록</h3>
-
-                {/* 예시 휴일 항목들 - 실제 구현 시 동적으로 생성 */}
-                <div className="flex space-x-2 items-center">
-                  <CustomDatePicker
-                    selected={null}
-                    onChange={() => {}}
-                    placeholderText="휴일 날짜"
-                  />
-                  <input
-                    type="text"
-                    placeholder="설명"
-                    className="flex-1 text-sm border border-gray-300 rounded-md p-1"
-                  />
-                </div>
-
-                <div className="flex space-x-2 items-center">
-                  <CustomDatePicker
-                    selected={null}
-                    onChange={() => {}}
-                    placeholderText="휴일 날짜"
-                  />
-                  <input
-                    type="text"
-                    placeholder="설명"
-                    className="flex-1 text-sm border border-gray-300 rounded-md p-1"
-                  />
-                </div>
-
-                <button type="button" className="text-xs text-blue-600 hover:text-blue-800">
-                  + 휴일 추가
-                </button>
-              </div>
-            </div>
-          )}
+          {/* 휴일 추가 목록 */}
+          {/* 생략 ... */}
 
           {/* 계산하기 버튼 */}
           <button
@@ -274,7 +123,6 @@ function CalculatorFormContent() {
   );
 }
 
-// 외부로 노출되는 메인 컴포넌트 - Provider를 내장
 export default function CalculatorForm() {
   return (
     <CalculatorProvider>

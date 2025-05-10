@@ -1,0 +1,6 @@
+@use '../../styles/variables' as vars;
+
+.activeButton {
+  background-color: vars.$button-primary;
+  color: white;
+}

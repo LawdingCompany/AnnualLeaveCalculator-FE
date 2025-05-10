@@ -1,5 +1,27 @@
 @use '../../styles/variables' as vars;
+@use 'sass:color';
 
+// 커스텀 날짜 선택기 관련 스타일
+.calendar {
+  border-radius: 0.5rem;
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+  border: 1px solid #e5e7eb;
+  font-family: 'Inter', 'Noto Sans KR', sans-serif;
+}
+
+.calendarPopper {
+  z-index: 9999;
+}
+
+.sundayText {
+  color: #ef4444; // 빨간색 (일요일)
+}
+
+.saturdayText {
+  color: vars.$button-primary; // 파란색 (토요일)
+}
+
+// 계산기 카드 관련 스타일
 .calculatorCard {
   background-color: #eef0ff;
   border-radius: 1rem;
@@ -116,11 +138,59 @@
   transition: background-color 0.2s;
 
   &:hover {
-    background-color: darken(vars.$button-primary, 10%);
+    // darken 대신 color.adjust 사용
+    background-color: color.adjust(vars.$button-primary, $lightness: -10%);
   }
 
   &:focus {
     outline: none;
     box-shadow: 0 0 0 2px rgba(vars.$button-primary, 0.4);
+  }
+}
+
+// 전역 스타일 (DatePicker 라이브러리 커스터마이징)
+:global {
+  .react-datepicker {
+    font-family: 'Inter', 'Noto Sans KR', sans-serif;
+    border-color: #e5e7eb;
+  }
+
+  .react-datepicker__header {
+    background-color: #eff6ff;
+    border-bottom: 1px solid #dbeafe;
+    padding-top: 10px;
+  }
+
+  .react-datepicker__day--selected {
+    background-color: vars.$button-primary !important;
+    border-radius: 50%;
+    font-weight: bold;
+  }
+
+  .react-datepicker__day:hover {
+    background-color: #dbeafe !important;
+    border-radius: 50%;
+  }
+
+  .react-datepicker__day {
+    border-radius: 50%;
+    width: 2rem;
+    height: 2rem;
+    line-height: 2rem;
+    margin: 0.2rem;
+  }
+
+  .react-datepicker__day-name {
+    width: 2rem;
+    margin: 0.2rem;
+  }
+
+  .react-datepicker__day--keyboard-selected {
+    background-color: #dbeafe;
+    border-radius: 50%;
+  }
+
+  .react-datepicker__triangle {
+    display: none;
   }
 }
