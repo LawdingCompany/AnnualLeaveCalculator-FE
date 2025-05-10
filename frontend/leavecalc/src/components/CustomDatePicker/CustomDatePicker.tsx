@@ -1,6 +1,8 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { createPortal } from 'react-dom';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import './CustomDatePicker.css';
+
 // 뷰 타입 정의
 type CalendarView = 'day' | 'month' | 'year';
 
@@ -8,7 +10,8 @@ type CalendarView = 'day' | 'month' | 'year';
 interface CustomDatePickerProps {
   selected: Date | null;
   onChange: (date: Date | null) => void;
-  monthYearOnly?: boolean;
+  monthDayOnly?: boolean;
+  Only?: boolean;
   dateFormat?: string;
   placeholderText?: string;
   className?: string;
@@ -32,10 +35,11 @@ const MONTHS = [
   '11월',
   '12월',
 ];
+
 export default function CustomDatePicker({
   selected,
   onChange,
-  monthYearOnly = false,
+  monthDayOnly = false,
   dateFormat = 'YYYY.MM.DD',
   placeholderText = 'YYYY.MM.DD',
   className = '',
@@ -50,7 +54,7 @@ export default function CustomDatePicker({
   const [selectedDate, setSelectedDate] = useState<Date | null>(selected);
 
   // 캘린더 뷰 상태 (일/월/연도)
-  const [view, setView] = useState<CalendarView>(monthYearOnly ? 'month' : 'day');
+  const [view, setView] = useState<CalendarView>(monthDayOnly ? 'month' : 'day');
 
   // 수동 입력을 위한 상태
   const [inputValue, setInputValue] = useState<string>('');
@@ -60,6 +64,9 @@ export default function CustomDatePicker({
 
   // 현재 표시되는 연도 범위 (연도 뷰에서 사용)
   const [yearRange, setYearRange] = useState<[number, number]>([2017, currentYear + 5]);
+
+  // 드롭다운 위치를 위한 상태 추가
+  const [position, setPosition] = useState({ top: 0, left: 0 });
 
   // 수동 입력 필드 및 캘린더 컨테이너 참조
   const inputRef = useRef<HTMLInputElement>(null);
@@ -87,12 +94,26 @@ export default function CustomDatePicker({
     }
   }, []);
 
+  // 드롭다운 위치 계산을 위한 useEffect 추가
+  useEffect(() => {
+    if (isOpen && inputRef.current) {
+      const rect = inputRef.current.getBoundingClientRect();
+      setPosition({
+        top: rect.bottom + 5,
+        left: rect.left,
+      });
+    }
+  }, [isOpen]);
+
   // 외부 클릭 감지 이벤트
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
+      // Portal을 사용하므로 calendar-dropdown 클래스를 가진 요소를 직접 찾아서 처리
+      const dropdown = document.querySelector('.calendar-dropdown');
+
       if (
-        calendarRef.current &&
-        !calendarRef.current.contains(event.target as Node) &&
+        dropdown &&
+        !dropdown.contains(event.target as Node) &&
         inputRef.current &&
         !inputRef.current.contains(event.target as Node)
       ) {
@@ -111,7 +132,7 @@ export default function CustomDatePicker({
 
   // 날짜를 지정된 포맷에 맞게 표시하는 함수
   const formatDate = (date: Date): string => {
-    if (monthYearOnly) {
+    if (monthDayOnly) {
       const month = (date.getMonth() + 1).toString().padStart(2, '0');
       const day = date.getDate().toString().padStart(2, '0');
 
@@ -169,7 +190,7 @@ export default function CustomDatePicker({
         formatted += monthNum.toString().padStart(monthPart.length, '0');
 
         // 월 포맷으로만 사용하는 경우는 여기서 종료
-        if (monthYearOnly) return formatted;
+        if (monthDayOnly) return formatted;
 
         // 월이 완성되고 추가 숫자가 있으면 일 처리
         if (numbers.length > 6) {
@@ -226,7 +247,7 @@ export default function CustomDatePicker({
 
       let year: number, month: number, day: number;
 
-      if (monthYearOnly) {
+      if (monthDayOnly) {
         // 월/일만 있는 경우 현재 연도 사용
         year = currentYear;
         month = parts.length > 0 && parts[0] ? parseInt(parts[0].trim(), 10) - 1 : 0;
@@ -284,8 +305,12 @@ export default function CustomDatePicker({
     // 콜백 함수 호출
     if (onChange) onChange(date);
 
-    // 날짜를 선택하면 monthYearOnly가 아닌 경우에만 캘린더 닫기
-    if (!monthYearOnly) {
+    // 날짜를 선택하면 monthDayOnly가 아닌 경우에만 캘린더 닫기
+    if (view === 'day') {
+      // setTimeout으로 상태 업데이트 후 닫기 실행
+      setTimeout(() => {
+        setIsOpen(false);
+      }, 0);
       setIsOpen(false);
     }
   };
@@ -295,11 +320,10 @@ export default function CustomDatePicker({
     const newDate = new Date(currentDate);
     newDate.setMonth(monthIndex);
 
-    if (monthYearOnly) {
+    if (monthDayOnly) {
       // 월만 선택하는 모드인 경우 현재 날짜에 1일로 설정
-      newDate.setDate(1);
-      handleDateSelect(newDate);
-      setView('month');
+      setCurrentDate(newDate);
+      setView('day');
     } else {
       // 일반 모드에서는 일 선택 뷰로 전환
       setCurrentDate(newDate);
@@ -473,7 +497,9 @@ export default function CustomDatePicker({
                 ]
                   .filter(Boolean)
                   .join(' ')}
-                onClick={(e) => {
+                onMouseDown={(e) => {
+                  // onClick 대신 onMouseDown 사용
+                  e.preventDefault();
                   e.stopPropagation();
                   handleDateSelect(day.date);
                 }}
@@ -497,7 +523,8 @@ export default function CustomDatePicker({
             className={['month', currentDate.getMonth() === i && 'selected']
               .filter(Boolean)
               .join(' ')}
-            onClick={(e) => {
+            onMouseDown={(e) => {
+              e.preventDefault();
               e.stopPropagation();
               handleMonthSelect(i);
             }}
@@ -531,8 +558,10 @@ export default function CustomDatePicker({
             className={['year', currentDate.getFullYear() === y && 'selected']
               .filter(Boolean)
               .join(' ')}
-            onClick={(e) => {
-              e.stopPropagation();
+            onMouseDown={(e) => {
+              // onClick 대신 onMouseDown 사용
+              e.preventDefault(); // 이벤트 기본 동작 방지
+              e.stopPropagation(); // 이벤트 버블링 방지
               handleYearSelect(y);
             }}
           >
@@ -557,6 +586,78 @@ export default function CustomDatePicker({
     }
   };
 
+  // 캘린더 드롭다운 컴포넌트
+  const CalendarDropdown = () => {
+    return (
+      <div
+        className="calendar-dropdown"
+        style={{
+          top: `${position.top}px`,
+          left: `${position.left}px`,
+        }}
+      >
+        <div className="calendar-container">
+          <div
+            className="calendar-header"
+            onMouseDown={(e) => {
+              // 헤더 영역 클릭 시 이벤트 전파 방지
+              if (e.target === e.currentTarget) {
+                e.preventDefault();
+                e.stopPropagation();
+              }
+            }}
+          >
+            <button
+              className="nav-button"
+              onMouseDown={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                handleNavigation('prev');
+              }}
+            >
+              <ChevronLeft size={20} />
+            </button>
+            <button
+              className="title-button"
+              style={{
+                position: 'relative',
+                zIndex: 10,
+                userSelect: 'none',
+              }}
+              onMouseDown={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+
+                // 상태 업데이트를 직접 수행
+                if (view === 'day') {
+                  setView('month');
+                } else if (view === 'month') {
+                  setView('year');
+                } else {
+                  setView('day');
+                }
+              }}
+            >
+              {getTitleText()}
+            </button>
+            <button
+              type="button"
+              className="nav-button"
+              onMouseDown={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                handleNavigation('next');
+              }}
+            >
+              <ChevronRight size={20} />
+            </button>
+          </div>
+          <div className="calendar-content">{renderViewContent()}</div>
+        </div>
+      </div>
+    );
+  };
+
   return (
     <div className={`datepicker-container ${className}`} ref={calendarRef}>
       <div className="calendar-input">
@@ -571,33 +672,7 @@ export default function CustomDatePicker({
           inputMode="numeric"
         />
       </div>
-      {isOpen && (
-        <div className="calendar-dropdown">
-          <div className="calendar-container">
-            <div className="calendar-header">
-              <button className="nav-button" onClick={() => handleNavigation('prev')}>
-                <ChevronLeft size={20} />
-              </button>
-              <button
-                className="title-button"
-                onClick={() => setView((v) => (v === 'day' ? 'month' : 'year'))}
-              >
-                {getTitleText()}
-              </button>
-              <button className="nav-button" onClick={() => handleNavigation('next')}>
-                <ChevronRight size={20} />
-              </button>
-            </div>
-            <div className="calendar-content">
-              {view === 'day'
-                ? renderDayView()
-                : view === 'month'
-                  ? renderMonthView()
-                  : renderYearView()}
-            </div>
-          </div>
-        </div>
-      )}
+      {isOpen && createPortal(<CalendarDropdown />, document.body)}
     </div>
   );
 }

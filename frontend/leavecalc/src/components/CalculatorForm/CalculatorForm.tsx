@@ -32,7 +32,7 @@ function CalculatorFormContent() {
       </div>
 
       {/* 흰색 폼 영역에 고정 높이와 스크롤 추가 */}
-      <div className="bg-white rounded-xl p-5 max-h-[450px] overflow-y-auto">
+      <div className="bg-white rounded-xl p-5 max-h-[450px] overflow-y-auto ">
         {/* 내부 콘텐츠를 감싸는 컨테이너 - 좌우 여백 일관성 유지 */}
         <div className="mx-auto w-[95%]">
           {/* 산정 방식 선택 컴포넌트 */}

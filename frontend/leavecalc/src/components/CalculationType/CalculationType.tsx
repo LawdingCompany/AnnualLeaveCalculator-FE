@@ -65,7 +65,7 @@ export default function CalculationType({
               <CustomDatePicker
                 selected={fiscalYearDate}
                 onChange={onFiscalYearDateChange}
-                monthYearOnly={true}
+                monthDayOnly={true}
                 dateFormat="MM.dd"
                 placeholderText="MM.DD"
               />
@@ -93,8 +93,8 @@ export default function CalculationType({
           <div className="w-20 text-right text-sm font-medium text-gray-700">계산 기준일</div>
           <div className="w-36">
             <CustomDatePicker
-              selected={hireDate}
-              onChange={onHireDateChange}
+              selected={referenceDate}
+              onChange={onReferenceDateChange}
               placeholderText="YYYY.MM.DD"
             />
           </div>
