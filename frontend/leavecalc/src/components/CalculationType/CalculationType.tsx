@@ -28,7 +28,7 @@ export default function CalculationType({
       {/* 첫 번째 행: 산정 방식 + 버튼 (왼쪽) / 회계연도 (오른쪽) */}
       <div className="grid grid-cols-2 gap-4 mb-4">
         {/* 왼쪽: 산정 방식 버튼 - gap-3 추가로 간격 조절 */}
-        <div className="flex items-center gap-1">
+        <div className="flex items-center gap-3">
           <div className="w-20 text-right text-sm font-medium text-gray-700">산정 방식</div>
           <div className="ml-1 inline-flex rounded-md border border-gray-300 overflow-hidden">
             <button
