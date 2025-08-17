@@ -1,4 +1,3 @@
-// CalcaulatorForm.tsx
 import React, { lazy, Suspense } from 'react';
 import CalculatorProvider, { useCalculator } from '@contexts/CalculatorContext';
 import CalculationType from '@components/CalculationType/CalculationType';
@@ -38,8 +37,13 @@ function CalculatorFormContent() {
   } = useCalculator();
 
   return (
-    <div className={`${styles.card} rounded-2xl p-6 shadow-md w-full max-w-lg mx-auto`}>
-      <div className="text-center mb-6">
+    // ✅ h-full 추가: 부모 높이를 모두 사용
+    // ✅ flex flex-col: 세로 방향 레이아웃
+    <div
+      className={`${styles.card} rounded-2xl p-6 shadow-md w-full max-w-lg mx-auto h-full flex flex-col`}
+    >
+      {/* 헤더 영역 - 고정 크기 */}
+      <div className="text-center mb-6 flex-shrink-0">
         <h1 className="text-5xl font-semibold mb-5">연차 계산기</h1>
         <p className="text-xl mb-2">
           당신의 진짜 연차 일수는 얼마일까요?
@@ -52,8 +56,10 @@ function CalculatorFormContent() {
         </p>
       </div>
 
-      {/* 흰색 폼 영역에 고정 높이와 스크롤 추가 */}
-      <div className="bg-white rounded-xl p-5 max-h-[450px] overflow-y-auto overscroll-contain scroll-smooth">
+      {/* ✅ 메인 폼 영역 - 남은 공간을 모두 사용하고 스크롤 */}
+      {/* flex-1: 남은 공간 모두 차지 */}
+      {/* min-h-0: flex 아이템이 축소될 수 있도록 허용 */}
+      <div className="bg-white rounded-xl p-5 flex-1 min-h-0 overflow-y-auto overscroll-contain scroll-smooth">
         {/* 내부 콘텐츠를 감싸는 컨테이너 - 좌우 여백 일관성 유지 */}
         <div className="mx-auto w-[95%]">
           {/* 산정 방식 선택 컴포넌트 */}
@@ -84,11 +90,17 @@ function CalculatorFormContent() {
           {/* 계산 결과 표시 */}
           <CalculationResult />
 
-          {/* 계산하기 버튼 */}
+          {/* ✅ 버튼을 하단에 고정하려면 별도 영역으로 분리 */}
+        </div>
+      </div>
+
+      {/* ✅ 버튼 영역 - 하단 고정 */}
+      <div className="flex-shrink-0 bg-white px-5 pb-5 pt-3 rounded-b-xl">
+        <div className="mx-auto w-[95%]">
           <button
             type="button"
             onClick={calculateVacation}
-            className={`${styles.button} w-full py-2 px-4 mt-4 font-medium rounded-md transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 active:scale-98`}
+            className={`${styles.button} w-full py-2 px-4 font-medium rounded-md transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 active:scale-98`}
           >
             계산하기
           </button>
@@ -106,5 +118,7 @@ const CalculatorForm = React.memo(() => {
     </CalculatorProvider>
   );
 });
+
+CalculatorForm.displayName = 'CalculatorForm';
 
 export default CalculatorForm;
