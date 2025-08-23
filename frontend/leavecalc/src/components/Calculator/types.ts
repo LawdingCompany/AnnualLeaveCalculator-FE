@@ -41,6 +41,8 @@ export interface CalculatorState {
   referenceDate: string; // YYYY-MM-DD
   nonWorkingPeriods: UiNonWorkingPeriod[];
   companyHolidays: string[]; // YYYY-MM-DD[]
+  specialPeriodsEnabled: boolean;
+  companyHolidaysEnabled: boolean;
 }
 
 export type Action =
@@ -51,7 +53,10 @@ export type Action =
   | { type: 'ADD_PERIOD'; payload?: Partial<UiNonWorkingPeriod> }
   | { type: 'UPDATE_PERIOD'; index: number; payload: Partial<UiNonWorkingPeriod> }
   | { type: 'REMOVE_PERIOD'; index: number }
-  | { type: 'SET_COMPANY_HOLIDAYS'; payload: string[] };
+  | { type: 'CLEAR_PERIODS' }
+  | { type: 'SET_COMPANY_HOLIDAYS'; payload: string[] }
+  | { type: 'SET_SPECIAL_PERIODS_ENABLED'; payload: boolean }
+  | { type: 'SET_COMPANY_HOLIDAYS_ENABLED'; payload: boolean };
 
 // 1~16 → 1/2/3 매핑 규칙 (제출 시 사용)
 export function mapSubtypeToCategory(subtype: number): NonWorkingCategory {

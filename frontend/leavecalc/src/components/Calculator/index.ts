@@ -7,3 +7,5 @@ export { default as SubmitBar } from './SubmitBar';
 export { default as FAQ } from './FAQ';
 export { default as GuidelineHint } from './GuidelineHint';
 export { default as HelpDrawer } from './HelpDrawer';
+export { default as CompanyHolidaysSection } from './CompanyHolidaysSection';
+export { default as FeedbackModal } from './FeedbackModal';

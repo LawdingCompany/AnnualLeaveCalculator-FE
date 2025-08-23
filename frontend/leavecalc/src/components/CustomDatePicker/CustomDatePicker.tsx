@@ -1,26 +1,23 @@
+// CustomDatePicker.tsx (전체 교체)
 import React, { useState, useEffect, useRef } from 'react';
 import { createPortal } from 'react-dom';
 import { ChevronLeft, ChevronRight, Calendar } from 'lucide-react';
 import './CustomDatePicker.css';
 
-// 뷰 타입 정의
 type CalendarView = 'day' | 'month' | 'year';
 
-// Props 타입 정의
 interface CustomDatePickerProps {
   selected: Date | null;
   onChange: (date: Date | null) => void;
   dateFormat?: string;
   placeholderText?: string;
   className?: string;
-  minDate?: Date | null; // minDate 속성 추가
-  maxDate?: Date | null; // 선택적으로 maxDate도 추가
+  minDate?: Date | null;
+  maxDate?: Date | null;
 }
 
-// 요일 라벨 (한국어)
+// 요일/월 라벨
 const DAYS_OF_WEEK = ['일', '월', '화', '수', '목', '금', '토'];
-
-// 월 라벨 (한국어)
 const MONTHS = [
   '1월',
   '2월',
@@ -36,44 +33,56 @@ const MONTHS = [
   '12월',
 ];
 
+// ✅ 법개정 최소 선택일
+const LAW_MIN_DATE = new Date(2017, 4, 30); // 2017-05-30 (0=1월)
+
+// 스크롤 부모들 찾기 (overflow: auto|scroll)
+function getScrollParents(el: HTMLElement | null): (HTMLElement | Window)[] {
+  const res: (HTMLElement | Window)[] = [window];
+  let p = el?.parentElement || null;
+  const re = /(auto|scroll)/;
+  while (p && p !== document.body) {
+    const cs = getComputedStyle(p);
+    if (re.test(`${cs.overflow}${cs.overflowY}${cs.overflowX}`)) res.push(p);
+    p = p.parentElement;
+  }
+  return res;
+}
+
 export default function CustomDatePicker({
   selected,
   onChange,
   placeholderText = 'YYYY.MM.DD',
   className = '',
-  minDate = null, // minDate 기본값 설정
-  maxDate = null, // maxDate 기본값 설정
+  minDate = null,
+  maxDate = null,
 }: CustomDatePickerProps) {
-  // 현재 연도 계산
   const currentYear = new Date().getFullYear();
 
-  // 현재 날짜 정보 (selected가 있으면 해당 날짜, 없으면 현재 날짜)
   const [currentDate, setCurrentDate] = useState<Date>(selected || new Date());
-
-  // 선택된 날짜 정보
   const [selectedDate, setSelectedDate] = useState<Date | null>(selected);
-
-  // 캘린더 뷰 상태 (일/월/연도)
   const [view, setView] = useState<CalendarView>('day');
-
-  // 수동 입력을 위한 상태
   const [inputValue, setInputValue] = useState<string>('');
-
-  // 캘린더 표시 여부
   const [isOpen, setIsOpen] = useState<boolean>(false);
 
-  // 현재 표시되는 연도 범위 (연도 뷰에서 사용)
+  // 드롭다운 위치/너비
+  const [position, setPosition] = useState({ top: 0, left: 0 });
+  const [dropdownWidth, setDropdownWidth] = useState<number | undefined>(undefined);
+
   const [yearRange, setYearRange] = useState<[number, number]>([2017, currentYear + 5]);
 
-  // 드롭다운 위치를 위한 상태 추가
-  const [position, setPosition] = useState({ top: 0, left: 0 });
-
-  // 수동 입력 필드 및 캘린더 컨테이너 참조
   const inputRef = useRef<HTMLInputElement>(null);
   const calendarRef = useRef<HTMLDivElement>(null);
   const inputContainerRef = useRef<HTMLDivElement>(null);
 
-  // selected prop이 변경되면 내부 상태 업데이트
+  // ✅ props.minDate와 법개정일 중 더 큰 값
+  const effectiveMinDate: Date | null = minDate
+    ? minDate < LAW_MIN_DATE
+      ? LAW_MIN_DATE
+      : minDate
+    : LAW_MIN_DATE;
+  const effectiveMaxDate: Date | null = maxDate ?? null;
+
   useEffect(() => {
     if (selected !== selectedDate) {
       setSelectedDate(selected);
@@ -86,32 +95,50 @@ export default function CustomDatePicker({
     }
   }, [selected]);
 
-  // 초기 마운트 시와 selected 변경 시 input 값 설정
   useEffect(() => {
-    if (selectedDate) {
-      formatAndSetInputValue(selectedDate);
-    } else {
-      setInputValue('');
-    }
+    if (selectedDate) formatAndSetInputValue(selectedDate);
+    else setInputValue('');
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // 드롭다운 위치 계산을 위한 useEffect 추가
+  // ⬇️ 드롭다운 위치 업데이트
+  const updatePosition = () => {
+    if (!inputContainerRef.current) return;
+    const rect = inputContainerRef.current.getBoundingClientRect();
+    setPosition({
+      top: rect.bottom + 5, // fixed 기준이므로 scrollY 더하지 않음
+      left: rect.left,
+    });
+    setDropdownWidth(rect.width);
+  };
+
+  // 열려 있을 때 스크롤/리사이즈/리사이즈옵저버로 따라붙기
   useEffect(() => {
-    if (isOpen && inputContainerRef.current) {
-      const rect = inputContainerRef.current.getBoundingClientRect();
-      setPosition({
-        top: rect.bottom + 5,
-        left: rect.left,
-      });
-    }
+    if (!isOpen) return;
+    updatePosition();
+
+    const parents = getScrollParents(inputContainerRef.current);
+    parents.forEach((p) =>
+      p.addEventListener('scroll', updatePosition, { passive: true, capture: true }),
+    );
+    window.addEventListener('resize', updatePosition, { passive: true });
+
+    const ro = 'ResizeObserver' in window ? new ResizeObserver(() => updatePosition()) : null;
+    if (ro && inputContainerRef.current) ro.observe(inputContainerRef.current);
+
+    return () => {
+      parents.forEach((p) =>
+        p.removeEventListener('scroll', updatePosition, { capture: true } as any),
+      );
+      window.removeEventListener('resize', updatePosition);
+      if (ro && inputContainerRef.current) ro.disconnect();
+    };
   }, [isOpen]);
 
-  // 외부 클릭 감지 이벤트
+  // 외부 클릭으로 닫기
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
-      // Portal을 사용하므로 calendar-dropdown 클래스를 가진 요소를 직접 찾아서 처리
       const dropdown = document.querySelector('.calendar-dropdown');
-
       if (
         dropdown &&
         !dropdown.contains(event.target as Node) &&
@@ -121,160 +148,101 @@ export default function CustomDatePicker({
         setIsOpen(false);
       }
     };
-
-    if (isOpen) {
-      document.addEventListener('mousedown', handleClickOutside);
-    }
-
-    return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
-    };
+    if (isOpen) document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
   }, [isOpen]);
 
-  // 날짜를 지정된 포맷에 맞게 표시하는 함수
   const formatDate = (date: Date): string => {
-    const year = date.getFullYear();
-    const month = (date.getMonth() + 1).toString().padStart(2, '0');
-    const day = date.getDate().toString().padStart(2, '0');
-
-    return `${year}.${month}.${day}`;
+    const y = date.getFullYear();
+    const m = String(date.getMonth() + 1).padStart(2, '0');
+    const d = String(date.getDate()).padStart(2, '0');
+    return `${y}.${m}.${d}`;
   };
-
-  // 날짜 변경 시 input 값 포맷팅 및 설정
   const formatAndSetInputValue = (date: Date) => {
-    const formattedValue = formatDate(date);
-    setInputValue(formattedValue);
+    setInputValue(formatDate(date));
   };
 
-  // 날짜 문자열 포맷팅 함수
   const formatDateString = (input: string): string => {
-    // 숫자와 구분자만 허용
     const digitsOnly = input.replace(/[^\d.]/g, '');
-
-    // 숫자만 추출
     const numbers = digitsOnly.replace(/\./g, '');
-
-    // 숫자가 없으면 빈 문자열 반환
     if (numbers.length === 0) return '';
-
     let formatted = '';
-
-    // 연도 처리 (최대 4자리)
     if (numbers.length > 0) {
       const yearPart = numbers.substring(0, Math.min(4, numbers.length));
       formatted = yearPart;
-
-      // 연도가 완성되고 추가 숫자가 있으면 월 처리
       if (numbers.length > 4) {
         formatted += '.';
-
-        // 월 처리 (최대 2자리)
         const monthPart = numbers.substring(4, Math.min(6, numbers.length));
-
-        // 월이 12를 초과하지 않도록 검사
         let monthNum = parseInt(monthPart, 10);
-        if (monthPart.length === 2 && monthNum > 12) {
-          monthNum = 12;
-        }
-
+        if (monthPart.length === 2 && monthNum > 12) monthNum = 12;
         formatted += monthNum.toString().padStart(monthPart.length, '0');
-
-        // 월이 완성되고 추가 숫자가 있으면 일 처리
         if (numbers.length > 6) {
           formatted += '.';
-
-          // 일 처리 (최대 2자리)
           const dayPart = numbers.substring(6, Math.min(8, numbers.length));
-
-          // 일이 해당 월의 최대일수를 초과하지 않도록 검사
           let dayNum = parseInt(dayPart, 10);
           const yearNum = parseInt(formatted.split('.')[0], 10);
           const monthIndex = parseInt(formatted.split('.')[1], 10) - 1;
           const lastDayOfMonth = new Date(yearNum, monthIndex + 1, 0).getDate();
-
-          if (dayPart.length === 2 && dayNum > lastDayOfMonth) {
-            dayNum = lastDayOfMonth;
-          } else if (dayNum === 0 && dayPart.length > 0) {
-            dayNum = 1;
-          }
-
+          if (dayPart.length === 2 && dayNum > lastDayOfMonth) dayNum = lastDayOfMonth;
+          else if (dayNum === 0 && dayPart.length > 0) dayNum = 1;
           formatted += dayNum.toString().padStart(dayPart.length, '0');
         }
       }
     }
-
     return formatted;
   };
 
-  // 입력된 날짜 처리
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const newValue = e.target.value;
-    // 입력값을 포맷팅하여 상태 업데이트
-    const formattedValue = formatDateString(newValue);
+    const formattedValue = formatDateString(e.target.value);
     setInputValue(formattedValue);
   };
 
-  // 캘린더 토글 함수
-  const toggleCalendar = () => {
-    setIsOpen(!isOpen);
+  const handleInputClick = () => setIsOpen(true);
+
+  const isDateInRange = (date: Date): boolean => {
+    const t = date.getTime();
+    const min = effectiveMinDate ? effectiveMinDate.getTime() : Number.NEGATIVE_INFINITY;
+    const max = effectiveMaxDate ? effectiveMaxDate.getTime() : Number.POSITIVE_INFINITY;
+    return t >= min && t <= max;
   };
 
-  // 입력 필드 클릭 시 캘린더 토글
-  const handleInputClick = () => {
-    toggleCalendar();
-  };
+  const isDateDisabled = (date: Date): boolean => !isDateInRange(date);
 
-  // 입력에서 포커스가 벗어났을 때 입력값 검증 및 완성
   const handleInputBlur = () => {
     try {
-      // 완전히 비어있는 경우 null로 설정
       if (inputValue.trim() === '') {
         setSelectedDate(null);
-        if (onChange) onChange(null);
+        onChange?.(null);
         return;
       }
-
-      // 입력된 날짜 검증
       const parts = inputValue.split('.');
-
-      // 연/월/일 모두 처리
       let year = parts[0] ? parseInt(parts[0].trim(), 10) : currentYear;
       let month = parts.length > 1 && parts[1] ? parseInt(parts[1].trim(), 10) - 1 : 0;
       let day = parts.length > 2 && parts[2] ? parseInt(parts[2].trim(), 10) : 1;
 
-      // 값 범위 검증
       if (year < 2017 || year > currentYear + 5) year = currentYear;
       if (month < 0 || month > 11) month = 0;
-
-      const lastDayOfMonth = new Date(year, month + 1, 0).getDate();
-      if (day < 1 || day > lastDayOfMonth) day = 1;
+      const lastDay = new Date(year, month + 1, 0).getDate();
+      if (day < 1 || day > lastDay) day = 1;
 
       const newDate = new Date(year, month, day);
-
-      // 유효한 날짜인지 확인
       if (!isNaN(newDate.getTime())) {
-        // minDate 및 maxDate 검증 추가
         if (isDateInRange(newDate)) {
           setSelectedDate(newDate);
           setCurrentDate(newDate);
-
-          // 콜백 함수 호출
-          if (onChange) onChange(newDate);
-
-          // 형식화된 날짜 문자열로 입력값 업데이트
+          onChange?.(newDate);
           formatAndSetInputValue(newDate);
         } else {
-          // 범위를 벗어난 날짜는 기존 선택으로 되돌리거나 최소/최대 날짜로 설정
-          if (minDate && newDate < minDate) {
-            setSelectedDate(minDate);
-            setCurrentDate(minDate);
-            if (onChange) onChange(minDate);
-            formatAndSetInputValue(minDate);
-          } else if (maxDate && newDate > maxDate) {
-            setSelectedDate(maxDate);
-            setCurrentDate(maxDate);
-            if (onChange) onChange(maxDate);
-            formatAndSetInputValue(maxDate);
+          if (effectiveMinDate && newDate < effectiveMinDate) {
+            setSelectedDate(effectiveMinDate);
+            setCurrentDate(effectiveMinDate);
+            onChange?.(effectiveMinDate);
+            formatAndSetInputValue(effectiveMinDate);
+          } else if (effectiveMaxDate && newDate > effectiveMaxDate) {
+            setSelectedDate(effectiveMaxDate);
+            setCurrentDate(effectiveMaxDate);
+            onChange?.(effectiveMaxDate);
+            formatAndSetInputValue(effectiveMaxDate);
           } else if (selectedDate) {
             formatAndSetInputValue(selectedDate);
           } else {
@@ -282,73 +250,34 @@ export default function CustomDatePicker({
           }
         }
       } else {
-        // 유효하지 않은 날짜인 경우 선택된 날짜가 있으면 그 값으로 복원, 아니면 비움
-        if (selectedDate) {
-          formatAndSetInputValue(selectedDate);
-        } else {
-          setInputValue('');
-        }
+        if (selectedDate) formatAndSetInputValue(selectedDate);
+        else setInputValue('');
       }
-    } catch (error) {
-      // 파싱 오류 시 이전 선택 날짜로 복원
-      if (selectedDate) {
-        formatAndSetInputValue(selectedDate);
-      } else {
-        setInputValue('');
-      }
+    } catch {
+      if (selectedDate) formatAndSetInputValue(selectedDate);
+      else setInputValue('');
     }
   };
 
-  // minDate와 maxDate를 고려한 날짜 범위 체크 함수
-  const isDateInRange = (date: Date): boolean => {
-    if (minDate && date < minDate) {
-      return false;
-    }
-    if (maxDate && date > maxDate) {
-      return false;
-    }
-    return true;
-  };
-
-  // 날짜가 선택 불가능한지 확인하는 함수
-  const isDateDisabled = (date: Date): boolean => {
-    return !isDateInRange(date);
-  };
-
-  // 특정 날짜 선택 처리
   const handleDateSelect = (date: Date) => {
-    // 선택 불가능한 날짜는 무시
-    if (isDateDisabled(date)) {
-      return;
-    }
-
+    if (isDateDisabled(date)) return;
     setSelectedDate(date);
     setCurrentDate(date);
     formatAndSetInputValue(date);
-
-    // 콜백 함수 호출
-    if (onChange) onChange(date);
-
-    // 날짜를 선택하면 즉시 캘린더 닫기
+    onChange?.(date);
     setIsOpen(false);
   };
 
-  // 월 선택 처리
   const handleMonthSelect = (monthIndex: number) => {
     const newDate = new Date(currentDate);
     newDate.setMonth(monthIndex);
-
-    // 일반 모드에서는 일 선택 뷰로 전환
     setCurrentDate(newDate);
     setView('day');
   };
 
-  // 연도 선택 처리
   const handleYearSelect = (year: number) => {
-    // 선택 가능한 연도 범위 내에서만 선택 허용
-    const currentYear = new Date().getFullYear();
-
-    if (year >= 2017 && year <= currentYear + 5) {
+    const nowY = new Date().getFullYear();
+    if (year >= 2017 && year <= nowY + 5) {
       const newDate = new Date(currentDate);
       newDate.setFullYear(year);
       setCurrentDate(newDate);
@@ -356,127 +285,71 @@ export default function CustomDatePicker({
     }
   };
 
-  // 이전/다음 이동 처리
   const handleNavigation = (direction: 'prev' | 'next') => {
     const newDate = new Date(currentDate);
-    const currentYear = new Date().getFullYear();
-
-    if (view === 'day') {
-      // 일 뷰에서는 월 단위로 이동
-      newDate.setMonth(newDate.getMonth() + (direction === 'next' ? 1 : -1));
-    } else if (view === 'month') {
-      // 월 뷰에서는 연도 단위로 이동
+    const nowY = new Date().getFullYear();
+    if (view === 'day') newDate.setMonth(newDate.getMonth() + (direction === 'next' ? 1 : -1));
+    else if (view === 'month')
       newDate.setFullYear(newDate.getFullYear() + (direction === 'next' ? 1 : -1));
-    } else if (view === 'year') {
-      // 연도 뷰에서는 12년 단위로 이동
+    else if (view === 'year') {
       const [start, end] = yearRange;
-      const rangeSize = end - start + 1;
-
-      // 새 범위가 2017~(현재연도+5) 범위를 벗어나지 않도록 검사
-      let newStart = start + (direction === 'next' ? rangeSize : -rangeSize);
-      let newEnd = end + (direction === 'next' ? rangeSize : -rangeSize);
-
-      // 범위 제한 적용
-      if (newStart < 2017) {
-        newStart = 2017;
-        newEnd = newStart + rangeSize - 1;
+      const size = end - start + 1;
+      let ns = start + (direction === 'next' ? size : -size);
+      let ne = end + (direction === 'next' ? size : -size);
+      if (ns < 2017) {
+        ns = 2017;
+        ne = ns + size - 1;
       }
-
-      if (newEnd > currentYear + 5) {
-        newEnd = currentYear + 5;
-        newStart = newEnd - rangeSize + 1;
-
-        // 시작 연도가 2017보다 작아지지 않도록 조정
-        if (newStart < 2017) {
-          newStart = 2017;
-        }
+      if (ne > nowY + 5) {
+        ne = nowY + 5;
+        ns = ne - size + 1;
+        if (ns < 2017) ns = 2017;
       }
-
-      setYearRange([newStart, newEnd]);
+      setYearRange([ns, ne]);
       return;
     }
-
     setCurrentDate(newDate);
   };
 
-  // 현재 뷰의 제목 텍스트 생성
   const getTitleText = () => {
     const year = currentDate.getFullYear();
     const month = currentDate.getMonth();
-
-    if (view === 'day') {
-      return `${year}년 ${month + 1}월`;
-    } else if (view === 'month') {
-      return `${year}`;
-    } else {
-      return `${yearRange[0]} ~ ${yearRange[1]}`;
-    }
+    if (view === 'day') return `${year}년 ${month + 1}월`;
+    if (view === 'month') return `${year}`;
+    return `${yearRange[0]} ~ ${yearRange[1]}`;
   };
 
-  // 현재 월의 일 데이터 생성
   const getDaysInMonth = () => {
     const year = currentDate.getFullYear();
     const month = currentDate.getMonth();
-
-    // 현재 월의 첫 날
     const firstDay = new Date(year, month, 1);
-    // 다음 월의 첫 날 - 1 = 현재 월의 마지막 날
     const lastDay = new Date(year, month + 1, 0);
-
-    // 첫 날의 요일 (0 = 일요일, 6 = 토요일)
     const firstDayOfWeek = firstDay.getDay();
-    // 월의 총 일수
     const daysInMonth = lastDay.getDate();
-
-    // 이전 달의 마지막 날들
     const prevMonthLastDay = new Date(year, month, 0).getDate();
-
-    // 캘린더 그리드에 표시할 날짜 데이터
     const days: { date: Date; currentMonth: boolean }[] = [];
-
-    // 이전 달의 날짜들 추가
     for (let i = 0; i < firstDayOfWeek; i++) {
       const day = prevMonthLastDay - firstDayOfWeek + i + 1;
-      days.push({
-        date: new Date(year, month - 1, day),
-        currentMonth: false,
-      });
+      days.push({ date: new Date(year, month - 1, day), currentMonth: false });
     }
-
-    // 현재 달의 날짜들 추가
     for (let i = 1; i <= daysInMonth; i++) {
-      days.push({
-        date: new Date(year, month, i),
-        currentMonth: true,
-      });
+      days.push({ date: new Date(year, month, i), currentMonth: true });
     }
-
-    // 다음 달의 날짜들로 나머지 채우기 (최대 42칸 = 6주)
-    const remainingDays = 42 - days.length;
-    for (let i = 1; i <= remainingDays; i++) {
-      days.push({
-        date: new Date(year, month + 1, i),
-        currentMonth: false,
-      });
+    const remaining = 42 - days.length;
+    for (let i = 1; i <= remaining; i++) {
+      days.push({ date: new Date(year, month + 1, i), currentMonth: false });
     }
-
     return days;
   };
 
-  // 날짜 비교 헬퍼 함수
-  const isSameDay = (d1: Date, d2: Date | null) => {
-    if (!d2) return false;
-    return (
-      d1.getFullYear() === d2.getFullYear() &&
-      d1.getMonth() === d2.getMonth() &&
-      d1.getDate() === d2.getDate()
-    );
-  };
+  const isSameDay = (d1: Date, d2: Date | null) =>
+    !!d2 &&
+    d1.getFullYear() === d2.getFullYear() &&
+    d1.getMonth() === d2.getMonth() &&
+    d1.getDate() === d2.getDate();
 
-  // 일 뷰 렌더링
   const renderDayView = () => {
     const days = getDaysInMonth();
-
     return (
       <div className="calendar-day-view">
         <div className="weekdays">
@@ -497,7 +370,6 @@ export default function CustomDatePicker({
             const sel = isSameDay(day.date, selectedDate);
             const dow = day.date.getDay();
             const disabled = isDateDisabled(day.date);
-
             return (
               <div
                 key={idx}
@@ -508,19 +380,16 @@ export default function CustomDatePicker({
                   sel && 'selected',
                   dow === 0 && 'sunday',
                   dow === 6 && 'saturday',
-                  disabled && 'disabled', // 비활성화된 날짜에 대한 클래스 추가
+                  disabled && 'disabled',
                 ]
                   .filter(Boolean)
                   .join(' ')}
                 onMouseDown={(e) => {
-                  // 비활성화된 날짜는 선택할 수 없음
                   if (disabled) {
                     e.preventDefault();
                     e.stopPropagation();
                     return;
                   }
-
-                  // onClick 대신 onMouseDown 사용
                   e.preventDefault();
                   e.stopPropagation();
                   handleDateSelect(day.date);
@@ -535,17 +404,17 @@ export default function CustomDatePicker({
     );
   };
 
-  // 월 뷰 렌더링
   const renderMonthView = () => {
+    const min = effectiveMinDate ? effectiveMinDate.getTime() : Number.NEGATIVE_INFINITY;
+    const max = effectiveMaxDate ? effectiveMaxDate.getTime() : Number.POSITIVE_INFINITY;
+
     return (
       <div className="months-grid">
         {MONTHS.map((m, i) => {
-          // 해당 월의 첫날이 minDate보다 이전이거나 maxDate보다 이후인 경우 비활성화
-          const monthFirstDay = new Date(currentDate.getFullYear(), i, 1);
-          const monthLastDay = new Date(currentDate.getFullYear(), i + 1, 0);
-          const disabled =
-            (minDate && monthLastDay < minDate) || (maxDate && monthFirstDay > maxDate);
+          const monthFirstTs = new Date(currentDate.getFullYear(), i, 1).getTime();
+          const monthLastTs = new Date(currentDate.getFullYear(), i + 1, 0).getTime();
 
+          const disabled = monthLastTs < min || monthFirstTs > max; // ✅ 모두 number
           return (
             <div
               key={i}
@@ -557,13 +426,11 @@ export default function CustomDatePicker({
                 .filter(Boolean)
                 .join(' ')}
               onMouseDown={(e) => {
-                // 비활성화된 월은 선택할 수 없음
                 if (disabled) {
                   e.preventDefault();
                   e.stopPropagation();
                   return;
                 }
-
                 e.preventDefault();
                 e.stopPropagation();
                 handleMonthSelect(i);
@@ -577,59 +444,54 @@ export default function CustomDatePicker({
     );
   };
 
-  // 연도 뷰 렌더링
   const renderYearView = () => {
-    const currentYear = new Date().getFullYear();
+    const nowY = new Date().getFullYear();
     const [startYear, endYear] = yearRange;
-    const years = [];
 
-    // 실제 표시 가능한 연도 범위를 2017년 ~ (현재연도 + 5년)으로 제한
-    const actualStartYear = Math.max(2017, startYear);
-    const actualEndYear = Math.min(currentYear + 5, endYear);
+    const min = effectiveMinDate ? effectiveMinDate.getTime() : Number.NEGATIVE_INFINITY;
+    const max = effectiveMaxDate ? effectiveMaxDate.getTime() : Number.POSITIVE_INFINITY;
 
-    for (let year = actualStartYear; year <= actualEndYear; year++) {
-      // 해당 연도가 선택 가능한지 확인
-      const yearFirstDay = new Date(year, 0, 1);
-      const yearLastDay = new Date(year, 11, 31);
-      const disabled = (minDate && yearLastDay < minDate) || (maxDate && yearFirstDay > maxDate);
+    const years: { year: number; disabled: boolean }[] = [];
+    const actualStart = Math.max(2017, startYear);
+    const actualEnd = Math.min(nowY + 5, endYear);
 
-      years.push({ year, disabled });
+    for (let y = actualStart; y <= actualEnd; y++) {
+      const yearFirstTs = new Date(y, 0, 1).getTime();
+      const yearLastTs = new Date(y, 11, 31).getTime();
+      const disabled = yearLastTs < min || yearFirstTs > max; // ✅ 모두 number
+      years.push({ year: y, disabled });
     }
 
     return (
       <div className="years-grid">
-        {years.map((yearObj, i) => (
+        {years.map((y, i) => (
           <div
             key={i}
             className={[
               'year',
-              currentDate.getFullYear() === yearObj.year && 'selected',
-              yearObj.disabled && 'disabled',
+              currentDate.getFullYear() === y.year && 'selected',
+              y.disabled && 'disabled',
             ]
               .filter(Boolean)
               .join(' ')}
             onMouseDown={(e) => {
-              // 비활성화된 연도는 선택할 수 없음
-              if (yearObj.disabled) {
+              if (y.disabled) {
                 e.preventDefault();
                 e.stopPropagation();
                 return;
               }
-
-              // onClick 대신 onMouseDown 사용
-              e.preventDefault(); // 이벤트 기본 동작 방지
-              e.stopPropagation(); // 이벤트 버블링 방지
-              handleYearSelect(yearObj.year);
+              e.preventDefault();
+              e.stopPropagation();
+              handleYearSelect(y.year);
             }}
           >
-            {yearObj.year}
+            {y.year}
           </div>
         ))}
       </div>
     );
   };
 
-  // 현재 뷰에 따른 컨텐츠 렌더링
   const renderViewContent = () => {
     switch (view) {
       case 'day':
@@ -643,7 +505,6 @@ export default function CustomDatePicker({
     }
   };
 
-  // 캘린더 드롭다운 컴포넌트
   const CalendarDropdown = () => {
     return (
       <div
@@ -651,13 +512,13 @@ export default function CustomDatePicker({
         style={{
           top: `${position.top}px`,
           left: `${position.left}px`,
+          width: dropdownWidth ? `${dropdownWidth}px` : undefined,
         }}
       >
         <div className="calendar-container">
           <div
             className="calendar-header"
             onMouseDown={(e) => {
-              // 헤더 영역 클릭 시 이벤트 전파 방지
               if (e.target === e.currentTarget) {
                 e.preventDefault();
                 e.stopPropagation();
@@ -676,23 +537,11 @@ export default function CustomDatePicker({
             </button>
             <button
               className="title-button"
-              style={{
-                position: 'relative',
-                zIndex: 10,
-                userSelect: 'none',
-              }}
+              style={{ position: 'relative', zIndex: 10, userSelect: 'none' }}
               onMouseDown={(e) => {
                 e.preventDefault();
                 e.stopPropagation();
-
-                // 상태 업데이트를 직접 수행
-                if (view === 'day') {
-                  setView('month');
-                } else if (view === 'month') {
-                  setView('year');
-                } else {
-                  setView('day');
-                }
+                setView((v) => (v === 'day' ? 'month' : v === 'month' ? 'year' : 'day'));
               }}
             >
               {getTitleText()}
@@ -732,10 +581,12 @@ export default function CustomDatePicker({
         <button
           type="button"
           className="calendar-icon-button"
-          onClick={toggleCalendar}
+          onClick={() => {
+            setIsOpen((v) => !v);
+          }}
           aria-label="달력 열기"
         >
-          <Calendar size={20} />
+          <Calendar size={18} />
         </button>
       </div>
       {isOpen && createPortal(<CalendarDropdown />, document.body)}

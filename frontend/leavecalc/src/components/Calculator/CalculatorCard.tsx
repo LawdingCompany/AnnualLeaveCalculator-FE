@@ -4,9 +4,12 @@ import {
   HireAndReference,
   SpecialPeriodsSection,
   SubmitBar,
-  // FAQ, // 필요 시 활성화
+  FAQ,
   GuidelineHint,
+  CompanyHolidaysSection,
+  FeedbackModal,
 } from './';
+import React, { useState } from 'react';
 import FooterLinks from '@components/Footer/FooterLinks';
 import { useCalcState } from './context';
 import { uiPayloadSchema, mapSubtypeToCategory } from './types';
@@ -24,15 +27,18 @@ async function postCalculate(payload: any) {
 
 export function CalculatorCard() {
   const state = useCalcState();
+  const [feedbackOpen, setFeedbackOpen] = useState(false);
 
   const onSubmit = async () => {
+    const uiPeriods = state.specialPeriodsEnabled ? state.nonWorkingPeriods : [];
+    const uiHolidays = state.companyHolidaysEnabled ? state.companyHolidays : [];
     // 1) UI payload (런타임 형식 검증)
     const uiPayload = {
       calculationType: state.calculationType,
       hireDate: state.hireDate,
       referenceDate: state.referenceDate,
-      nonWorkingPeriods: state.nonWorkingPeriods, // subtype 유지
-      companyHolidays: state.companyHolidays,
+      nonWorkingPeriods: uiPeriods, // subtype 유지
+      companyHolidays: uiHolidays,
       ...(state.calculationType === 2 ? { fiscalYear: state.fiscalYear } : {}),
     };
     const parsed = uiPayloadSchema.safeParse(uiPayload);
@@ -78,10 +84,27 @@ export function CalculatorCard() {
         <ApplicationMode />
         <HireAndReference />
         <SpecialPeriodsSection />
-        {/* <FAQ /> */}
+        <CompanyHolidaysSection />
         <SubmitBar onSubmit={onSubmit} />
+        <hr className="h-px border-0 bg-[#e2e8f0]" />
+        <FAQ />
         <FooterLinks />
       </section>
+      {/* 🔵 우측 하단 고정 ‘피드백’ 버튼 */}
+      <button
+        className="fixed bottom-6 right-6 rounded-full bg-blue-600 px-4 py-3 text-white shadow-lg hover:bg-blue-700"
+        onClick={() => setFeedbackOpen(true)}
+      >
+        피드백
+      </button>
+
+      <FeedbackModal
+        open={feedbackOpen}
+        onClose={() => setFeedbackOpen(false)}
+        onSubmitted={() => {
+          // 제출 완료 후 추가 액션 필요하면 여기에
+        }}
+      />
     </main>
   );
 }

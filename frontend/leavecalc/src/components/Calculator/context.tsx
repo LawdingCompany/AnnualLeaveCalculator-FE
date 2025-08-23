@@ -1,13 +1,17 @@
 import React, { createContext, useContext, useReducer } from 'react';
-import type { CalculatorState, Action, UiNonWorkingPeriod, NonWorkingSubtype } from './types';
+import type { CalculatorState, Action, UiNonWorkingPeriod } from './types';
 
 const initialState: CalculatorState = {
   calculationType: 1,
   fiscalYear: '01-01',
   hireDate: '',
   referenceDate: '',
-  nonWorkingPeriods: [{ subtype: 1, startDate: '', endDate: '' }],
+  // ✅ 처음엔 비어 있어야 체크 해제 상태에서 박스가 숨김
+  nonWorkingPeriods: [],
   companyHolidays: [],
+  // ✅ 기본은 체크 해제
+  specialPeriodsEnabled: false,
+  companyHolidaysEnabled: false,
 };
 
 function reducer(state: CalculatorState, action: Action): CalculatorState {
@@ -20,29 +24,46 @@ function reducer(state: CalculatorState, action: Action): CalculatorState {
       return { ...state, hireDate: action.payload };
     case 'SET_REFERENCE_DATE':
       return { ...state, referenceDate: action.payload };
+
     case 'ADD_PERIOD': {
       const p: UiNonWorkingPeriod = {
-        subtype: (action.payload?.subtype as NonWorkingSubtype) ?? 1,
+        subtype: action.payload?.subtype ?? 1,
         startDate: action.payload?.startDate ?? '',
         endDate: action.payload?.endDate ?? '',
       };
       return { ...state, nonWorkingPeriods: [...state.nonWorkingPeriods, p] };
     }
+
     case 'UPDATE_PERIOD': {
       const next = state.nonWorkingPeriods.map((p, i) =>
         i === action.index ? { ...p, ...action.payload } : p,
       );
       return { ...state, nonWorkingPeriods: next };
     }
+
     case 'REMOVE_PERIOD': {
       const next = state.nonWorkingPeriods.filter((_, i) => i !== action.index);
-      return {
-        ...state,
-        nonWorkingPeriods: next.length ? next : [{ subtype: 1, startDate: '', endDate: '' }],
-      };
+      // ✅ 더 이상 강제로 1행을 추가하지 않음 (토글/추가 버튼으로 컨트롤)
+      return { ...state, nonWorkingPeriods: next };
     }
+
+    // ✅ 특이기간 전부 비우기 (토글 OFF 시 사용)
+    case 'CLEAR_PERIODS':
+      return { ...state, nonWorkingPeriods: [] };
+
+    // ✅ 체크박스 토글 상태 저장
+    case 'SET_SPECIAL_PERIODS_ENABLED':
+      return { ...state, specialPeriodsEnabled: action.payload };
+
     case 'SET_COMPANY_HOLIDAYS':
       return { ...state, companyHolidays: action.payload };
+
+    case 'SET_COMPANY_HOLIDAYS':
+      return { ...state, companyHolidays: action.payload };
+
+    case 'SET_COMPANY_HOLIDAYS_ENABLED':
+      return { ...state, companyHolidaysEnabled: action.payload };
+
     default:
       return state;
   }

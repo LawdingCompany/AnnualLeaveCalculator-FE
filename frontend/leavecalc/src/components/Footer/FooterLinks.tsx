@@ -3,11 +3,11 @@ export default function FooterLinks() {
     <div className="mt-8 border-t pt-4 text-center text-xs text-neutral-500">
       <div className="flex items-center justify-center gap-4">
         <a className="underline" href="/guidelines">
-          연차 산정 가이드
+          연차 산정 기준
         </a>
         <span>·</span>
         <a className="underline" href="/terms">
-          이용약관
+          공지사항
         </a>
         <span>·</span>
         <a className="underline" href="/privacy">
@@ -15,7 +15,7 @@ export default function FooterLinks() {
         </a>
         <span>·</span>
         <a className="underline" href="/changelog">
-          변경 이력
+          이용약관
         </a>
       </div>
       <div className="mt-2">© LAWDING</div>
