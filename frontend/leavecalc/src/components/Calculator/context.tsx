@@ -1,62 +1,112 @@
+// src/components/Calculator/context.tsx
 import React, { createContext, useContext, useReducer } from 'react';
 import type { CalculatorState, Action, UiNonWorkingPeriod } from './types';
 
-const initialState: CalculatorState = {
-  calculationType: 1,
+/** 화면 모드 */
+type ViewMode = 'form' | 'result';
+
+/** API 응답 최소 타입 (필요하면 확장 가능) */
+export type CalcApiResult =
+  | {
+      calculationType: 'FISCAL_YEAR' | 'HIRE_DATE';
+      annualLeaveResultType: 'FULL';
+      fiscalYear?: string;
+      hireDate?: string;
+      referenceDate?: string;
+      calculationDetail: {
+        accrualPeriod?: { startDate: string; endDate: string };
+        baseAnnualLeave: number;
+        serviceYears: number;
+        additionalLeave: number;
+        totalLeaveDays: number;
+      };
+      explanation: string;
+    }
+  | {
+      calculationType: 'FISCAL_YEAR' | 'HIRE_DATE';
+      annualLeaveResultType: 'MONTHLY';
+      fiscalYear?: string;
+      hireDate?: string;
+      referenceDate?: string;
+      calculationDetail: {
+        records: { period: { startDate: string; endDate: string }; monthlyLeave: number }[];
+        totalLeaveDays: number;
+      };
+      explanation: string;
+    };
+
+/** 기존 폼 상태 + UI 전환/결과 상태 */
+type ExtState = CalculatorState & {
+  view: ViewMode;
+  result: CalcApiResult | null;
+};
+
+/** 기존 액션 + 추가 액션(뷰/결과) */
+type ExtAction =
+  | Action
+  | { type: 'SET_VIEW'; payload: ViewMode }
+  | { type: 'SET_RESULT'; payload: CalcApiResult | null };
+
+/** 초기값 */
+const initialState: ExtState = {
+  calculationType: 1, // 1: 입사일 기준, 2: 회계연도 기준 (프로젝트 컨벤션에 맞춰 사용)
   fiscalYear: '01-01',
   hireDate: '',
   referenceDate: '',
-  // ✅ 처음엔 비어 있어야 체크 해제 상태에서 박스가 숨김
   nonWorkingPeriods: [],
   companyHolidays: [],
-  // ✅ 기본은 체크 해제
   specialPeriodsEnabled: false,
   companyHolidaysEnabled: false,
+
+  // UI 전환/결과
+  view: 'form',
+  result: null,
 };
 
-function reducer(state: CalculatorState, action: Action): CalculatorState {
+/** 리듀서 */
+function reducer(state: ExtState, action: ExtAction): ExtState {
   switch (action.type) {
+    // ===== 기본 폼 액션들 =====
     case 'SET_CALCULATION_TYPE':
       return { ...state, calculationType: action.payload };
+
     case 'SET_FISCAL_YEAR':
       return { ...state, fiscalYear: action.payload };
+
     case 'SET_HIRE_DATE':
       return { ...state, hireDate: action.payload };
+
     case 'SET_REFERENCE_DATE':
       return { ...state, referenceDate: action.payload };
 
     case 'ADD_PERIOD': {
       const p: UiNonWorkingPeriod = {
-        subtype: action.payload?.subtype ?? 1,
-        startDate: action.payload?.startDate ?? '',
-        endDate: action.payload?.endDate ?? '',
+        subtype: (action as any).payload?.subtype ?? 1,
+        startDate: (action as any).payload?.startDate ?? '',
+        endDate: (action as any).payload?.endDate ?? '',
       };
       return { ...state, nonWorkingPeriods: [...state.nonWorkingPeriods, p] };
     }
 
     case 'UPDATE_PERIOD': {
+      const idx = (action as any).index as number;
       const next = state.nonWorkingPeriods.map((p, i) =>
-        i === action.index ? { ...p, ...action.payload } : p,
+        i === idx ? { ...p, ...(action as any).payload } : p,
       );
       return { ...state, nonWorkingPeriods: next };
     }
 
     case 'REMOVE_PERIOD': {
-      const next = state.nonWorkingPeriods.filter((_, i) => i !== action.index);
-      // ✅ 더 이상 강제로 1행을 추가하지 않음 (토글/추가 버튼으로 컨트롤)
+      const idx = (action as any).index as number;
+      const next = state.nonWorkingPeriods.filter((_, i) => i !== idx);
       return { ...state, nonWorkingPeriods: next };
     }
 
-    // ✅ 특이기간 전부 비우기 (토글 OFF 시 사용)
     case 'CLEAR_PERIODS':
       return { ...state, nonWorkingPeriods: [] };
 
-    // ✅ 체크박스 토글 상태 저장
     case 'SET_SPECIAL_PERIODS_ENABLED':
       return { ...state, specialPeriodsEnabled: action.payload };
-
-    case 'SET_COMPANY_HOLIDAYS':
-      return { ...state, companyHolidays: action.payload };
 
     case 'SET_COMPANY_HOLIDAYS':
       return { ...state, companyHolidays: action.payload };
@@ -64,14 +114,23 @@ function reducer(state: CalculatorState, action: Action): CalculatorState {
     case 'SET_COMPANY_HOLIDAYS_ENABLED':
       return { ...state, companyHolidaysEnabled: action.payload };
 
+    // ===== 결과 화면/전환 =====
+    case 'SET_VIEW':
+      return { ...state, view: action.payload };
+
+    case 'SET_RESULT':
+      return { ...state, result: action.payload };
+
     default:
       return state;
   }
 }
 
-const StateCtx = createContext<CalculatorState | undefined>(undefined);
-const DispatchCtx = createContext<React.Dispatch<Action> | undefined>(undefined);
+/** Context 분리: 읽기(State) / 쓰기(Dispatch) */
+const StateCtx = createContext<ExtState | undefined>(undefined);
+const DispatchCtx = createContext<React.Dispatch<ExtAction> | undefined>(undefined);
 
+/** Provider */
 export function CalculatorProvider({ children }: { children: React.ReactNode }) {
   const [state, dispatch] = useReducer(reducer, initialState);
   return (
@@ -81,12 +140,14 @@ export function CalculatorProvider({ children }: { children: React.ReactNode }) 
   );
 }
 
+/** 읽기 훅 */
 export function useCalcState() {
   const v = useContext(StateCtx);
   if (!v) throw new Error('useCalcState must be used within CalculatorProvider');
   return v;
 }
 
+/** 쓰기 훅 */
 export function useCalcDispatch() {
   const v = useContext(DispatchCtx);
   if (!v) throw new Error('useCalcDispatch must be used within CalculatorProvider');
