@@ -1,124 +1,30 @@
-// ResultView.tsx
+// src/components/Calculator/ResultView.tsx
 import React from 'react';
 import { useCalcDispatch, useCalcState } from './context';
+import type { CalcApiResult } from './resultTypes';
+import ResultSummaryLine from './result/ResultSummaryLine';
+import ResultBasicInfo from './result/ResultBasicInfo';
+import ResultDetails from './result/ResultDetails';
 
 export default function ResultView() {
   const s = useCalcState();
   const d = useCalcDispatch();
-  const r = s.result!;
-  const typeLabel = r.annualLeaveResultType === 'FULL' ? '정기 연차' : '월차 누적';
+  const r = s.result as CalcApiResult;
 
   const goBack = () => {
     d({ type: 'SET_RESULT', payload: null });
     d({ type: 'SET_VIEW', payload: 'form' });
   };
 
-  // 공통 상단 요약 카드
-  const Summary = () => {
-    const total =
-      r.annualLeaveResultType === 'FULL'
-        ? r.calculationDetail.totalLeaveDays
-        : r.calculationDetail.totalLeaveDays;
-
-    const period =
-      r.annualLeaveResultType === 'FULL' && r.calculationDetail.accrualPeriod
-        ? `${r.calculationDetail.accrualPeriod.startDate} ~ ${r.calculationDetail.accrualPeriod.endDate}`
-        : null;
-
-    return (
-      <div className="rounded-lg border border-neutral-200 p-4">
-        <div className="flex items-start justify-between">
-          <div>
-            <div className="text-sm text-neutral-500">연차 결과</div>
-            <h3 className="text-lg font-semibold text-neutral-800 mt-0.5">{typeLabel}</h3>
-            <p className="text-sm text-neutral-500 mt-1">{r.explanation}</p>
-          </div>
-          <div className="rounded-md bg-blue-50 px-3 py-2 text-sm text-blue-700 font-semibold">
-            총 {total.toFixed(1)}일
-          </div>
-        </div>
-
-        {period && (
-          <div className="mt-3 text-sm">
-            <span className="text-neutral-500 mr-2">사용 가능 기간</span>
-            <span className="font-medium">{period}</span>
-          </div>
-        )}
-      </div>
-    );
-  };
-
-  // 상세보기 본문
-  const Details = () => {
-    if (r.annualLeaveResultType === 'FULL') {
-      const cd = r.calculationDetail;
-      return (
-        <div className="grid grid-cols-2 gap-3 text-sm">
-          {cd.accrualPeriod && (
-            <div className="col-span-2">
-              <span className="text-neutral-500 mr-2">산정기간</span>
-              <span className="font-medium">
-                {cd.accrualPeriod.startDate} ~ {cd.accrualPeriod.endDate}
-              </span>
-            </div>
-          )}
-          <div>
-            <span className="text-neutral-500 mr-2">기본 연차</span>
-            <span className="font-medium">{cd.baseAnnualLeave}일</span>
-          </div>
-          <div>
-            <span className="text-neutral-500 mr-2">근속연수</span>
-            <span className="font-medium">{cd.serviceYears}년</span>
-          </div>
-          <div>
-            <span className="text-neutral-500 mr-2">가산휴가</span>
-            <span className="font-medium">{cd.additionalLeave}일</span>
-          </div>
-          <div>
-            <span className="text-neutral-500 mr-2">총 발생</span>
-            <span className="font-semibold">{cd.totalLeaveDays.toFixed(1)}일</span>
-          </div>
-        </div>
-      );
-    }
-
-    // MONTHLY
-    const cd = r.calculationDetail;
-    return (
-      <div className="overflow-x-auto">
-        <table className="min-w-full text-sm">
-          <thead>
-            <tr className="text-left text-neutral-500">
-              <th className="py-2 pr-3">기간</th>
-              <th className="py-2">발생</th>
-            </tr>
-          </thead>
-          <tbody>
-            {cd.records.map((rec, i) => (
-              <tr key={i} className="border-t">
-                <td className="py-2 pr-3">
-                  {rec.period.startDate} ~ {rec.period.endDate}
-                </td>
-                <td className="py-2">{rec.monthlyLeave.toFixed(1)}일</td>
-              </tr>
-            ))}
-          </tbody>
-          <tfoot>
-            <tr className="border-t font-semibold">
-              <td className="py-2 pr-3">합계</td>
-              <td className="py-2">{cd.totalLeaveDays.toFixed(1)}일</td>
-            </tr>
-          </tfoot>
-        </table>
-      </div>
-    );
-  };
-
   return (
     <section className="grid gap-4">
-      <Summary />
+      {/* 1) 한 줄 요약 */}
+      <ResultSummaryLine result={r} />
 
-      {/* 상세보기 토글 */}
+      {/* 2) 기본 정보 */}
+      <ResultBasicInfo result={r} />
+
+      {/* 3) 상세보기 */}
       <details className="rounded-lg border border-neutral-200 p-4">
         <summary className="flex cursor-pointer items-center justify-between gap-3 text-sm">
           <span className="font-medium text-neutral-800">상세보기</span>
@@ -136,10 +42,11 @@ export default function ResultView() {
           </svg>
         </summary>
         <div className="mt-3">
-          <Details />
+          <ResultDetails result={r} />
         </div>
       </details>
 
+      {/* 4) 다시 계산 */}
       <div className="flex justify-end">
         <button
           onClick={goBack}

@@ -50,7 +50,9 @@ export default function ApplicationMode() {
       </div>
 
       {/* 3열: 라벨 */}
-      <span className="text-sm font-medium text-neutral-700 whitespace-nowrap mr-2">회계연도</span>
+      <span className="text-sm font-medium text-neutral-700 whitespace-nowrap mr-2">
+        회계연도 시작일
+      </span>
 
       {/* 4열: 시작일 입력 그룹 */}
       <div className="flex items-center gap-2">
@@ -58,7 +60,7 @@ export default function ApplicationMode() {
           value={currentMonth} // "01" ~ "12"
           onChange={(mm) => d({ type: 'SET_FISCAL_YEAR', payload: `${mm}-01` })}
           disabled={fyDisabled}
-          className="w-[72px]" // 폭만 여기서 조절
+          className="w-[70px]" // 폭만 여기서 조절
           // center는 기본 true (선택값/옵션 모두 중앙 정렬)
         />
         <span className="text-sm text-neutral-600">월</span>

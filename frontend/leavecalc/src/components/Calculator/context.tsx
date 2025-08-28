@@ -1,39 +1,10 @@
 // src/components/Calculator/context.tsx
 import React, { createContext, useContext, useReducer } from 'react';
 import type { CalculatorState, Action, UiNonWorkingPeriod } from './types';
+import type { CalcApiResult } from './resultTypes';
 
 /** 화면 모드 */
 type ViewMode = 'form' | 'result';
-
-/** API 응답 최소 타입 (필요하면 확장 가능) */
-export type CalcApiResult =
-  | {
-      calculationType: 'FISCAL_YEAR' | 'HIRE_DATE';
-      annualLeaveResultType: 'FULL';
-      fiscalYear?: string;
-      hireDate?: string;
-      referenceDate?: string;
-      calculationDetail: {
-        accrualPeriod?: { startDate: string; endDate: string };
-        baseAnnualLeave: number;
-        serviceYears: number;
-        additionalLeave: number;
-        totalLeaveDays: number;
-      };
-      explanation: string;
-    }
-  | {
-      calculationType: 'FISCAL_YEAR' | 'HIRE_DATE';
-      annualLeaveResultType: 'MONTHLY';
-      fiscalYear?: string;
-      hireDate?: string;
-      referenceDate?: string;
-      calculationDetail: {
-        records: { period: { startDate: string; endDate: string }; monthlyLeave: number }[];
-        totalLeaveDays: number;
-      };
-      explanation: string;
-    };
 
 /** 기존 폼 상태 + UI 전환/결과 상태 */
 type ExtState = CalculatorState & {
