@@ -10,7 +10,7 @@ function TypeChip({ onClick }: { onClick: () => void }) {
       type="button"
       onClick={onClick}
       className="inline-flex items-center gap-1 rounded-full border border-blue-200 bg-blue-50 px-2 py-0.5 text-[11px] font-medium text-blue-700
-                 hover:bg-blue-100 focus-visible:outline focus-visible:outline-2 focus-visible:outline-blue-500/30 align-baseline"
+                 hover:bg-blue-100 focus-visible:outline focus-visible:outline-blue-500/30 align-baseline"
       title="유형 안내 열기"
     >
       <Info className="h-3.5 w-3.5" aria-hidden="true" />
@@ -81,7 +81,7 @@ export default function FAQ() {
         {items.map((item, idx) => (
           <li key={idx}>
             <details className="group rounded-lg border border-neutral-200">
-              <summary className="flex cursor-pointer select-none items-center justify-between gap-3 px-3 py-2 text-sm text-neutral-800 hover:bg-neutral-50 focus-visible:outline focus-visible:outline-2 focus-visible:outline-blue-500/30 rounded-lg">
+              <summary className="flex cursor-pointer select-none items-center justify-between gap-3 px-3 py-2 text-sm text-neutral-800 hover:bg-neutral-50 focus-visible:outline focus-visible:outline-blue-500/30 rounded-lg">
                 <span className="font-medium">{item.q}</span>
                 <svg
                   className="h-4 w-4 shrink-0 text-neutral-400 transition-transform group-open:rotate-180"

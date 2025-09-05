@@ -4,7 +4,7 @@ import { fmtDays, fmtDateKR, typeLabelOf, getPeriods } from './resultUtils';
 
 export default function ResultSummaryLine({ result }: { result: CalcApiResult }) {
   const total = result.calculationDetail.totalLeaveDays;
-  const typeLabel = typeLabelOf(result.annualLeaveResultType);
+  const typeLabel = typeLabelOf(result.leaveType);
   const dateKR = fmtDateKR(result.referenceDate);
 
   const { accrualLabel, usableLabel } = getPeriods(result);
@@ -32,7 +32,7 @@ export default function ResultSummaryLine({ result }: { result: CalcApiResult })
       <div className="grid items-center gap-3 md:grid-cols-[1fr_auto]">
         {/* 좌측: 캡션 + 문장 + 보조 정보 */}
         <div>
-          {/* 캡션 + 유형 배지(인라인) */}
+          {/* 캡션 + 유형 배지 */}
           <div className="flex flex-wrap items-center gap-2">
             <span className="text-[12px] font-medium text-neutral-500">계산 결과 : </span>
             <span className="inline-flex items-center gap-1 rounded-full border border-blue-200 bg-blue-50 px-2 py-0.5 text-[11px] font-medium text-blue-700">
@@ -49,10 +49,11 @@ export default function ResultSummaryLine({ result }: { result: CalcApiResult })
             입니다.
           </p>
 
-          {/* 보조 정보 스트립: 사용 가능 기간 (+ 필요 시 산정 기간) */}
+          {/* 보조 정보: 사용 가능 기간 / 산정 기간 */}
           {(showUsable || showAccrual) && (
             <div className="mt-2 flex flex-wrap items-center gap-2">
-              {showAccrual && <Chip label="사용 가능 기간 :" value={accrualLabel!} />}
+              {showUsable && <Chip label="사용 가능 기간 :" value={usableLabel!} />}
+              {showAccrual && <Chip label="산정 기간 :" value={accrualLabel!} />}
             </div>
           )}
         </div>

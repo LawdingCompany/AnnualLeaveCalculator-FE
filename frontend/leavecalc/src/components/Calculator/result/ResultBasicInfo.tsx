@@ -20,7 +20,7 @@ const VALUE_CLS = `${BASE} text-neutral-900 tabular-nums`;
 // 날짜 범위 포맷
 function formatRange(a?: string | null, b?: string | null) {
   if (!a || !b) return '-';
-  return `${a}\u00A0~\u00A0${b}`; // non-breaking space로 간격 고정
+  return `${a}\u00A0~\u00A0${b}`;
 }
 
 /** 2셀: 라벨/값 한 행 */
@@ -33,7 +33,7 @@ function Row({ label, value }: { label: string; value: string }) {
   );
 }
 
-/** 4셀: 좌(라벨/값) + 우(라벨/값) 한 행 — 하나의 DOM만 사용, 반응형은 컬럼 수만 변경 */
+/** 4셀: 좌(라벨/값) + 우(라벨/값) 한 행 */
 function PairRow({
   leftLabel,
   leftValue,
@@ -60,44 +60,55 @@ export default function ResultBasicInfo({ result }: { result: CalcApiResult }) {
   const calcLabel = result.calculationType === 'FISCAL_YEAR' ? '회계연도' : '입사일';
   const fiscalStart = result.calculationType === 'FISCAL_YEAR' ? (result.fiscalYear ?? '-') : '-';
 
-  // 공통 기간
-  const { accrualLabel, monthlySum, proratedSum } = getPeriods(result);
+  // 공통 기간 요약
+  const { accrualLabel, usableLabel } = getPeriods(result);
   const accrualPretty = (() => {
     if (!accrualLabel || accrualLabel === '-') return '-';
     const [a, , b] = accrualLabel.split(' ');
     return formatRange(a, b);
   })();
 
-  // 유형별 기간
-  const monthlyPeriodLabel =
-    result.annualLeaveResultType === 'MONTHLY'
-      ? accrualLabel
-      : result.annualLeaveResultType === 'MONTHY_PRORATED'
+  // 유형별 사용 가능 기간 라벨
+  const monthlyUsable =
+    result.leaveType === 'MONTHLY'
+      ? usableLabel
+      : result.leaveType === 'MONTHLY_AND_PRORATED'
         ? formatRange(
-            result.calculationDetail.monthlyLeaveAccrualPeriod.startDate,
-            result.calculationDetail.monthlyLeaveAccrualPeriod.endDate,
+            result.calculationDetail.monthlyDetail.availablePeriod.startDate,
+            result.calculationDetail.monthlyDetail.availablePeriod.endDate,
           )
         : null;
 
-  const proratedPeriodLabel =
-    result.annualLeaveResultType === 'PRORATED'
-      ? accrualLabel
-      : result.annualLeaveResultType === 'MONTHY_PRORATED'
+  const proratedUsable =
+    result.leaveType === 'PRORATED'
+      ? usableLabel
+      : result.leaveType === 'MONTHLY_AND_PRORATED'
         ? formatRange(
-            result.calculationDetail.proratedLeaveAccrualPeriod.startDate,
-            result.calculationDetail.proratedLeaveAccrualPeriod.endDate,
+            result.calculationDetail.proratedDetail.availablePeriod.startDate,
+            result.calculationDetail.proratedDetail.availablePeriod.endDate,
           )
         : null;
 
-  const fullPeriodLabel =
-    result.annualLeaveResultType === 'FULL'
+  const annualUsable =
+    result.leaveType === 'ANNUAL'
       ? formatRange(
-          result.calculationDetail.accrualPeriod.startDate,
-          result.calculationDetail.accrualPeriod.endDate,
+          result.calculationDetail.availablePeriod.startDate,
+          result.calculationDetail.availablePeriod.endDate,
         )
       : null;
 
+  // 합계
   const total = result.calculationDetail.totalLeaveDays;
+
+  // 콤보 타입 합계 분해
+  const monthlySum =
+    result.leaveType === 'MONTHLY_AND_PRORATED'
+      ? result.calculationDetail.monthlyDetail.totalLeaveDays
+      : undefined;
+  const proratedSum =
+    result.leaveType === 'MONTHLY_AND_PRORATED'
+      ? result.calculationDetail.proratedDetail.totalLeaveDays
+      : undefined;
 
   return (
     <section className="rounded-xl border border-neutral-200 p-5 md:p-6">
@@ -115,7 +126,7 @@ export default function ResultBasicInfo({ result }: { result: CalcApiResult }) {
         }}
       />
 
-      {/* 1) 공통 정보 (행 간격은 한 곳에서 통일) */}
+      {/* 1) 공통 정보 */}
       <div style={{ display: 'grid', rowGap: ROW_GAP }}>
         <PairRow
           leftLabel="산정 기준"
@@ -134,29 +145,28 @@ export default function ResultBasicInfo({ result }: { result: CalcApiResult }) {
 
       {/* 2) 결과 요약 */}
       <div className="mt-4" style={{ display: 'grid', rowGap: ROW_GAP }}>
-        {(result.annualLeaveResultType === 'FULL' ||
-          result.annualLeaveResultType === 'ADJUSTED') && (
+        {result.leaveType === 'ANNUAL' && (
           <>
             <Row label="연차 합계" value={`${fmtDays(total)}일`} />
-            <Row label="연차 사용 가능 기간" value={fullPeriodLabel ?? '-'} />
+            <Row label="연차 사용 가능 기간" value={annualUsable ?? '-'} />
           </>
         )}
 
-        {result.annualLeaveResultType === 'MONTHLY' && (
+        {result.leaveType === 'MONTHLY' && (
           <>
             <Row label="월차 합계" value={`${fmtDays(total)}일`} />
-            <Row label="월차 사용 가능 기간" value={monthlyPeriodLabel ?? '-'} />
+            <Row label="월차 사용 가능 기간" value={monthlyUsable ?? '-'} />
           </>
         )}
 
-        {result.annualLeaveResultType === 'PRORATED' && (
+        {result.leaveType === 'PRORATED' && (
           <>
             <Row label="비례연차 합계" value={`${fmtDays(total)}일`} />
-            <Row label="비례연차 사용 가능 기간" value={proratedPeriodLabel ?? '-'} />
+            <Row label="비례연차 사용 가능 기간" value={proratedUsable ?? '-'} />
           </>
         )}
 
-        {result.annualLeaveResultType === 'MONTHY_PRORATED' && (
+        {result.leaveType === 'MONTHLY_AND_PRORATED' && (
           <>
             {/* 1행: 월차 합계 | 비례연차 합계 */}
             <PairRow
@@ -168,9 +178,9 @@ export default function ResultBasicInfo({ result }: { result: CalcApiResult }) {
             {/* 2행: 월차 사용 가능 기간 | 비례연차 사용 가능 기간 */}
             <PairRow
               leftLabel="월차 사용 가능 기간"
-              leftValue={monthlyPeriodLabel ?? '-'}
+              leftValue={monthlyUsable ?? '-'}
               rightLabel="비례연차 사용 가능 기간"
-              rightValue={proratedPeriodLabel ?? '-'}
+              rightValue={proratedUsable ?? '-'}
             />
           </>
         )}

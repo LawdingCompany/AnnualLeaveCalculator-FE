@@ -3,8 +3,8 @@ import type { CalcApiResult } from '../resultTypes';
 import { fmtDays } from './resultUtils';
 
 export default function ResultDetails({ result }: { result: CalcApiResult }) {
-  switch (result.annualLeaveResultType) {
-    case 'FULL': {
+  switch (result.leaveType) {
+    case 'ANNUAL': {
       const cd = result.calculationDetail;
       return (
         <div className="grid grid-cols-2 gap-3 text-sm">
@@ -73,7 +73,7 @@ export default function ResultDetails({ result }: { result: CalcApiResult }) {
           <div>
             <span className="mr-2 text-neutral-500">산정기간</span>
             <span className="font-medium">
-              {cd.proratedLeaveAccrualPeriod.startDate} ~ {cd.proratedLeaveAccrualPeriod.endDate}
+              {cd.accrualPeriod.startDate} ~ {cd.accrualPeriod.endDate}
             </span>
           </div>
           <div>
@@ -84,62 +84,31 @@ export default function ResultDetails({ result }: { result: CalcApiResult }) {
       );
     }
 
-    case 'MONTHY_PRORATED': {
+    case 'MONTHLY_AND_PRORATED': {
       const cd = result.calculationDetail;
       return (
         <div className="grid gap-2 text-sm">
           <div>
             <span className="mr-2 text-neutral-500">월차 산정</span>
             <span className="font-medium">
-              {cd.monthlyLeaveAccrualPeriod.startDate} ~ {cd.monthlyLeaveAccrualPeriod.endDate}
+              {cd.monthlyDetail.accrualPeriod.startDate} ~ {cd.monthlyDetail.accrualPeriod.endDate}
             </span>
-            <span className="ml-2 text-neutral-500">({fmtDays(cd.monthlyLeaveDays)}일)</span>
+            <span className="ml-2 text-neutral-500">
+              ({fmtDays(cd.monthlyDetail.totalLeaveDays)}일)
+            </span>
           </div>
           <div>
             <span className="mr-2 text-neutral-500">비례연차 산정</span>
             <span className="font-medium">
-              {cd.proratedLeaveAccrualPeriod.startDate} ~ {cd.proratedLeaveAccrualPeriod.endDate}
+              {cd.proratedDetail.accrualPeriod.startDate} ~{' '}
+              {cd.proratedDetail.accrualPeriod.endDate}
             </span>
-            <span className="ml-2 text-neutral-500">({fmtDays(cd.proratedLeaveDays)}일)</span>
+            <span className="ml-2 text-neutral-500">
+              ({fmtDays(cd.proratedDetail.totalLeaveDays)}일)
+            </span>
           </div>
           <div>
             <span className="mr-2 text-neutral-500">총 발생</span>
-            <span className="font-semibold">{fmtDays(cd.totalLeaveDays)}일</span>
-          </div>
-        </div>
-      );
-    }
-
-    case 'ADJUSTED': {
-      const cd = result.calculationDetail;
-      return (
-        <div className="grid grid-cols-2 gap-3 text-sm">
-          <div>
-            <span className="mr-2 text-neutral-500">기본 연차</span>
-            <span className="font-medium">{cd.baseAnnualLeave}일</span>
-          </div>
-          <div>
-            <span className="mr-2 text-neutral-500">근속연수</span>
-            <span className="font-medium">{cd.serviceYears}년</span>
-          </div>
-          <div>
-            <span className="mr-2 text-neutral-500">가산휴가</span>
-            <span className="font-medium">{cd.additionalLeave}일</span>
-          </div>
-          <div>
-            <span className="mr-2 text-neutral-500">연간 소정근로일</span>
-            <span className="font-medium">{cd.prescribedWorkingDays}일</span>
-          </div>
-          <div>
-            <span className="mr-2 text-neutral-500">제외 근로일</span>
-            <span className="font-medium">{cd.excludedWorkingDays}일</span>
-          </div>
-          <div>
-            <span className="mr-2 text-neutral-500">출근율</span>
-            <span className="font-medium">{(cd.prescribeWorkingRatio * 100).toFixed(2)}%</span>
-          </div>
-          <div className="col-span-2">
-            <span className="mr-2 text-neutral-500">최종 부여</span>
             <span className="font-semibold">{fmtDays(cd.totalLeaveDays)}일</span>
           </div>
         </div>

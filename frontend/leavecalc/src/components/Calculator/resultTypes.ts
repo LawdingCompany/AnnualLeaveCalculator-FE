@@ -1,80 +1,80 @@
-// src/components/Calculator/resultTypes.ts
-export type CalculationType = 'FISCAL_YEAR' | 'HIRE_DATE';
-export type AnnualLeaveResultType =
-  | 'MONTHLY'
-  | 'PRORATED'
-  | 'MONTHY_PRORATED' // 백엔드 키 그대로 사용
-  | 'ADJUSTED'
-  | 'FULL';
+/** 공통 기간 */
+export interface Period {
+  startDate: string;
+  endDate: string;
+}
 
-type CommonResult = {
-  calculationType: CalculationType;
-  annualLeaveResultType: AnnualLeaveResultType;
-  fiscalYear?: string | null;
-  hireDate?: string;
-  referenceDate?: string;
-  explanation: string;
-};
+/** 결과 유형 */
+export type LeaveType = 'MONTHLY' | 'PRORATED' | 'ANNUAL' | 'MONTHLY_AND_PRORATED';
 
-/** 4.1 MONTHLY */
-export type CalcMonthlyResult = CommonResult & {
-  annualLeaveResultType: 'MONTHLY';
-  calculationDetail: {
-    records: { period: { startDate: string; endDate: string }; monthlyLeave: number }[];
-    totalLeaveDays: number;
-  };
-};
+/** 공통 필드 */
+export interface BaseResult {
+  calculationType: 'HIRE_DATE' | 'FISCAL_YEAR';
+  fiscalYear?: string; // MM-DD
+  hireDate: string;
+  referenceDate: string;
+  nonWorkingPeriod?: {
+    type: number;
+    startDate: string;
+    endDate: string;
+  }[];
+  companyHolidays?: string[];
+  leaveType: LeaveType;
+  explanations: string[];
+  nonWorkingExplanations?: string[];
+}
 
-/** 4.2 PRORATED */
-export type CalcProratedResult = CommonResult & {
-  annualLeaveResultType: 'PRORATED';
-  calculationDetail: {
-    proratedLeaveAccrualPeriod: { startDate: string; endDate: string };
-    totalLeaveDays: number;
-  };
-};
+/** MONTHLY */
+export interface MonthlyRecord {
+  period: Period;
+  monthlyLeave: number;
+}
+export interface MonthlyDetail {
+  accrualPeriod: Period;
+  availablePeriod: Period;
+  attendanceRate?: number;
+  prescribedWorkingRatio?: number;
+  serviceYears: number;
+  totalLeaveDays: number;
+  records: MonthlyRecord[];
+}
 
-/** 4.3 MONTHY_PRORATED */
-export type CalcMonthlyProratedResult = CommonResult & {
-  annualLeaveResultType: 'MONTHY_PRORATED';
-  calculationDetail: {
-    monthlyLeaveAccrualPeriod: { startDate: string; endDate: string };
-    monthlyLeaveDays: number;
-    proratedLeaveAccrualPeriod: { startDate: string; endDate: string };
-    proratedLeaveDays: number;
-    totalLeaveDays: number;
-  };
-};
+/** PRORATED */
+export interface ProratedDetail {
+  accrualPeriod: Period;
+  availablePeriod: Period;
+  attendanceRate?: number;
+  prescribedWorkingRatio?: number;
+  serviceYears: number;
+  totalLeaveDays: number;
+}
 
-/** 4.4 FULL */
-export type CalcFullResult = CommonResult & {
-  annualLeaveResultType: 'FULL';
-  calculationDetail: {
-    accrualPeriod: { startDate: string; endDate: string };
-    baseAnnualLeave: number;
-    serviceYears: number;
-    additionalLeave: number;
-    totalLeaveDays: number;
-  };
-};
+/** ANNUAL */
+export interface AnnualDetail {
+  accrualPeriod: Period;
+  availablePeriod: Period;
+  attendanceRate?: number;
+  prescribedWorkingRatio?: number;
+  serviceYears: number;
+  totalLeaveDays: number;
+  baseAnnualLeave: number;
+  additionalLeave: number;
+}
 
-/** 4.5 ADJUSTED */
-export type CalcAdjustedResult = CommonResult & {
-  annualLeaveResultType: 'ADJUSTED';
-  calculationDetail: {
-    baseAnnualLeave: number;
-    serviceYears: number;
-    additionalLeave: number;
-    prescribedWorkingDays: number;
-    excludedWorkingDays: number;
-    prescribeWorkingRatio: number; // 스펙 키 그대로(철자 주의)
-    totalLeaveDays: number;
-  };
-};
+/** MONTHLY + PRORATED */
+export interface MonthlyAndProratedDetail {
+  serviceYears: number;
+  totalLeaveDays: number;
+  monthlyDetail: Omit<MonthlyDetail, 'serviceYears'>;
+  proratedDetail: Omit<ProratedDetail, 'serviceYears'>;
+}
 
+/** 최상위 응답 타입 */
 export type CalcApiResult =
-  | CalcMonthlyResult
-  | CalcProratedResult
-  | CalcMonthlyProratedResult
-  | CalcFullResult
-  | CalcAdjustedResult;
+  | (BaseResult & { leaveType: 'MONTHLY'; calculationDetail: MonthlyDetail })
+  | (BaseResult & { leaveType: 'PRORATED'; calculationDetail: ProratedDetail })
+  | (BaseResult & { leaveType: 'ANNUAL'; calculationDetail: AnnualDetail })
+  | (BaseResult & {
+      leaveType: 'MONTHLY_AND_PRORATED';
+      calculationDetail: MonthlyAndProratedDetail;
+    });
