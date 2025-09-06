@@ -143,7 +143,7 @@ export function CalculatorCard() {
 
   return (
     <main
-      className="relative rounded-xl border border-neutral-200 p-8 overflow-y-auto"
+      className={`relative rounded-xl border border-neutral-200 p-8 ${calculating ? 'overflow-hidden' : 'overflow-y-auto'}`}
       aria-busy={calculating}
     >
       <Header />
