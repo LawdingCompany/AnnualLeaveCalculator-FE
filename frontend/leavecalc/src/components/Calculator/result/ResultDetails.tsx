@@ -1,118 +1,53 @@
-// src/components/Calculator/result/ResultDetails.tsx
-import type { CalcApiResult } from '../resultTypes';
-import { fmtDays } from './resultUtils';
+// src/components/Calculator/result/detail/ResultDetail.tsx
+import React from 'react';
+import type { CalcApiResult, LeaveType } from '../resultTypes';
+import MonthlyDetail from './detail/MonthlyDetail';
+import ProratedDetail from './detail/ProratedDetail';
+import ComboDetail from './detail/ComboDetail';
+import AnnualDetail from './detail/AnnualDetail';
+import ExplanationSection from './detail/_shared';
 
-export default function ResultDetails({ result }: { result: CalcApiResult }) {
-  switch (result.leaveType) {
-    case 'ANNUAL': {
-      const cd = result.calculationDetail;
-      return (
-        <div className="grid grid-cols-2 gap-3 text-sm">
-          <div className="col-span-2">
-            <span className="mr-2 text-neutral-500">산정기간</span>
-            <span className="font-medium">
-              {cd.accrualPeriod.startDate} ~ {cd.accrualPeriod.endDate}
-            </span>
-          </div>
-          <div>
-            <span className="mr-2 text-neutral-500">기본 연차</span>
-            <span className="font-medium">{cd.baseAnnualLeave}일</span>
-          </div>
-          <div>
-            <span className="mr-2 text-neutral-500">근속연수</span>
-            <span className="font-medium">{cd.serviceYears}년</span>
-          </div>
-          <div>
-            <span className="mr-2 text-neutral-500">가산휴가</span>
-            <span className="font-medium">{cd.additionalLeave}일</span>
-          </div>
-          <div>
-            <span className="mr-2 text-neutral-500">총 발생</span>
-            <span className="font-semibold">{fmtDays(cd.totalLeaveDays)}일</span>
-          </div>
-        </div>
-      );
-    }
+// 안전한 타입 가드
+function isMonthly(type?: LeaveType) {
+  return type === 'MONTHLY';
+}
+function isProrated(type?: LeaveType) {
+  return type === 'PRORATED';
+}
+function isCombo(type?: LeaveType) {
+  return type === 'MONTHLY_AND_PRORATED';
+}
+function isAnnual(type?: LeaveType) {
+  return type === 'ANNUAL';
+}
 
-    case 'MONTHLY': {
-      const cd = result.calculationDetail;
-      return (
-        <div className="overflow-x-auto">
-          <table className="min-w-full text-sm">
-            <thead>
-              <tr className="text-left text-neutral-500">
-                <th className="py-2 pr-3">기간</th>
-                <th className="py-2">발생</th>
-              </tr>
-            </thead>
-            <tbody>
-              {cd.records.map((rec, i) => (
-                <tr key={i} className="border-t">
-                  <td className="py-2 pr-3">
-                    {rec.period.startDate} ~ {rec.period.endDate}
-                  </td>
-                  <td className="py-2">{fmtDays(rec.monthlyLeave)}일</td>
-                </tr>
-              ))}
-            </tbody>
-            <tfoot>
-              <tr className="border-t font-semibold">
-                <td className="py-2 pr-3">합계</td>
-                <td className="py-2">{fmtDays(cd.totalLeaveDays)}일</td>
-              </tr>
-            </tfoot>
-          </table>
-        </div>
-      );
-    }
-
-    case 'PRORATED': {
-      const cd = result.calculationDetail;
-      return (
-        <div className="grid gap-2 text-sm">
-          <div>
-            <span className="mr-2 text-neutral-500">산정기간</span>
-            <span className="font-medium">
-              {cd.accrualPeriod.startDate} ~ {cd.accrualPeriod.endDate}
-            </span>
-          </div>
-          <div>
-            <span className="mr-2 text-neutral-500">총 발생</span>
-            <span className="font-semibold">{fmtDays(cd.totalLeaveDays)}일</span>
-          </div>
-        </div>
-      );
-    }
-
-    case 'MONTHLY_AND_PRORATED': {
-      const cd = result.calculationDetail;
-      return (
-        <div className="grid gap-2 text-sm">
-          <div>
-            <span className="mr-2 text-neutral-500">월차 산정</span>
-            <span className="font-medium">
-              {cd.monthlyDetail.accrualPeriod.startDate} ~ {cd.monthlyDetail.accrualPeriod.endDate}
-            </span>
-            <span className="ml-2 text-neutral-500">
-              ({fmtDays(cd.monthlyDetail.totalLeaveDays)}일)
-            </span>
-          </div>
-          <div>
-            <span className="mr-2 text-neutral-500">비례연차 산정</span>
-            <span className="font-medium">
-              {cd.proratedDetail.accrualPeriod.startDate} ~{' '}
-              {cd.proratedDetail.accrualPeriod.endDate}
-            </span>
-            <span className="ml-2 text-neutral-500">
-              ({fmtDays(cd.proratedDetail.totalLeaveDays)}일)
-            </span>
-          </div>
-          <div>
-            <span className="mr-2 text-neutral-500">총 발생</span>
-            <span className="font-semibold">{fmtDays(cd.totalLeaveDays)}일</span>
-          </div>
-        </div>
-      );
-    }
+export default function ResultDetail({ result }: { result: CalcApiResult | null }) {
+  if (!result) {
+    return <div className="p-6 text-sm text-neutral-500">표시할 결과가 없습니다.</div>;
   }
+
+  const { leaveType, calculationDetail, explanations, nonWorkingExplanations } = result;
+
+  let detailEl: React.ReactNode = null;
+
+  if (isMonthly(leaveType)) {
+    detailEl = <MonthlyDetail detail={calculationDetail as any} />;
+  } else if (isProrated(leaveType)) {
+    detailEl = <ProratedDetail detail={calculationDetail as any} />;
+  } else if (isCombo(leaveType)) {
+    detailEl = <ComboDetail detail={calculationDetail as any} />;
+  } else if (isAnnual(leaveType)) {
+    detailEl = <AnnualDetail detail={calculationDetail as any} />;
+  }
+
+  return (
+    <div>
+      {detailEl}
+      {/* ✅ 공통 설명 블록 추가 */}
+      <ExplanationSection
+        explanations={explanations}
+        nonWorkingExplanations={nonWorkingExplanations}
+      />
+    </div>
+  );
 }

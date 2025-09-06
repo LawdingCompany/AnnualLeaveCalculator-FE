@@ -1,6 +1,6 @@
 import { z } from 'zod';
 
-/** UI에서 고르는 상세 사유 (1~16) */
+// UI에서 고르는 상세 사유 (1~19)
 export type NonWorkingSubtype =
   | 1
   | 2
@@ -17,7 +17,10 @@ export type NonWorkingSubtype =
   | 13
   | 14
   | 15
-  | 16;
+  | 16
+  | 17
+  | 18
+  | 19;
 
 /**
  * UI 표시에 쓰이는 사유 라벨
@@ -26,21 +29,24 @@ export type NonWorkingSubtype =
  */
 export const PERIOD_LABELS: Record<NonWorkingSubtype, string> = {
   1: '육아휴직',
-  2: '산전·산후휴가',
-  3: '배우자출산휴가',
-  4: '병가',
-  5: '공가(예비군/민방위 등)',
-  6: '경조휴가',
-  7: '업무상 재해 휴업',
-  8: '쟁의행위(노사분쟁)',
-  9: '징계·정직',
-  10: '자격/면허 정지',
-  11: '교육·파견',
-  12: '해외연수/출장 장기',
-  13: '감염병 격리',
-  14: '무단결근',
-  15: '기타(출근간주)',
-  16: '기타(소정근로제외)',
+  2: '출산전후휴가',
+  3: '유사산휴가',
+  4: '예비군훈련',
+  5: '업무상 부상 또는 질병(산재인정)',
+  6: '공민권 행사를 위한 휴무일',
+  7: '배우자 출산휴가',
+  8: '가족돌봄휴가',
+  9: '부당해고',
+  10: '불법직장폐쇄',
+  11: '무단결근',
+  12: '징계로 인한 정직, 강제휴직, 직위해제',
+  13: '불법쟁의행위',
+  14: '병역의무 이행을 위한 휴직',
+  15: '개인사유로 인한 휴직',
+  16: '개인질병(업무상질병X)으로 인한 휴직',
+  17: '기타(출근처리)',
+  18: '기타(결근처리)',
+  19: '기타(소정근로제외)',
 };
 
 /** 서버에 보내는 카테고리 (1=출근간주, 2=결근, 3=소정근로제외) */
@@ -111,17 +117,37 @@ export const uiPayloadSchema = z.object({
 
 /** subtype → category 매핑 (임시 규칙: 기본은 3=소정근로제외) */
 export function mapSubtypeToCategory(sub: NonWorkingSubtype): NonWorkingCategory {
-  // 필요한 경우 도메인 규칙에 맞게 정교화
-  // 예: 5(공가)·6(경조휴가)·11(교육/파견)은 1=출근간주 등
   switch (sub) {
-    case 5: // 공가
-    case 6: // 경조휴가
-    case 11: // 교육·파견
-      return 1; // 출근간주
-    case 14: // 무단결근
-      return 2; // 결근
+    // ✅ 출근 처리(1)
+    case 1:
+    case 2:
+    case 3:
+    case 4:
+    case 5:
+    case 6:
+    case 7:
+    case 8:
+    case 9:
+    case 10:
+    case 17:
+      return 1;
+
+    // ✅ 결근 처리(2)
+    case 11:
+    case 12:
+    case 13:
+    case 18:
+      return 2;
+
+    // ✅ 소정근로제외(3)
+    case 14:
+    case 15:
+    case 16:
+    case 19:
+      return 3;
+
     default:
-      return 3; // 소정근로제외
+      return 3;
   }
 }
 

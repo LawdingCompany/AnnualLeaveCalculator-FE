@@ -1,3 +1,4 @@
+// src/components/Calculator/CalculatorCard.tsx
 import {
   Header,
   ApplicationMode,
@@ -9,7 +10,8 @@ import {
   CompanyHolidaysSection,
   FeedbackModal,
 } from './';
-import { useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
+import { createPortal } from 'react-dom'; // ✅ named import 로 수정
 import FooterLinks from '@components/Footer/FooterLinks';
 import { useCalcState, useCalcDispatch } from './context';
 import { uiPayloadSchema, mapSubtypeToCategory } from './types';
@@ -61,10 +63,47 @@ export function CalculatorCard() {
   // ✅ 계산 로딩 상태
   const [calculating, setCalculating] = useState(false);
 
+  // ✅ 카드 DOM 참조 (카드 영역만 덮기 위해 좌표/반경 필요)
+  const cardRef = useRef<HTMLElement | null>(null);
+  const [overlayRect, setOverlayRect] = useState<DOMRect | null>(null);
+  const [overlayRadius, setOverlayRadius] = useState<string>('12px'); // 기본값: rounded-xl 대략
+
   const openGuide = (section?: 'accuracy' | 'glossary' | 'disclaimer') => {
     setGuideInitial(section);
     setGuideOpen(true);
   };
+
+  // ✅ 로딩 중 카드 박스 좌표 + border-radius 추적
+  useEffect(() => {
+    if (!calculating) {
+      setOverlayRect(null);
+      return;
+    }
+    const update = () => {
+      if (cardRef.current) {
+        const rect = cardRef.current.getBoundingClientRect();
+        setOverlayRect(rect);
+
+        // 카드의 실제 border-radius를 읽어 동일 적용
+        const br = getComputedStyle(cardRef.current).borderRadius;
+        if (br) setOverlayRadius(br);
+      }
+    };
+
+    update(); // 최초 1회
+    const onScroll = () => update();
+    const onResize = () => update();
+
+    window.addEventListener('scroll', onScroll, true);
+    window.addEventListener('resize', onResize);
+    const raf = requestAnimationFrame(update);
+
+    return () => {
+      window.removeEventListener('scroll', onScroll, true);
+      window.removeEventListener('resize', onResize);
+      cancelAnimationFrame(raf);
+    };
+  }, [calculating]);
 
   const onSubmit = async () => {
     setCalculating(true);
@@ -124,8 +163,6 @@ export function CalculatorCard() {
       // 결과 반영은 한 번에
       dispatch({ type: 'SET_RESULT', payload: result });
       dispatch({ type: 'SET_VIEW', payload: 'result' });
-
-      // 전환 페인트를 부드럽게 하고 싶다면(선택): await nextFrame();
     } catch (e) {
       console.error(e);
       // 실패한 경우에도 최소 노출 시간 지켜줌
@@ -141,9 +178,45 @@ export function CalculatorCard() {
 
   const isResult = state.view === 'result' && state.result;
 
+  // ✅ 카드만 덮는 포털 오버레이 (흐림 제거 + 테두리 둥글게 적용)
+  const overlayPortal = useMemo(() => {
+    if (!calculating || !overlayRect) return null;
+    const style: React.CSSProperties = {
+      position: 'fixed',
+      top: overlayRect.top,
+      left: overlayRect.left,
+      width: overlayRect.width,
+      height: overlayRect.height,
+      zIndex: 1000,
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+      flexDirection: 'column',
+      gap: '12px',
+      background: 'rgba(23,23,23,0.30)', // neutral-900/30
+      borderRadius: overlayRadius, // ✅ 카드의 radius 그대로
+    };
+    return createPortal(
+      <div style={style} role="status" aria-live="polite" aria-label="연차 계산 진행 중">
+        <div
+          className="h-10 w-10 animate-spin rounded-full border-2 border-white border-t-transparent"
+          aria-hidden="true"
+        />
+        <p className="text font-medium text-white">계산 중입니다…</p>
+        <p className="text font-medium text-white">
+          잠시만 기다려주세요. 정확한 연차 계산을 위해 정보를 확인하고 있습니다.
+        </p>
+      </div>,
+      document.body,
+    );
+  }, [calculating, overlayRect, overlayRadius]);
+
   return (
     <main
-      className={`relative rounded-xl border border-neutral-200 p-8 ${calculating ? 'overflow-hidden' : 'overflow-y-auto'}`}
+      ref={cardRef}
+      className={`relative rounded-xl border border-neutral-200 p-8 ${
+        calculating ? 'overflow-hidden' : 'overflow-y-auto'
+      }`}
       aria-busy={calculating}
     >
       <Header />
@@ -177,21 +250,8 @@ export function CalculatorCard() {
         </>
       )}
 
-      {/* ✅ 로딩 오버레이 (회색 딤 + 접근성 속성) */}
-      {calculating && (
-        <div
-          className="absolute inset-0 z-50 flex flex-col items-center justify-center gap-3 
-               bg-neutral-900/30" // ← 더 어둡게
-          role="status"
-          aria-live="polite"
-        >
-          <div className="h-10 w-10 animate-spin rounded-full border-2 border-white border-t-transparent" />
-          <p className="text font-medium text-white">계산 중입니다…</p>
-          <p className="text font-medium text-white">
-            잠시만 기다려주세요. 정확한 연차 계산을 위해 정보를 확인하고 있습니다.
-          </p>
-        </div>
-      )}
+      {/* 카드만 덮는 포털 오버레이 */}
+      {overlayPortal}
 
       {/* 피드백 버튼 + 모달 */}
       <button

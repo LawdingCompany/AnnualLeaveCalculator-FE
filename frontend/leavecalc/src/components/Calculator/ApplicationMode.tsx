@@ -1,6 +1,6 @@
 // ApplicationMode.tsx
 import { useCalcDispatch, useCalcState } from './context';
-import MonthSelect from '@components/ui/MonthSelect';
+import SelectBox from '@components/ui/SelectBox';
 
 const SEG_BTN = [
   'h-10 px-3 rounded-md border text-md',
@@ -20,6 +20,11 @@ export default function ApplicationMode() {
   const d = useCalcDispatch();
   const fyDisabled = s.calculationType !== 2;
   const currentMonth = monthFromFiscalYear(s.fiscalYear);
+
+  const MONTH_OPTIONS = Array.from({ length: 12 }, (_, i) => {
+    const mm = String(i + 1).padStart(2, '0');
+    return { value: mm, label: `${i + 1}` };
+  });
 
   return (
     // 라벨 칼럼은 내용폭, 버튼 영역은 200px, 오른쪽 라벨은 내용폭, 입력영역은 1fr
@@ -56,12 +61,14 @@ export default function ApplicationMode() {
 
       {/* 4열: 시작일 입력 그룹 */}
       <div className="flex items-center gap-2">
-        <MonthSelect
-          value={currentMonth} // "01" ~ "12"
+        <SelectBox
+          value={currentMonth}
           onChange={(mm) => d({ type: 'SET_FISCAL_YEAR', payload: `${mm}-01` })}
+          options={MONTH_OPTIONS}
           disabled={fyDisabled}
-          className="w-[70px]" // 폭만 여기서 조절
-          // center는 기본 true (선택값/옵션 모두 중앙 정렬)
+          className="w-[70px]" // 컨테이너 폭
+          buttonClassName="h-9" // 버튼 높이 통일
+          placeholder="월"
         />
         <span className="text-md font-medium text-neutral-600">월</span>
 

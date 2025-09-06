@@ -3,6 +3,7 @@ import { useState } from 'react';
 import { useCalcDispatch, useCalcState } from './context';
 import CustomDatePicker from '@components/CustomDatePicker/CustomDatePicker';
 import { PERIOD_LABELS, type NonWorkingSubtype } from './types';
+import ReasonSelect from '@components/ui/ReasonSelect';
 
 const MAX_PERIODS = 3;
 
@@ -151,6 +152,11 @@ export default function SpecialPeriodsSection() {
     }
   };
 
+  const reasonOptions = SUBTYPE_OPTIONS.map((code) => ({
+    value: code,
+    label: PERIOD_LABELS[code],
+  }));
+
   return (
     <div className="grid gap-2">
       {/* 토글 + 카운터 */}
@@ -177,27 +183,14 @@ export default function SpecialPeriodsSection() {
           {/* 작성 컴포저 */}
           <div className="grid grid-cols-[max-content_1fr_max-content_1fr_max-content_1fr_max-content] items-center gap-2">
             <span className="text-sm text-neutral-600 ml-1 mr-1">사유</span>
-            <select
-              className={SELECT_CLS}
-              value={draftSubtype ?? ''}
-              onChange={(e) =>
-                setDraftSubtype(
-                  (e.target.value ? Number(e.target.value) : null) as NonWorkingSubtype | null,
-                )
-              }
-              disabled={editIndex === null && isFull} // 가득 찼으면 새 입력 비활성화(편집은 허용)
-            >
-              <option value="" className="text-center" disabled>
-                사유 선택
-              </option>
-              {SUBTYPE_OPTIONS.map((code) => (
-                <option key={code} value={code}>
-                  {PERIOD_LABELS[code]}
-                </option>
-              ))}
-            </select>
-
-            <span className="text-sm text-neutral-600 ml-2 mr-1">시작일</span>
+            <ReasonSelect
+              value={draftSubtype ?? null}
+              onChange={(v) => setDraftSubtype(v as NonWorkingSubtype)}
+              options={reasonOptions}
+              disabled={editIndex === null && isFull}
+              className="min-w-[160px]"
+            />
+            <span className="text-sm text-neutral-600 ml-6 mr-1">시작일</span>
             <CustomDatePicker
               selected={draftStart}
               onChange={(dt) => setDraftStart(dt)}
@@ -207,7 +200,7 @@ export default function SpecialPeriodsSection() {
               maxDate={draftEnd ?? refDateObj ?? undefined}
             />
 
-            <span className="text-sm text-neutral-600 ml-2 mr-1">종료일</span>
+            <span className="text-sm text-neutral-600 mr-1">종료일</span>
             <CustomDatePicker
               selected={draftEnd}
               onChange={(dt) => setDraftEnd(dt)}

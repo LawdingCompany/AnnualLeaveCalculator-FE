@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useCalcDispatch, useCalcState } from './context';
 import CustomDatePicker from '@components/CustomDatePicker/CustomDatePicker';
+import SelectBox from '@components/ui/SelectBox';
 
 // yyyy-mm-dd <-> Date
 function toDate(str?: string): Date | null {
@@ -135,6 +136,7 @@ export default function CompanyHolidaysSection() {
     }
   };
 
+  const options = HOLIDAY_TYPE_OPTIONS.map((opt) => ({ value: opt.value, label: opt.label }));
   return (
     <div className="grid gap-2">
       {/* 토글 + 카운터 */}
@@ -163,22 +165,15 @@ export default function CompanyHolidaysSection() {
             {/* 사유 라벨 */}
             <span className="text-sm ml-1 mr-1 text-neutral-600">사유</span>
 
-            {/* 드롭다운 (기본 꺾새 제거: appearance-none) */}
-            <select
-              value={draftType}
-              onChange={(e) => setDraftType(e.target.value as HolidayType | '')}
-              className="h-9 min-w-[140px] text-center rounded-md border border-neutral-300 bg-white px-2 text-sm text-neutral-800 focus:outline-none focus:ring-2 focus:ring-blue-200 appearance-none"
-            >
-              <option value="" className="text-center">
-                휴일 선택
-              </option>
-              {HOLIDAY_TYPE_OPTIONS.map((opt) => (
-                <option key={opt.value} value={opt.value}>
-                  {opt.label}
-                </option>
-              ))}
-            </select>
-
+            <SelectBox
+              value={draftType || null}
+              onChange={(v) => setDraftType(v)}
+              options={options}
+              disabled={editIndex === null && isFull}
+              className="min-w-[140px]"
+              // 필요시 버튼 높이 맞춤
+              buttonClassName="h-9"
+            />
             {/* 날짜 라벨 (연한색) */}
             <span className="text-sm ml-2 mr-1 text-neutral-500">날짜</span>
 

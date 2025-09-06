@@ -1,9 +1,5 @@
 import type { CalcApiResult } from '../resultTypes';
 
-export function fmtDays(v: number): string {
-  return v % 1 === 0 ? v.toString() : v.toFixed(1);
-}
-
 export function fmtDateKR(iso: string): string {
   if (!iso) return '-';
   const [y, m, d] = iso.split('-');
@@ -17,9 +13,9 @@ export function typeLabelOf(type: CalcApiResult['leaveType']): string {
     case 'PRORATED':
       return '비례연차';
     case 'ANNUAL':
-      return '정기연차';
+      return '연차';
     case 'MONTHLY_AND_PRORATED':
-      return '월차+비례연차';
+      return '월차 & 비례연차';
     default:
       return type;
   }
@@ -27,33 +23,39 @@ export function typeLabelOf(type: CalcApiResult['leaveType']): string {
 
 /** 결과 기간 요약 */
 export function getPeriods(result: CalcApiResult) {
+  const toRange = (a?: { startDate?: string | null; endDate?: string | null } | null) =>
+    a?.startDate && a?.endDate ? `${a.startDate} ~ ${a.endDate}` : '-';
+
   switch (result.leaveType) {
     case 'MONTHLY': {
-      const cd = result.calculationDetail;
+      const cd = result.calculationDetail as any;
       return {
-        accrualLabel: `${cd.accrualPeriod.startDate} ~ ${cd.accrualPeriod.endDate}`,
-        usableLabel: `${cd.availablePeriod.startDate} ~ ${cd.availablePeriod.endDate}`,
+        accrualLabel: toRange(cd?.accrualPeriod),
+        usableLabel: toRange(cd?.availablePeriod),
       };
     }
     case 'PRORATED': {
-      const cd = result.calculationDetail;
+      const cd = result.calculationDetail as any;
       return {
-        accrualLabel: `${cd.accrualPeriod.startDate} ~ ${cd.accrualPeriod.endDate}`,
-        usableLabel: `${cd.availablePeriod.startDate} ~ ${cd.availablePeriod.endDate}`,
+        accrualLabel: toRange(cd?.accrualPeriod),
+        usableLabel: toRange(cd?.availablePeriod),
       };
     }
     case 'ANNUAL': {
-      const cd = result.calculationDetail;
+      const cd = result.calculationDetail as any;
       return {
-        accrualLabel: `${cd.accrualPeriod.startDate} ~ ${cd.accrualPeriod.endDate}`,
-        usableLabel: `${cd.availablePeriod.startDate} ~ ${cd.availablePeriod.endDate}`,
+        accrualLabel: toRange(cd?.accrualPeriod),
+        usableLabel: toRange(cd?.availablePeriod),
       };
     }
     case 'MONTHLY_AND_PRORATED': {
-      const cd = result.calculationDetail;
+      const cd = result.calculationDetail as any;
+      // 실제 키 이름 확인: monthly/prorated 또는 monthlyDetail/proratedDetail
+      const monthly = cd?.monthly ?? cd?.monthlyDetail;
+      const prorated = cd?.prorated ?? cd?.proratedDetail;
       return {
-        accrualLabel: `${cd.monthlyDetail.accrualPeriod.startDate} ~ ${cd.proratedDetail.accrualPeriod.endDate}`,
-        usableLabel: `${cd.proratedDetail.availablePeriod.startDate} ~ ${cd.proratedDetail.availablePeriod.endDate}`,
+        accrualLabel: toRange(monthly?.accrualPeriod) || toRange(prorated?.accrualPeriod),
+        usableLabel: toRange(prorated?.availablePeriod),
       };
     }
     default:
