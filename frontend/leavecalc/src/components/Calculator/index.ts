@@ -4,7 +4,7 @@ export { default as ApplicationMode } from './ApplicationMode';
 export { default as HireAndReference } from './HireAndReference';
 export { default as SpecialPeriodsSection } from './SpecialPeriodsSection';
 export { default as SubmitBar } from './SubmitBar';
-export { default as FAQ } from './FAQ';
+export { default as GuideLine } from './GuideLine';
 export { default as GuidelineHint } from './GuidelineHint';
 export { default as HelpDrawer } from './HelpDrawer';
 export { default as CompanyHolidaysSection } from './CompanyHolidaysSection';

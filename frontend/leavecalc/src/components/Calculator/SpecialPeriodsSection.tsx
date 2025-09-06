@@ -43,7 +43,7 @@ function overlaps(aStart: string, aEnd: string, bStart: string, bEnd: string) {
 
 // DatePicker와 톤 맞춘 select
 const SELECT_CLS = [
-  'w-full appearance-none rounded-md border px-3 py-2 text-sm bg-white outline-none',
+  'w-full appearance-none rounded-md border px-3 py-2 text-sm bg-white outline-none text-center',
   'border-[#e2e8f0]',
   'focus:border-blue-600',
   'focus:shadow-[0_0_0_3px_rgba(59,130,246,0.1)]',
@@ -115,12 +115,30 @@ export default function SpecialPeriodsSection() {
       endDate: toStr(draftEnd),
     };
 
+    // ✅ 편집 중이었던 원본이 삭제되어 인덱스가 유효하지 않다면 안전하게 "추가"로 처리
     if (editIndex === null) {
+      d({ type: 'ADD_PERIOD', payload });
+    } else if (editIndex < 0 || editIndex >= s.nonWorkingPeriods.length) {
       d({ type: 'ADD_PERIOD', payload });
     } else {
       d({ type: 'UPDATE_PERIOD', index: editIndex, payload });
     }
+
     clearDraft();
+  };
+
+  // ✅ 삭제 시 편집 인덱스 보정/해제
+  const handleRemove = (idx: number) => {
+    if (editIndex !== null) {
+      if (idx === editIndex) {
+        // 편집 중인 항목 자체를 삭제 → 편집 상태 해제
+        clearDraft();
+      } else if (idx < editIndex) {
+        // 앞쪽 항목이 삭제되어 인덱스가 한 칸 당겨짐 → 보정
+        setEditIndex(editIndex - 1);
+      }
+    }
+    d({ type: 'REMOVE_PERIOD', index: idx });
   };
 
   const handleToggle = (checked: boolean) => {
@@ -137,7 +155,7 @@ export default function SpecialPeriodsSection() {
     <div className="grid gap-2">
       {/* 토글 + 카운터 */}
       <div className="flex items-center justify-between">
-        <label className="flex items-center gap-2 text-sm font-medium text-neutral-700">
+        <label className="flex items-center gap-2 text-md font-medium text-neutral-700">
           <input
             type="checkbox"
             className="h-4 w-4 rounded border-neutral-300"
@@ -147,7 +165,7 @@ export default function SpecialPeriodsSection() {
           특이사항이 있는 기간
         </label>
         {enabled && (
-          <span className="text-xs text-neutral-500">
+          <span className="text-sm text-neutral-500">
             {count}/{MAX_PERIODS}
           </span>
         )}
@@ -158,7 +176,7 @@ export default function SpecialPeriodsSection() {
         <div className="rounded-lg border border-neutral-200 p-3 space-y-3">
           {/* 작성 컴포저 */}
           <div className="grid grid-cols-[max-content_1fr_max-content_1fr_max-content_1fr_max-content] items-center gap-2">
-            <span className="text-sm text-neutral-600">사유</span>
+            <span className="text-sm text-neutral-600 ml-1 mr-1">사유</span>
             <select
               className={SELECT_CLS}
               value={draftSubtype ?? ''}
@@ -169,7 +187,7 @@ export default function SpecialPeriodsSection() {
               }
               disabled={editIndex === null && isFull} // 가득 찼으면 새 입력 비활성화(편집은 허용)
             >
-              <option value="" disabled>
+              <option value="" className="text-center" disabled>
                 사유 선택
               </option>
               {SUBTYPE_OPTIONS.map((code) => (
@@ -179,7 +197,7 @@ export default function SpecialPeriodsSection() {
               ))}
             </select>
 
-            <span className="text-sm text-neutral-600">시작일</span>
+            <span className="text-sm text-neutral-600 ml-2 mr-1">시작일</span>
             <CustomDatePicker
               selected={draftStart}
               onChange={(dt) => setDraftStart(dt)}
@@ -189,7 +207,7 @@ export default function SpecialPeriodsSection() {
               maxDate={draftEnd ?? refDateObj ?? undefined}
             />
 
-            <span className="text-sm text-neutral-600">종료일</span>
+            <span className="text-sm text-neutral-600 ml-2 mr-1">종료일</span>
             <CustomDatePicker
               selected={draftEnd}
               onChange={(dt) => setDraftEnd(dt)}
@@ -208,7 +226,7 @@ export default function SpecialPeriodsSection() {
                 editIndex === null && isFull ? `최대 ${MAX_PERIODS}개까지 추가 가능합니다.` : ''
               }
             >
-              {editIndex === null ? '추가하기' : '수정 완료'}
+              {editIndex === null ? '추가하기' : '수정하기'}
             </button>
           </div>
 
@@ -233,12 +251,10 @@ export default function SpecialPeriodsSection() {
               s.nonWorkingPeriods.map((p, idx) => (
                 <div
                   key={idx}
-                  className="grid grid-cols-[1fr_max-content_max-content_max-content] items-center gap-2 rounded-md border border-neutral-200 px-3 py-2"
+                  className="grid grid-cols-[1fr_max-content_max-content_max-content] items-center gap-2 rounded-md border text-sm border-neutral-200 px-3 py-2"
                 >
                   <div className="min-w-0">
-                    <div className="text-sm font-medium text-neutral-800 truncate">
-                      {PERIOD_LABELS[p.subtype]}
-                    </div>
+                    <div className=" text-neutral-800 truncate">{PERIOD_LABELS[p.subtype]}</div>
                     <div className="text-xs text-neutral-500">
                       {p.startDate} ~ {p.endDate} · {daysInclusive(p.startDate, p.endDate)}일
                     </div>
@@ -260,7 +276,7 @@ export default function SpecialPeriodsSection() {
                   <button
                     type="button"
                     className="text-xs text-red-600 underline"
-                    onClick={() => d({ type: 'REMOVE_PERIOD', index: idx })}
+                    onClick={() => handleRemove(idx)} // ✅ 안전 삭제 핸들러 사용
                   >
                     삭제
                   </button>
@@ -271,7 +287,7 @@ export default function SpecialPeriodsSection() {
 
           {/* 하단 안내 */}
           <div className="flex justify-between">
-            <small className="text-[12px] text-neutral-500">
+            <small className="text-xs text-neutral-500">
               * 겹치는 기간은 등록할 수 없습니다. 예시) 2025-01-12 ~ 2025-06-11 : 육아휴직,
               2025-05-15 ~ 2025-05-21 : 가족돌봄휴가
             </small>

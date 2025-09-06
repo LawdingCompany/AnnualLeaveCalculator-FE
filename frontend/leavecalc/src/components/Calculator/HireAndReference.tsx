@@ -27,27 +27,35 @@ export default function HireAndReference() {
   const refDateObj = toDate(s.referenceDate);
 
   return (
-    <div className="grid grid-cols-[max-content_180px_max-content_1fr] items-center gap-x-11">
+    <div className="grid grid-cols-[max-content_198px_max-content_1fr] items-center gap-x-8">
       {/* 입사일 */}
-      <label className="text-sm font-medium text-neutral-700 whitespace-nowrap">입사일</label>
+      <label className="text-md font-medium text-neutral-700 whitespace-nowrap">
+        입사일 <span className="text-red-500">*</span>
+      </label>
       <CustomDatePicker
         selected={hireDateObj}
         onChange={(dt) => d({ type: 'SET_HIRE_DATE', payload: toStr(dt) })}
         dateFormat="YYYY-MM-DD"
         placeholderText="YYYY-MM-DD"
-        className="max-w-[150px]"
+        className={`max-w-[150px] rounded-md border-2 ${
+          s.hireDate ? 'border-neutral-300' : 'border-red-400'
+        } focus:outline-none focus:ring-0 focus:border-neutral-300`}
         // 선택적으로 기준일 이후 선택 제한
         maxDate={refDateObj ?? undefined}
       />
 
       {/* 기준일 */}
-      <span className="text-sm font-medium text-neutral-700 whitespace-nowrap">기준일</span>
+      <label className="text-md font-medium text-neutral-700 whitespace-nowrap">
+        계산 기준일 <span className="text-red-500">*</span>
+      </label>
       <CustomDatePicker
         selected={refDateObj}
         onChange={(dt) => d({ type: 'SET_REFERENCE_DATE', payload: toStr(dt) })}
         dateFormat="YYYY-MM-DD"
         placeholderText="YYYY-MM-DD"
-        className="max-w-[150px]"
+        className={`max-w-[150px] ml-5 rounded-md border-2 ${
+          s.referenceDate ? 'border-neutral-300' : 'border-red-400'
+        } focus:outline-none focus:ring-0 focus:border-neutral-300`}
         // 선택적으로 입사일 이전 선택 제한
         minDate={hireDateObj ?? undefined}
       />

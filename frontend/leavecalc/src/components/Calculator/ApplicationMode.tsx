@@ -3,7 +3,7 @@ import { useCalcDispatch, useCalcState } from './context';
 import MonthSelect from '@components/ui/MonthSelect';
 
 const SEG_BTN = [
-  'h-10 px-3 rounded-md border text-sm font-medium',
+  'h-10 px-3 rounded-md border text-md',
   'bg-white text-neutral-700 border-[#e2e8f0]', // 회색 테두리
   'hover:bg-neutral-50', // 호버
   'focus:outline-none focus:border-blue-600', // 포커스 테두리
@@ -23,9 +23,9 @@ export default function ApplicationMode() {
 
   return (
     // 라벨 칼럼은 내용폭, 버튼 영역은 200px, 오른쪽 라벨은 내용폭, 입력영역은 1fr
-    <div className="grid grid-cols-[max-content_200px_max-content_1fr] items-center gap-x-6">
+    <div className="grid grid-cols-[max-content_200px_max-content_1fr] items-center gap-x-7">
       {/* 1열: 라벨 */}
-      <label className="text-sm font-medium text-neutral-700 whitespace-nowrap">산정 방식</label>
+      <label className="font-medium text-neutral-700 whitespace-nowrap">산정 방식</label>
 
       {/* 2열: 버튼 그룹 */}
       <div className="flex items-center gap-2" role="group" aria-label="산정 방식">
@@ -50,7 +50,7 @@ export default function ApplicationMode() {
       </div>
 
       {/* 3열: 라벨 */}
-      <span className="text-sm font-medium text-neutral-700 whitespace-nowrap mr-2">
+      <span className="text-md font-medium text-neutral-700 whitespace-nowrap mr-2">
         회계연도 시작일
       </span>
 
@@ -63,17 +63,17 @@ export default function ApplicationMode() {
           className="w-[70px]" // 폭만 여기서 조절
           // center는 기본 true (선택값/옵션 모두 중앙 정렬)
         />
-        <span className="text-sm text-neutral-600">월</span>
+        <span className="text-md font-medium text-neutral-600">월</span>
 
         {/* 고정 1일 (disable) */}
         <input
           value="1"
           disabled
           aria-label="회계연도 시작일(일)"
-          className="w-[44px] rounded-md border px-3 py-2 text-sm text-center
+          className="w-[44px] rounded-md border px-3 py-2 text-md font-medium text-center
                      border-neutral-200 bg-neutral-100 text-neutral-500 cursor-not-allowed select-none"
         />
-        <span className="text-sm text-neutral-600">일</span>
+        <span className="text-md font-medium text-neutral-600">일</span>
       </div>
     </div>
   );

@@ -53,7 +53,6 @@ export default function ResultSummaryLine({ result }: { result: CalcApiResult })
           {(showUsable || showAccrual) && (
             <div className="mt-2 flex flex-wrap items-center gap-2">
               {showUsable && <Chip label="사용 가능 기간 :" value={usableLabel!} />}
-              {showAccrual && <Chip label="산정 기간 :" value={accrualLabel!} />}
             </div>
           )}
         </div>

@@ -2,3 +2,11 @@
 @plugin 'flowbite-react/plugin/tailwindcss';
 @source "./node_modules/flowbite-react/dist/esm/**/*.mjs";
 @source '../.flowbite-react/class-list.json';
+@import 'pretendard/dist/web/static/pretendard.css';
+@theme {
+  --font-sans: Pretendard, ui-sans-serif, system-ui, sans-serif;
+}
+
+body {
+  @apply font-sans;
+}

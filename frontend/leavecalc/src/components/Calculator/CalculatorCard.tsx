@@ -4,7 +4,7 @@ import {
   HireAndReference,
   SpecialPeriodsSection,
   SubmitBar,
-  FAQ,
+  GuideLine,
   GuidelineHint,
   CompanyHolidaysSection,
   FeedbackModal,
@@ -14,10 +14,17 @@ import FooterLinks from '@components/Footer/FooterLinks';
 import { useCalcState, useCalcDispatch } from './context';
 import { uiPayloadSchema, mapSubtypeToCategory } from './types';
 import type { ApiNonWorkingPeriod, ApiPayload } from './types';
+import FAQModal from './FAQModal';
+import HelpDrawer from './HelpDrawer';
 import ResultView from './ResultView';
 
 const API_BASE = import.meta.env.VITE_API_BASE;
 
+const delay = (ms: number) => new Promise((res) => setTimeout(res, ms));
+const nextFrame = () => new Promise<void>((res) => requestAnimationFrame(() => res()));
+const MIN_SPINNER_MS = 5000; // 로딩 오버레이 최소 표시 시간(ms)
+
+// ---------- API ----------
 async function postCalculate(payload: ApiPayload) {
   const url = `${API_BASE}/annual-leaves/calculate`;
   console.groupCollapsed('[AnnualLeave] POST', url);
@@ -42,9 +49,29 @@ async function postCalculate(payload: ApiPayload) {
 export function CalculatorCard() {
   const state = useCalcState();
   const dispatch = useCalcDispatch();
+
+  const [policyOpen, setPolicyOpen] = useState<null | 'guidelines' | 'terms' | 'privacy'>(null);
   const [feedbackOpen, setFeedbackOpen] = useState(false);
+  const [guideOpen, setGuideOpen] = useState(false);
+  const [guideInitial, setGuideInitial] = useState<
+    'accuracy' | 'glossary' | 'disclaimer' | undefined
+  >(undefined);
+  const [faqOpen, setFaqOpen] = useState(false);
+
+  // ✅ 계산 로딩 상태
+  const [calculating, setCalculating] = useState(false);
+
+  const openGuide = (section?: 'accuracy' | 'glossary' | 'disclaimer') => {
+    setGuideInitial(section);
+    setGuideOpen(true);
+  };
 
   const onSubmit = async () => {
+    setCalculating(true);
+
+    // 스피너가 실제로 한 번은 그려지도록 브라우저에 한 프레임 양보
+    await nextFrame();
+
     const uiPeriods = state.specialPeriodsEnabled ? state.nonWorkingPeriods : [];
     const uiHolidays = state.companyHolidaysEnabled ? state.companyHolidays : [];
 
@@ -56,9 +83,13 @@ export function CalculatorCard() {
       companyHolidays: uiHolidays,
       ...(state.calculationType === 2 ? { fiscalYear: state.fiscalYear } : {}),
     };
+
+    const startedAt = performance.now();
+
     const parsed = uiPayloadSchema.safeParse(uiPayload);
     if (!parsed.success) {
       alert('입력값을 확인해주세요. (날짜: YYYY-MM-DD / 회계연도: MM-DD)');
+      setCalculating(false);
       return;
     }
 
@@ -84,18 +115,37 @@ export function CalculatorCard() {
 
     try {
       const result = await postCalculate(apiPayload);
+
+      // 최소 노출 시간 보장
+      const elapsed = performance.now() - startedAt;
+      const remain = Math.max(0, MIN_SPINNER_MS - elapsed);
+      if (remain > 0) await delay(remain);
+
+      // 결과 반영은 한 번에
       dispatch({ type: 'SET_RESULT', payload: result });
       dispatch({ type: 'SET_VIEW', payload: 'result' });
+
+      // 전환 페인트를 부드럽게 하고 싶다면(선택): await nextFrame();
     } catch (e) {
       console.error(e);
+      // 실패한 경우에도 최소 노출 시간 지켜줌
+      const elapsed = performance.now() - startedAt;
+      const remain = Math.max(0, MIN_SPINNER_MS - elapsed);
+      if (remain > 0) await delay(remain);
+
       alert('서버 통신에 실패했습니다. 잠시 후 다시 시도해주세요.');
+    } finally {
+      setCalculating(false);
     }
   };
 
   const isResult = state.view === 'result' && state.result;
 
   return (
-    <main className="relative rounded-xl border border-neutral-200 p-8 overflow-y-auto">
+    <main
+      className="relative rounded-xl border border-neutral-200 p-8 overflow-y-auto"
+      aria-busy={calculating}
+    >
       <Header />
 
       {isResult ? (
@@ -113,21 +163,53 @@ export function CalculatorCard() {
             <HireAndReference />
             <SpecialPeriodsSection />
             <CompanyHolidaysSection />
-            <SubmitBar onSubmit={onSubmit} />
+            <SubmitBar
+              onSubmit={onSubmit}
+              disabled={!state.hireDate || !state.referenceDate || calculating}
+            />
             <hr className="h-px border-0 bg-[#e2e8f0]" />
-            <FAQ />
-            <FooterLinks />
+            <GuideLine />
+            <FooterLinks
+              onOpenGuide={(section) => openGuide(section)}
+              onOpenFAQ={() => setFaqOpen(true)}
+            />
           </section>
         </>
       )}
 
+      {/* ✅ 로딩 오버레이 (회색 딤 + 접근성 속성) */}
+      {calculating && (
+        <div
+          className="absolute inset-0 z-50 flex flex-col items-center justify-center gap-3 
+               bg-neutral-900/30" // ← 더 어둡게
+          role="status"
+          aria-live="polite"
+        >
+          <div className="h-10 w-10 animate-spin rounded-full border-2 border-white border-t-transparent" />
+          <p className="text font-medium text-white">계산 중입니다…</p>
+          <p className="text font-medium text-white">
+            잠시만 기다려주세요. 정확한 연차 계산을 위해 정보를 확인하고 있습니다.
+          </p>
+        </div>
+      )}
+
+      {/* 피드백 버튼 + 모달 */}
       <button
-        className="fixed bottom-6 right-6 rounded-full bg-blue-600 px-4 py-3 text-white shadow-lg hover:bg-blue-700"
+        className="fixed bottom-6 right-6 rounded-full bg-blue-600 px-4 py-3 text-white shadow-lg hover:bg-blue-700 disabled:opacity-60"
         onClick={() => setFeedbackOpen(true)}
+        disabled={calculating}
       >
         피드백
       </button>
       <FeedbackModal open={feedbackOpen} onClose={() => setFeedbackOpen(false)} />
+
+      {/* 도움말/FAQ */}
+      <HelpDrawer
+        open={guideOpen}
+        onClose={() => setGuideOpen(false)}
+        initialSection={guideInitial}
+      />
+      <FAQModal open={faqOpen} onClose={() => setFaqOpen(false)} />
     </main>
   );
 }

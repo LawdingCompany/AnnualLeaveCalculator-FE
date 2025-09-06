@@ -1,24 +1,27 @@
-export default function FooterLinks() {
+// src/components/Footer/FooterLinks.tsx
+
+type FooterLinksProps = {
+  onOpenGuide: (section?: 'accuracy' | 'glossary' | 'disclaimer') => void;
+  onOpenFAQ: () => void;
+};
+
+export default function FooterLinks({ onOpenGuide, onOpenFAQ }: FooterLinksProps) {
   return (
-    <div className="mt-8 border-t pt-4 text-center text-xs text-neutral-500">
-      <div className="flex items-center justify-center gap-4">
-        <a className="underline" href="/guidelines">
-          연차 산정 기준
-        </a>
+    <footer className="mt-11 text-center text-[11px] text-neutral-500">
+      <nav className="flex justify-center gap-2">
+        <button onClick={() => onOpenGuide()} className="hover:underline">
+          서비스 가이드
+        </button>
         <span>·</span>
-        <a className="underline" href="/terms">
-          공지사항
-        </a>
+        <button onClick={onOpenFAQ} className="hover:underline">
+          자주 묻는 질문
+        </button>
         <span>·</span>
-        <a className="underline" href="/privacy">
-          개인정보처리방침
-        </a>
-        <span>·</span>
-        <a className="underline" href="/changelog">
-          이용약관
-        </a>
-      </div>
-      <div className="mt-2">© LAWDING</div>
-    </div>
+        <button onClick={() => onOpenGuide('disclaimer')} className="hover:underline">
+          법적 고지
+        </button>
+      </nav>
+      <p className="mt-1">© LAWDING</p>
+    </footer>
   );
 }
