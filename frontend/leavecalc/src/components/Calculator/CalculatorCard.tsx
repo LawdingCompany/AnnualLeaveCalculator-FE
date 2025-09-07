@@ -259,7 +259,7 @@ export function CalculatorCard() {
         onClick={() => setFeedbackOpen(true)}
         disabled={calculating}
       >
-        피드백
+        문의 및 피드백
       </button>
       <FeedbackModal open={feedbackOpen} onClose={() => setFeedbackOpen(false)} />
 

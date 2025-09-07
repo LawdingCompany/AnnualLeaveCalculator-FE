@@ -6,6 +6,9 @@ import ResultSummaryLine from './result/ResultSummaryLine';
 import ResultBasicInfo from './result/ResultBasicInfo';
 import ResultDetails from './result/ResultDetails';
 import FeedbackModal from './FeedbackModal';
+import FooterLinks from '@components/Footer/FooterLinks';
+import HelpDrawer from '@components/Calculator/HelpDrawer';
+import FAQModal from '@components/Calculator/FAQModal';
 
 export default function ResultView() {
   const s = useCalcState();
@@ -14,6 +17,14 @@ export default function ResultView() {
 
   const [detailOpen, setDetailOpen] = useState(false);
   const [feedbackOpen, setFeedbackOpen] = useState(false);
+
+  // ✅ HelpDrawer가 기대하는 prop 이름/타입에 맞춤
+  const [helpOpen, setHelpOpen] = useState(false);
+  const [helpSection, setHelpSection] = useState<
+    'accuracy' | 'glossary' | 'disclaimer' | 'types' | undefined
+  >(undefined);
+
+  const [faqOpen, setFaqOpen] = useState(false);
 
   const goBack = () => {
     d({ type: 'SET_RESULT', payload: null });
@@ -63,8 +74,31 @@ export default function ResultView() {
         <ResultDetails result={r} />
       </DetailModal>
 
-      {/* 오류문의 모달 */}
-      <FeedbackModal open={feedbackOpen} onClose={() => setFeedbackOpen(false)} />
+      {/* 오류문의 모달 (requestId 있으면 전달해서 함께 전송 체크 가능) */}
+      <FeedbackModal
+        open={feedbackOpen}
+        onClose={() => setFeedbackOpen(false)}
+        requestId={(r as any)?.requestId ?? undefined}
+      />
+
+      {/* ✅ prop 이름을 initialSection으로 변경, key로 탭 초기화 보장 */}
+      <HelpDrawer
+        key={helpSection ?? 'none'}
+        open={helpOpen}
+        onClose={() => setHelpOpen(false)}
+        initialSection={helpSection}
+      />
+      <FAQModal open={faqOpen} onClose={() => setFaqOpen(false)} />
+
+      {/* ✅ 결과 화면 하단에도 footer 추가 */}
+      <FooterLinks
+        onOpenGuide={(section) => {
+          // FooterLinks에 'types' 버튼을 추가하면 그대로 전달 가능
+          setHelpSection(section as typeof helpSection);
+          setHelpOpen(true);
+        }}
+        onOpenFAQ={() => setFaqOpen(true)}
+      />
     </section>
   );
 }

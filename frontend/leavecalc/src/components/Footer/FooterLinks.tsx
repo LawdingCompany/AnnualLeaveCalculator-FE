@@ -7,7 +7,7 @@ type FooterLinksProps = {
 
 export default function FooterLinks({ onOpenGuide, onOpenFAQ }: FooterLinksProps) {
   return (
-    <footer className="mt-11 text-center text-[11px] text-neutral-500">
+    <footer className="mt-6 text-center text-[11px] text-neutral-500">
       <nav className="flex justify-center gap-2">
         <button onClick={() => onOpenGuide()} className="hover:underline">
           서비스 가이드
@@ -22,6 +22,7 @@ export default function FooterLinks({ onOpenGuide, onOpenFAQ }: FooterLinksProps
         </button>
       </nav>
       <p className="mt-1">© LAWDING</p>
+      <p className="">문의 : jaeyun1723@naver.com</p>
     </footer>
   );
 }

@@ -69,9 +69,12 @@ export default function HelpDrawer({
       >
         {/* Header */}
         <header className="flex items-center justify-between border-b border-neutral-200 p-5">
-          <h3 id="helpdrawer-title" className="text-xl font-semibold text-neutral-900">
-            참고 가이드
-          </h3>
+          <div className="flex items-baseline gap-2">
+            <h3 id="helpdrawer-title" className="text-xl font-semibold text-neutral-900">
+              서비스 가이드
+            </h3>
+            <span className="text text-neutral-400">v1.0.0</span>
+          </div>
           <button
             ref={closeBtnRef}
             type="button"
