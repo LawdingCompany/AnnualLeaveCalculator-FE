@@ -25,8 +25,7 @@ export default function MonthlyDetail({ detail }: { detail: MonthlyDetailModel }
           rows={rows}
         />
         <div className="mt-3 flex items-center justify-end text-sm text-neutral-700">
-          총 합계 :
-          <span className="ml-1 font-semibold tabular-nums">{detail?.totalLeaveDays ?? 0}</span>
+          총 합계 :<span className="ml-1 font-semibold">{detail?.totalLeaveDays ?? 0}</span>
         </div>
       </Section>
 
@@ -60,7 +59,7 @@ export default function MonthlyDetail({ detail }: { detail: MonthlyDetailModel }
             },
             {
               kind: 'row',
-              label: '출근율(AR)',
+              label: '출근율',
               value:
                 detail?.attendanceRate != null
                   ? `${(detail.attendanceRate * 100).toFixed(1)}%`
@@ -68,7 +67,7 @@ export default function MonthlyDetail({ detail }: { detail: MonthlyDetailModel }
             },
             {
               kind: 'row',
-              label: '소정근로비율(PWR)',
+              label: '소정근로비율',
               value:
                 detail?.prescribedWorkingRatio != null
                   ? `${(detail.prescribedWorkingRatio * 100).toFixed(1)}%`

@@ -9,6 +9,7 @@ import FeedbackModal from './FeedbackModal';
 import FooterLinks from '@components/Footer/FooterLinks';
 import HelpDrawer from '@components/Calculator/HelpDrawer';
 import FAQModal from '@components/Calculator/FAQModal';
+import { Eye } from 'lucide-react';
 
 export default function ResultView() {
   const s = useCalcState();
@@ -37,32 +38,41 @@ export default function ResultView() {
       <ResultSummaryLine result={r} />
 
       {/* 2) 기본 정보 */}
-      <ResultBasicInfo result={r} />
+      <ResultBasicInfo
+        result={r}
+        onOpenGuide={(section) => {
+          setHelpSection(section); // 'types' 전달됨
+          setHelpOpen(true);
+        }}
+      />
 
       {/* 3) 하단 액션 바: 좌(오류문의) / 우(상세보기, 다시 계산) */}
       <div className="mt-2 flex items-center justify-between">
-        {/* 좌측: 오류 문의 */}
         <button
           type="button"
           onClick={() => setFeedbackOpen(true)}
-          className="rounded-md border border-neutral-300 px-4 py-2 text-sm hover:bg-neutral-50"
+          className="rounded-md border border-neutral-300 px-4 py-2 text-sm text-neutral-700
+         hover:bg-neutral-50 focus:outline-none focus:ring-2 focus:ring-blue-500/20"
         >
           오류 문의
         </button>
 
-        {/* 우측: 상세보기, 다시 계산 */}
         <div className="flex items-center gap-2">
+          {/* Secondary: 파란 아웃라인 */}
           <button
             type="button"
             onClick={() => setDetailOpen(true)}
-            className="rounded-md border border-neutral-300 px-4 py-2 text-sm hover:bg-neutral-50"
+            className="rounded-md border border-blue-200 px-4 py-2 text-sm font-medium text-blue-700
+                 hover:bg-blue-50 focus:outline-none focus:ring-2 focus:ring-blue-500/30"
           >
             상세보기
           </button>
+
           <button
             type="button"
             onClick={goBack}
-            className="rounded-md border border-neutral-300 px-4 py-2 text-sm hover:bg-neutral-50"
+            className="rounded-md border border-neutral-300 px-4 py-2 text-sm text-neutral-700
+                 hover:bg-neutral-50 focus:outline-none focus:ring-2 focus:ring-blue-500/20"
           >
             다시 계산
           </button>
@@ -141,9 +151,14 @@ function DetailModal({
       >
         {/* Header */}
         <header className="flex items-center justify-between border-b border-neutral-200 px-5 py-3">
-          <h3 id="detail-modal-title" className="text-lg font-semibold text-neutral-900">
-            {title}
-          </h3>
+          <div className="flex items-center gap-2">
+            <div className="inline-flex h-8 w-8 items-center justify-center rounded-lg bg-blue-50 text-blue-600">
+              <Eye className="h-4 w-4" aria-hidden />
+            </div>
+            <h3 id="detail-modal-title" className="text font-semibold text-neutral-900">
+              {title}
+            </h3>
+          </div>
           <button
             ref={closeBtnRef}
             type="button"

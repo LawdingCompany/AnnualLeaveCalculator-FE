@@ -66,7 +66,7 @@ export default function ApplicationMode() {
           onChange={(mm) => d({ type: 'SET_FISCAL_YEAR', payload: `${mm}-01` })}
           options={MONTH_OPTIONS}
           disabled={fyDisabled}
-          className="w-[70px]" // 컨테이너 폭
+          className="w-[44px]" // 컨테이너 폭
           buttonClassName="h-9" // 버튼 높이 통일
           placeholder="월"
         />
@@ -77,7 +77,7 @@ export default function ApplicationMode() {
           value="1"
           disabled
           aria-label="회계연도 시작일(일)"
-          className="w-[44px] rounded-md border px-3 py-2 text-md font-medium text-center
+          className="w-[44px] h-9 rounded-md border px-3 py-2 text-md font-medium text-center
                      border-neutral-200 bg-neutral-100 text-neutral-500 cursor-not-allowed select-none"
         />
         <span className="text-md font-medium text-neutral-600">일</span>

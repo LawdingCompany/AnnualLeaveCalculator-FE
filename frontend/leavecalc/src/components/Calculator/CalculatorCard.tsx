@@ -24,7 +24,6 @@ const API_BASE = import.meta.env.VITE_API_BASE;
 
 const delay = (ms: number) => new Promise((res) => setTimeout(res, ms));
 const nextFrame = () => new Promise<void>((res) => requestAnimationFrame(() => res()));
-const MIN_SPINNER_MS = 5000; // 로딩 오버레이 최소 표시 시간(ms)
 
 // ---------- API ----------
 async function postCalculate(payload: ApiPayload) {
@@ -52,7 +51,6 @@ export function CalculatorCard() {
   const state = useCalcState();
   const dispatch = useCalcDispatch();
 
-  const [policyOpen, setPolicyOpen] = useState<null | 'guidelines' | 'terms' | 'privacy'>(null);
   const [feedbackOpen, setFeedbackOpen] = useState(false);
   const [guideOpen, setGuideOpen] = useState(false);
   const [guideInitial, setGuideInitial] = useState<
@@ -155,21 +153,11 @@ export function CalculatorCard() {
     try {
       const result = await postCalculate(apiPayload);
 
-      // 최소 노출 시간 보장
-      const elapsed = performance.now() - startedAt;
-      const remain = Math.max(0, MIN_SPINNER_MS - elapsed);
-      if (remain > 0) await delay(remain);
-
       // 결과 반영은 한 번에
       dispatch({ type: 'SET_RESULT', payload: result });
       dispatch({ type: 'SET_VIEW', payload: 'result' });
     } catch (e) {
       console.error(e);
-      // 실패한 경우에도 최소 노출 시간 지켜줌
-      const elapsed = performance.now() - startedAt;
-      const remain = Math.max(0, MIN_SPINNER_MS - elapsed);
-      if (remain > 0) await delay(remain);
-
       alert('서버 통신에 실패했습니다. 잠시 후 다시 시도해주세요.');
     } finally {
       setCalculating(false);
@@ -224,7 +212,6 @@ export function CalculatorCard() {
       {isResult ? (
         <div className="mt-6 grid gap-5">
           <ResultView />
-          <hr className="h-px border-0 bg-[#e2e8f0]" />
         </div>
       ) : (
         <>

@@ -1,10 +1,15 @@
 // src/components/Calculator/FAQModal.tsx
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
+import { HelpCircle, X, ChevronDown, Search } from 'lucide-react';
 
-type FAQ = { q: string; a: React.ReactNode };
+type FAQ = { q: string; a: React.ReactNode; tags?: string[] };
 
 export default function FAQModal({ open, onClose }: { open: boolean; onClose: () => void }) {
+  if (!open) return null;
+
   const closeBtnRef = useRef<HTMLButtonElement | null>(null);
+  const [query, setQuery] = useState('');
+  const [expandAll, setExpandAll] = useState(false);
 
   useEffect(() => {
     if (!open) return;
@@ -17,9 +22,16 @@ export default function FAQModal({ open, onClose }: { open: boolean; onClose: ()
     };
   }, [open, onClose]);
 
+  useEffect(() => {
+    if (open) {
+      setQuery('');
+      setExpandAll(false);
+    }
+  }, [open]);
+
   if (!open) return null;
 
-  // ✅ FAQ 데이터 배열
+  // ✅ FAQ 데이터
   const faqs: FAQ[] = [
     {
       q: 'Q1. 출근을 못했으면 무조건 결근인가요?',
@@ -42,6 +54,7 @@ export default function FAQModal({ open, onClose }: { open: boolean; onClose: ()
           </p>
         </div>
       ),
+      tags: ['결근', '출근간주', '소정근로'],
     },
     {
       q: 'Q2. 근무한 지 1년이 안됐는데도 연차가 생기나요?',
@@ -50,6 +63,7 @@ export default function FAQModal({ open, onClose }: { open: boolean; onClose: ()
           네. 근로기준법 제60조 제1항에 따라 <b>매월 개근</b> 시 <b>1일의 월차</b>가 부여됩니다.
         </p>
       ),
+      tags: ['월차', '1년미만', '개근'],
     },
     {
       q: 'Q3. 연차 발생 기준이 회사마다 다른가요?',
@@ -59,6 +73,7 @@ export default function FAQModal({ open, onClose }: { open: boolean; onClose: ()
           내규/취업규칙/단체협약 등은 효력이 없으며, 최소한 법정 기준 이상의 연차를 지급해야 합니다.
         </p>
       ),
+      tags: ['법정기준', '내규', '취업규칙'],
     },
     {
       q: 'Q4. 출근을 못 한 날이 있으면 연차가 줄어드나요?',
@@ -69,6 +84,7 @@ export default function FAQModal({ open, onClose }: { open: boolean; onClose: ()
           <b>발생하지 않을 수 있어요</b>.
         </p>
       ),
+      tags: ['출근율', '80%', '무단결근', '월차'],
     },
     {
       q: 'Q5. 소수점 연차는 어떻게 사용하나요?',
@@ -86,54 +102,101 @@ export default function FAQModal({ open, onClose }: { open: boolean; onClose: ()
           </p>
         </div>
       ),
+      tags: ['소수점', '시간단위', '환산'],
     },
-    // ... 나머지 Q6~Q12도 같은 방식으로 이어붙이면 됨
   ];
 
+  const filtered = useMemo(() => {
+    const q = query.trim().toLowerCase();
+    if (!q) return faqs;
+    return faqs.filter(
+      (f) =>
+        f.q.toLowerCase().includes(q) ||
+        (typeof f.a === 'string' && f.a.toLowerCase().includes(q)) ||
+        (f.tags ?? []).some((t) => t.toLowerCase().includes(q)),
+    );
+  }, [faqs, query]);
+
   return (
-    <div className="fixed inset-0 z-50">
-      <div className="absolute inset-0 bg-black/40" onClick={onClose} />
+    <div className="fixed inset-0 z-[60]">
+      {/* Backdrop + blur */}
+      <div className="absolute inset-0 bg-black/40 backdrop-blur-[1px]" onClick={onClose} />
+
+      {/* Modal */}
       <div
         role="dialog"
         aria-modal="true"
         aria-labelledby="faq-title"
-        className="absolute left-1/2 top-1/2 w-[720px] max-w-[92vw] -translate-x-1/2 -translate-y-1/2 overflow-hidden rounded-2xl bg-white shadow-2xl ring-1 ring-black/5"
+        className="absolute left-1/2 top-1/2 w-[760px] max-w-[92vw] -translate-x-1/2 -translate-y-1/2 overflow-hidden rounded-2xl bg-white shadow-2xl ring-1 ring-black/5"
       >
         {/* Header */}
-        <header className="flex items-center justify-between border-b border-neutral-200 px-5 py-3">
-          <h3 id="faq-title" className="text-lg font-semibold text-neutral-900">
-            자주 묻는 질문(FAQ)
-          </h3>
+        <header className="flex items-center justify-between border-b border-neutral-200 px-5 py-4">
+          <div className="flex items-center gap-2">
+            <div className="inline-flex h-8 w-8 items-center justify-center rounded-lg bg-blue-50 text-blue-600">
+              <HelpCircle className="h-4 w-4" aria-hidden />
+            </div>
+            <h3 id="faq-title" className="text font-semibold text-neutral-900">
+              자주 묻는 질문(FAQ)
+            </h3>
+          </div>
           <button
             ref={closeBtnRef}
             type="button"
             aria-label="닫기"
             onClick={onClose}
-            className="rounded-md px-2 py-1 text-neutral-500 hover:bg-neutral-100"
+            className="rounded-md p-1 text-neutral-500 hover:bg-neutral-100"
           >
-            ✕
+            <X className="h-5 w-5" />
           </button>
         </header>
 
+        {/* Toolbar: 검색 + 전체 펼치기/접기 */}
+        <div className="flex items-center gap-2 px-5 pt-3">
+          <div className="relative w-full">
+            <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-neutral-400" />
+            <input
+              type="text"
+              placeholder="키워드로 검색하세요 (예: 월차, 80%, 무단결근)"
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+              className="w-full rounded-lg border border-neutral-200 bg-white pl-9 pr-3 py-2 text-sm outline-none focus:border-blue-600 focus:shadow-[0_0_0_3px_rgba(59,130,246,0.12)]"
+            />
+          </div>
+          <button
+            type="button"
+            onClick={() => setExpandAll((v) => !v)}
+            className="shrink-0 rounded-md border border-neutral-300 px-3 py-2 text-sm text-neutral-700 hover:bg-neutral-50"
+            aria-pressed={expandAll}
+          >
+            {expandAll ? '전체 접기' : '전체 펼치기'}
+          </button>
+        </div>
+
         {/* Body */}
-        <div className="max-h-[70vh] overflow-y-auto px-5 py-4">
-          <ul className="space-y-3">
-            {faqs.map((item, idx) => (
-              <FAQItem key={idx} q={item.q} a={item.a} />
-            ))}
-          </ul>
+        <div className="max-h-[68vh] overflow-y-auto px-5 py-4">
+          {filtered.length === 0 ? (
+            <p className="rounded-lg border border-neutral-200 bg-neutral-50 px-4 py-3 text-sm text-neutral-600">
+              검색 결과가 없습니다. 다른 키워드를 입력해 보세요.
+            </p>
+          ) : (
+            <ul className="space-y-3">
+              {filtered.map((item) => (
+                <FAQItem key={item.q} q={item.q} a={item.a} expandAll={expandAll} />
+              ))}
+            </ul>
+          )}
+
           <p className="mt-4 text-[12px] text-neutral-500">
-            * 해당 FAQ는 본 서비스의 일반적인 안내이며, 최종 해석과 적용은 회사 규정 및 관계 법령에
-            따릅니다.
+            * 본 안내는 일반 정보이며, 최종 해석과 적용은 회사 규정 및 관계 법령에 따릅니다.
           </p>
         </div>
 
-        {/* Footer */}
-        <div className="flex justify-end border-t border-neutral-200 px-5 py-3">
+        {/* Sticky Footer */}
+        <div className="sticky bottom-0 flex justify-end border-t border-neutral-200 bg-white/95 px-5 py-4 backdrop-blur">
           <button
             type="button"
             onClick={onClose}
-            className="rounded-md border border-neutral-200 px-3 py-1.5 text-sm text-neutral-700 hover:bg-neutral-50"
+            className="rounded-md border border-neutral-300 px-4 py-2 text-sm text-neutral-700 hover:bg-neutral-50"
           >
             닫기
           </button>
@@ -143,24 +206,34 @@ export default function FAQModal({ open, onClose }: { open: boolean; onClose: ()
   );
 }
 
-function FAQItem({ q, a }: { q: string; a: React.ReactNode }) {
+function FAQItem({ q, a, expandAll }: { q: string; a: React.ReactNode; expandAll: boolean }) {
+  // open 상태를 외부 expandAll의 변화에 동기화
+  const [open, setOpen] = useState(false);
+  const first = useRef(true);
+  useEffect(() => {
+    if (first.current) {
+      first.current = false;
+    } else {
+      setOpen(expandAll);
+    }
+  }, [expandAll]);
+
   return (
-    <li className="rounded-lg border border-neutral-200">
-      <details className="group">
-        <summary className="flex cursor-pointer select-none items-center justify-between gap-3 px-3 py-2">
-          <span className="font-medium text-neutral-900">{q}</span>
-          <svg
-            className="h-4 w-4 shrink-0 text-neutral-400 transition-transform group-open:rotate-180"
-            viewBox="0 0 20 20"
-            fill="currentColor"
-            aria-hidden="true"
-          >
-            <path
-              fillRule="evenodd"
-              d="M5.23 7.21a.75.75 0 011.06.02L10 10.94l3.71-3.71a.75.75 0 111.06 1.06l-4.24 4.24a.75.75 0 01-1.06 0L5.21 8.29a.75.75 0 01.02-1.08z"
-              clipRule="evenodd"
-            />
-          </svg>
+    <li className="rounded-xl border border-neutral-200">
+      <details
+        className="group"
+        open={open}
+        onToggle={(e) => setOpen((e.target as HTMLDetailsElement).open)}
+      >
+        <summary className="flex cursor-pointer select-none items-center gap-3 px-3 py-2">
+          <span className="inline-flex shrink-0 items-center justify-center rounded-md bg-blue-50 px-2 py-[2px] text-[11px] font-semibold text-blue-700">
+            {q.split('.')[0]}.
+          </span>
+          <span className="font-medium text-neutral-900">{q.replace(/^Q\d+\.\s*/, '')}</span>
+          <ChevronDown
+            className="ml-auto h-4 w-4 shrink-0 text-neutral-400 transition-transform group-open:rotate-180"
+            aria-hidden
+          />
         </summary>
         <div className="border-t border-neutral-200 px-3 py-3 text-sm">{a}</div>
       </details>

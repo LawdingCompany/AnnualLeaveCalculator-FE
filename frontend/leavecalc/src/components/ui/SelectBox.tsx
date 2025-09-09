@@ -88,10 +88,14 @@ export default function SelectBox<V extends string | number>({
         disabled={disabled}
         onClick={() => !disabled && setOpen((o) => !o)}
         className={[
-          'w-full inline-flex items-center justify-center rounded-md border px-3 py-2 text-sm bg-white',
+          // ✅ 기본 형태를 "고정 1일 input"과 동일하게 맞춤
+          'w-full inline-flex items-center justify-center rounded-md border px-3 text-center',
+          'h-9 text-md font-medium', // 높이/타이포 동일
           disabled
-            ? 'border-neutral-200 bg-neutral-100 text-neutral-500 cursor-not-allowed'
-            : 'border-[#e2e8f0] text-neutral-800 hover:bg-neutral-50 focus:outline-none focus:border-blue-600 focus:shadow-[0_0_0_3px_rgba(59,130,246,0.1)]',
+            ? // ✅ 비활성 시: 회색 배경/텍스트, 얕은 테두리, 손모양 금지, 선택 불가
+              'border-neutral-200 bg-neutral-100 text-neutral-500 cursor-not-allowed select-none'
+            : // ✅ 활성 시: 기존 인터랙션 유지
+              'border-[#e2e8f0] bg-white text-neutral-800 hover:bg-neutral-50 focus:outline-none focus:border-blue-600 focus:shadow-[0_0_0_3px_rgba(59,130,246,0.1)]',
           buttonClassName,
         ].join(' ')}
       >

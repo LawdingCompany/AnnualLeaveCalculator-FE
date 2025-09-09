@@ -1,4 +1,5 @@
 import React, { useEffect, useMemo, useRef } from 'react';
+import { BookOpen, Info, ListChecks, BookText, ShieldAlert, X } from 'lucide-react';
 
 export default function HelpDrawer({
   open,
@@ -9,6 +10,8 @@ export default function HelpDrawer({
   onClose: () => void;
   initialSection?: 'accuracy' | 'types' | 'glossary' | 'disclaimer';
 }) {
+  if (!open) return null;
+
   const closeBtnRef = useRef<HTMLButtonElement | null>(null);
 
   // 섹션 ref
@@ -17,9 +20,8 @@ export default function HelpDrawer({
   const secGlossaryRef = useRef<HTMLElement | null>(null);
   const secDisclaimerRef = useRef<HTMLElement | null>(null);
 
-  // ESC 닫기 + 최초 포커스
+  // ✅ ESC 닫기 + 최초 포커스 (열린 동안만 존재: 컴포넌트가 닫히면 언마운트)
   useEffect(() => {
-    if (!open) return;
     const onKey = (e: KeyboardEvent) => e.key === 'Escape' && onClose();
     window.addEventListener('keydown', onKey);
     const t = setTimeout(() => closeBtnRef.current?.focus(), 0);
@@ -27,11 +29,10 @@ export default function HelpDrawer({
       window.removeEventListener('keydown', onKey);
       clearTimeout(t);
     };
-  }, [open, onClose]);
+  }, [onClose]);
 
-  // 열릴 때 원하는 섹션으로 스크롤
+  // ✅ 첫 mount 시 initialSection으로 스크롤
   useEffect(() => {
-    if (!open) return;
     const target =
       initialSection === 'types'
         ? secTypesRef
@@ -42,12 +43,13 @@ export default function HelpDrawer({
             : initialSection === 'accuracy'
               ? secAccuracyRef
               : null;
+
     if (!target) return;
     const t = setTimeout(() => {
       target.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
     }, 100);
     return () => clearTimeout(t);
-  }, [open, initialSection]);
+  }, [initialSection]);
 
   const scrollTo = (ref: React.RefObject<HTMLElement | null>) => {
     ref.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
@@ -57,10 +59,8 @@ export default function HelpDrawer({
 
   return (
     <div className="fixed inset-0 z-40">
-      {/* Backdrop */}
       <div className="absolute inset-0 bg-black/40" onClick={onClose} />
 
-      {/* Drawer */}
       <aside
         role="dialog"
         aria-modal="true"
@@ -69,11 +69,16 @@ export default function HelpDrawer({
       >
         {/* Header */}
         <header className="flex items-center justify-between border-b border-neutral-200 p-5">
-          <div className="flex items-baseline gap-2">
-            <h3 id="helpdrawer-title" className="text-xl font-semibold text-neutral-900">
-              서비스 가이드
-            </h3>
-            <span className="text text-neutral-400">v1.0.0</span>
+          <div className="flex items-center gap-2">
+            <div className="inline-flex h-8 w-8 items-center justify-center rounded-lg bg-blue-50 text-blue-600">
+              <BookOpen className="h-4 w-4" aria-hidden />
+            </div>
+            <div className="flex items-baseline gap-2">
+              <h3 id="helpdrawer-title" className="text-xl font-semibold text-neutral-900">
+                서비스 가이드
+              </h3>
+              <span className="text-sm text-neutral-400">v1.0.0</span>
+            </div>
           </div>
           <button
             ref={closeBtnRef}
@@ -82,19 +87,36 @@ export default function HelpDrawer({
             onClick={onClose}
             className="rounded-md px-2 py-1 text-neutral-500 hover:bg-neutral-100"
           >
-            ✕
+            <X className="h-5 w-5" />
           </button>
         </header>
 
         {/* Body */}
         <div className="relative h-[calc(100%-56px)] overflow-y-auto">
           {/* 목차(Sticky, 불투명) */}
+          {/* 목차(Sticky) */}
           <nav className="sticky top-0 z-10 border-b border-neutral-200 bg-white">
             <div className="flex flex-wrap gap-2 px-4 py-3">
-              <TocButton label="서비스 설명" onClick={() => scrollTo(secAccuracyRef)} />
-              <TocButton label="특이사항 유형" onClick={() => scrollTo(secTypesRef)} />
-              <TocButton label="용어 설명" onClick={() => scrollTo(secGlossaryRef)} />
-              <TocButton label="법적 고지" onClick={() => scrollTo(secDisclaimerRef)} />
+              <TocButton
+                label="서비스 설명"
+                onClick={() => scrollTo(secAccuracyRef)}
+                icon={<Info className="h-3.5 w-3.5" aria-hidden />}
+              />
+              <TocButton
+                label="특이사항 유형"
+                onClick={() => scrollTo(secTypesRef)}
+                icon={<ListChecks className="h-3.5 w-3.5" aria-hidden />}
+              />
+              <TocButton
+                label="용어 설명"
+                onClick={() => scrollTo(secGlossaryRef)}
+                icon={<BookText className="h-3.5 w-3.5" aria-hidden />}
+              />
+              <TocButton
+                label="법적 고지"
+                onClick={() => scrollTo(secDisclaimerRef)}
+                icon={<ShieldAlert className="h-3.5 w-3.5" aria-hidden />}
+              />
             </div>
           </nav>
 
@@ -102,9 +124,14 @@ export default function HelpDrawer({
           <div className="space-y-8 p-4">
             {/* 1) 서비스 설명 */}
             <section ref={secAccuracyRef} aria-labelledby="sec-accuracy">
-              <h4 id="sec-accuracy" className="font-semibold">
-                서비스 설명
-              </h4>
+              <div className="flex items-center gap-2">
+                <div className="inline-flex h-6 w-6 items-center justify-center rounded-md bg-blue-50 text-blue-600">
+                  <Info className="h-3.5 w-3.5" aria-hidden />
+                </div>
+                <h4 id="sec-accuracy" className="font-semibold">
+                  서비스 설명
+                </h4>
+              </div>
               <ul className="mt-2 list-disc space-y-1 pl-5 text-sm leading-6 text-neutral-700">
                 <li>
                   <b>근로기준법 제60조 준수 : </b>입사일/회계연도 기준 선택 시{' '}
@@ -129,9 +156,14 @@ export default function HelpDrawer({
 
             {/* 2) 특이사항 유형 */}
             <section ref={secTypesRef} aria-labelledby="sec-types" className="space-y-3">
-              <h4 id="sec-types" className="font-semibold">
-                특이사항 유형
-              </h4>
+              <div className="flex items-center gap-2">
+                <div className="inline-flex h-6 w-6 items-center justify-center rounded-md bg-blue-50 text-blue-600">
+                  <ListChecks className="h-3.5 w-3.5" aria-hidden />
+                </div>
+                <h4 id="sec-types" className="font-semibold">
+                  특이사항 유형
+                </h4>
+              </div>
               <ul className="list-disc space-y-1 pl-5 text-sm text-neutral-500">
                 <li>
                   특이기간은 <b>출근처리 / 결근처리 / 소정근로제외</b> 세 범주로 나뉘며, 각 범주에
@@ -145,10 +177,14 @@ export default function HelpDrawer({
 
             {/* 3) 용어 설명 */}
             <section ref={secGlossaryRef} aria-labelledby="sec-glossary" className="space-y-3">
-              <h4 id="sec-glossary" className="font-semibold">
-                용어 설명
-              </h4>
-
+              <div className="flex items-center gap-2">
+                <div className="inline-flex h-6 w-6 items-center justify-center rounded-md bg-blue-50 text-blue-600">
+                  <BookText className="h-3.5 w-3.5" aria-hidden />
+                </div>
+                <h4 id="sec-glossary" className="font-semibold">
+                  용어 설명
+                </h4>
+              </div>
               <div className="space-y-3 text-sm leading-6 text-neutral-800">
                 <GlossaryItem term="월차">
                   근로기준법 제60조 제1항에 따라 <b>근무기간이 1년 미만</b>이거나{' '}
@@ -180,6 +216,16 @@ export default function HelpDrawer({
                     계산하므로 <b>출근율은 100%</b>로 산정됩니다.
                   </div>
                 </GlossaryItem>
+
+                <GlossaryItem term="비례율">
+                  비례연차를 산정할 때 적용하는 <b>비율</b>을 의미합니다. 입사연도 동안의{' '}
+                  <b>실제 재직일수 ÷ 회계연도 전체 일수</b>로 계산하며, 이 비례율을 곱해 연차일수를
+                  산출합니다.
+                  <div className="mt-2 rounded-md bg-neutral-50 px-3 py-2 text-[12px] text-neutral-600">
+                    예) 회계연도 365일 중 100일 재직 → 비례율 = 100 ÷ 365 ≈ 0.27 → 해당 비율만큼
+                    연차가 부여됨
+                  </div>
+                </GlossaryItem>
               </div>
             </section>
 
@@ -187,9 +233,14 @@ export default function HelpDrawer({
 
             {/* 4) 법적 고지 (맨 아래) */}
             <section ref={secDisclaimerRef} aria-labelledby="sec-disclaimer" className="space-y-2">
-              <h4 id="sec-disclaimer" className="font-semibold">
-                법적 고지
-              </h4>
+              <div className="flex items-center gap-2">
+                <div className="inline-flex h-6 w-6 items-center justify-center rounded-md bg-blue-50 text-blue-600">
+                  <ShieldAlert className="h-3.5 w-3.5" aria-hidden />
+                </div>
+                <h4 id="sec-disclaimer" className="font-semibold">
+                  법적 고지
+                </h4>
+              </div>
               <div className="space-y-2 text-[13px] leading-6 text-neutral-700">
                 <p>
                   이 웹사이트에서 산출된 내역은 연차유급휴가 산정에 <b>참고 목적으로 제공</b>된
@@ -213,13 +264,23 @@ export default function HelpDrawer({
   );
 }
 
-function TocButton({ label, onClick }: { label: string; onClick: () => void }) {
+function TocButton({
+  label,
+  onClick,
+  icon,
+}: {
+  label: string;
+  onClick: () => void;
+  icon?: React.ReactNode;
+}) {
   return (
     <button
       type="button"
       onClick={onClick}
-      className="rounded-full border border-blue-200 bg-blue-50 px-3 py-1 text-[12px] font-medium text-blue-700 hover:bg-blue-100"
+      className="inline-flex items-center gap-1.5 rounded-full border border-blue-200 bg-blue-50 px-3 py-1 text-[12px] font-medium text-blue-700 hover:bg-blue-100 focus-visible:outline focus-visible:outline-blue-500/30"
+      aria-label={`${label} 섹션으로 이동`}
     >
+      {icon}
       {label}
     </button>
   );
