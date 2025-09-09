@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react';
+import { useMemo } from 'react';
 import { Section, InfoGrid, RangeText, SimpleTable } from './_shared';
 import type { ProratedDetail as ProratedDetailModel } from '../../resultTypes';
 

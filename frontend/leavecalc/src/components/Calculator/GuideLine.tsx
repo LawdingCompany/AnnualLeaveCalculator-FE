@@ -1,7 +1,7 @@
 // src/components/Calculator/FAQ.tsx
 import React, { useState } from 'react';
 import HelpDrawer from './HelpDrawer';
-import { Info, HelpCircle, ChevronDown, BookOpen } from 'lucide-react';
+import { Info, ChevronDown, BookOpen } from 'lucide-react';
 
 type FAQItem = { title: string; body: React.ReactNode };
 

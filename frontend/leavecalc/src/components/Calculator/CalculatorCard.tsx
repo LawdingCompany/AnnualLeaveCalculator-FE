@@ -22,7 +22,6 @@ import ResultView from './ResultView';
 
 const API_BASE = import.meta.env.VITE_API_BASE;
 
-const delay = (ms: number) => new Promise((res) => setTimeout(res, ms));
 const nextFrame = () => new Promise<void>((res) => requestAnimationFrame(() => res()));
 
 // ---------- API ----------
@@ -120,8 +119,6 @@ export function CalculatorCard() {
       companyHolidays: uiHolidays,
       ...(state.calculationType === 2 ? { fiscalYear: state.fiscalYear } : {}),
     };
-
-    const startedAt = performance.now();
 
     const parsed = uiPayloadSchema.safeParse(uiPayload);
     if (!parsed.success) {
