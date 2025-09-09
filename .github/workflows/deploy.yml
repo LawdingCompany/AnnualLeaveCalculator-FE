@@ -1,0 +1,67 @@
+name: Deploy Frontend to S3 + CloudFront
+
+on:
+  push:
+    branches: [main]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+      contents: read
+
+    env:
+      DIST_DIR: dist # Vite 기본 산출물 폴더
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: yarn
+
+      # yarn berry(3.x)면 corepack 활성화 + immutable, yarn 1.x면 frozen-lockfile
+      - name: Install deps
+        run: |
+          corepack enable || true
+          if yarn -v | grep -q '^1\.'; then
+            yarn install --frozen-lockfile
+          else
+            yarn install --immutable
+          fi
+
+      - name: Build (Vite)
+        run: |
+          yarn build
+          test -d "$DIST_DIR"
+
+      - name: Configure AWS (OIDC)
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
+          aws-region: ap-northeast-2
+
+      # 해시 붙은 정적 자산(장기 캐시)
+      - name: Sync assets (immutable)
+        run: |
+          aws s3 sync ./$DIST_DIR s3://${{ secrets.S3_BUCKET }} \
+            --delete \
+            --exclude "index.html" \
+            --cache-control "public,max-age=31536000,immutable"
+
+      # 앱 셸(index.html)은 항상 최신
+      - name: Upload index.html (no-cache)
+        run: |
+          aws s3 cp ./$DIST_DIR/index.html s3://${{ secrets.S3_BUCKET }}/index.html \
+            --cache-control "no-cache"
+
+      # 보통 index.html만 무효화하면 충분
+      - name: Invalidate CloudFront (index.html)
+        run: |
+          aws cloudfront create-invalidation \
+            --distribution-id ${{ secrets.CF_DISTRIBUTION_ID }} \
+            --paths "/index.html"
