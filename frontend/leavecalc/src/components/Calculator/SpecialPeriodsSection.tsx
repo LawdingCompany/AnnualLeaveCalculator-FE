@@ -42,15 +42,6 @@ function overlaps(aStart: string, aEnd: string, bStart: string, bEnd: string) {
   return as <= be && bs <= ae; // 겹치면 true (포함 비교)
 }
 
-// DatePicker와 톤 맞춘 select
-const SELECT_CLS = [
-  'w-full appearance-none rounded-md border px-3 py-2 text-sm bg-white outline-none text-center',
-  'border-[#e2e8f0]',
-  'focus:border-blue-600',
-  'focus:shadow-[0_0_0_3px_rgba(59,130,246,0.1)]',
-  'disabled:border-neutral-200 disabled:bg-neutral-100 disabled:text-neutral-500 disabled:cursor-not-allowed',
-].join(' ');
-
 export default function SpecialPeriodsSection() {
   const s = useCalcState();
   const d = useCalcDispatch();

@@ -1,5 +1,5 @@
 // src/components/Calculator/result/detail/MonthlyDetail.tsx
-import React, { useMemo } from 'react';
+import { useMemo } from 'react';
 import { Section, InfoGrid, RangeText, SimpleTable } from './_shared';
 import type { MonthlyDetail as MonthlyDetailModel } from '../../resultTypes';
 
