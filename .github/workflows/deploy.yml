@@ -27,16 +27,40 @@ jobs:
           cache-dependency-path: frontend/leavecalc/yarn.lock
 
       # yarn berry(3.x)이면 immutable, yarn 1.x이면 frozen-lockfile
-      - name: Install deps
-        working-directory: ${{ env.ROOT_DIR }}
-        run: |
-          corepack enable || true
-          if yarn -v | grep -q '^1\.'; then
-            yarn install --frozen-lockfile
-          else
-            yarn install --immutable
-          fi
+     - name: Install deps (resilient)
+  working-directory: ${{ env.ROOT_DIR }}   # = frontend/leavecalc
+  env:
+    # npm 레지스트리 명시 (yarn도 이 env를 존중)
+    npm_config_registry: https://registry.npmjs.org
+    # Yarn 1 전용 네트워크 타임아웃(ms). 아래 --network-timeout과 중복되면 CLI가 우선.
+    YARN_NETWORK_TIMEOUT: 600000
+  run: |
+    set -e
+    corepack enable || true
 
+    # Yarn 버전에 따라 옵션 분기
+    if yarn -v | grep -q '^1\.'; then
+      CMD="yarn install --frozen-lockfile --network-timeout 600000 --mutex network"
+    else
+      CMD="yarn install --immutable"
+    fi
+
+    # 최대 5회 재시도 (지수 백오프)
+    tries=5
+    for i in $(seq 1 $tries); do
+      echo "[$i/$tries] $CMD"
+      if $CMD; then
+        echo "Dependencies installed."
+        break
+      fi
+      if [ "$i" -eq "$tries" ]; then
+        echo "Install failed after $tries attempts."
+        exit 1
+      fi
+      backoff=$(( i * 15 ))
+      echo "Retrying in ${backoff}s..."
+      sleep $backoff
+    done
       - name: Build (Vite)
         working-directory: ${{ env.ROOT_DIR }}
         run: |

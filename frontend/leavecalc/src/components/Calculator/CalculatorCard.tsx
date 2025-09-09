@@ -27,9 +27,6 @@ const nextFrame = () => new Promise<void>((res) => requestAnimationFrame(() => r
 // ---------- API ----------
 async function postCalculate(payload: ApiPayload) {
   const url = `${API_BASE}/annual-leaves/calculate`;
-  console.groupCollapsed('[AnnualLeave] POST', url);
-  console.log('payload', payload);
-  console.groupEnd();
 
   const res = await fetch(url, {
     method: 'POST',
@@ -37,12 +34,9 @@ async function postCalculate(payload: ApiPayload) {
     body: JSON.stringify(payload),
   });
   if (!res.ok) {
-    const text = await res.text().catch(() => '');
-    console.error('API error:', res.status, text);
     throw new Error(`API error ${res.status}`);
   }
   const json = await res.json();
-  console.log('response', json);
   return json;
 }
 
