@@ -12,7 +12,8 @@ jobs:
       contents: read
 
     env:
-      DIST_DIR: dist # Vite 기본 산출물 폴더
+      ROOT_DIR: frontend/leavecalc
+      DIST_DIR: frontend/leavecalc/dist # Vite 산출물 실제 경로
 
     steps:
       - name: Checkout
@@ -23,9 +24,11 @@ jobs:
         with:
           node-version: 20
           cache: yarn
+          cache-dependency-path: frontend/leavecalc/yarn.lock
 
-      # yarn berry(3.x)면 corepack 활성화 + immutable, yarn 1.x면 frozen-lockfile
+      # yarn berry(3.x)이면 immutable, yarn 1.x이면 frozen-lockfile
       - name: Install deps
+        working-directory: ${{ env.ROOT_DIR }}
         run: |
           corepack enable || true
           if yarn -v | grep -q '^1\.'; then
@@ -35,9 +38,10 @@ jobs:
           fi
 
       - name: Build (Vite)
+        working-directory: ${{ env.ROOT_DIR }}
         run: |
           yarn build
-          test -d "$DIST_DIR"
+          test -d "./dist"
 
       - name: Configure AWS (OIDC)
         uses: aws-actions/configure-aws-credentials@v4
@@ -48,7 +52,7 @@ jobs:
       # 해시 붙은 정적 자산(장기 캐시)
       - name: Sync assets (immutable)
         run: |
-          aws s3 sync ./$DIST_DIR s3://${{ secrets.S3_BUCKET }} \
+          aws s3 sync ./${{ env.DIST_DIR }} s3://${{ secrets.S3_BUCKET }} \
             --delete \
             --exclude "index.html" \
             --cache-control "public,max-age=31536000,immutable"
@@ -56,8 +60,9 @@ jobs:
       # 앱 셸(index.html)은 항상 최신
       - name: Upload index.html (no-cache)
         run: |
-          aws s3 cp ./$DIST_DIR/index.html s3://${{ secrets.S3_BUCKET }}/index.html \
-            --cache-control "no-cache"
+          aws s3 cp ./${{ env.DIST_DIR }}/index.html s3://${{ secrets.S3_BUCKET }}/index.html \
+            --cache-control "no-cache" \
+            --content-type "text/html; charset=utf-8"
 
       # 보통 index.html만 무효화하면 충분
       - name: Invalidate CloudFront (index.html)
