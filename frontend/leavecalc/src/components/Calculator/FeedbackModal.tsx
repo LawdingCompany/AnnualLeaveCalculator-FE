@@ -110,8 +110,6 @@ function RatingBar({
     }
   };
 
-  const label = value === 0 ? '선택 없음' : `${value}/5`;
-
   return (
     <div className="flex items-center gap-3">
       <div
@@ -140,7 +138,7 @@ function RatingBar({
               <Star
                 className={`h-6 w-6 ${
                   active
-                    ? 'fill-amber-500 stroke-amber-500' // ⭐ 더 쨍한 금색
+                    ? 'fill-amber-500 stroke-amber-500'
                     : 'stroke-neutral-300 hover:stroke-amber-400'
                 }`}
               />
@@ -148,11 +146,9 @@ function RatingBar({
           );
         })}
       </div>
-      <span className="text-xs text-neutral-600">{label}</span>
     </div>
   );
 }
-
 /** ───────────────────────────────────────────────────────────
  *  본문 길이 프로그레스바
  *  ─────────────────────────────────────────────────────────── */
@@ -343,9 +339,6 @@ export default function FeedbackModal({
                 <section className="grid gap-1.5">
                   <div className="flex items-center justify-between">
                     <label className="text-sm font-medium text-neutral-800">만족도 (선택)</label>
-                    {rating > 0 && (
-                      <span className="text-xs text-neutral-500 tabular-nums">{rating}/5</span>
-                    )}
                   </div>
                   <RatingBar value={rating} onChange={setRating} disabled={pending} />
                 </section>
