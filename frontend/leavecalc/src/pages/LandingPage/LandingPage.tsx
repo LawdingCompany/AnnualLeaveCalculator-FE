@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react';
+import { useLayoutEffect, useRef } from 'react';
 import BrandPanel from '@components/BrandPanel/BrandPanel';
 import { CalculatorCard } from '@components/Calculator';
 import { CalculatorProvider } from '@components/Calculator/context';
@@ -9,7 +9,7 @@ export default function LandingPage() {
   // CalculatorCard 래퍼
   const calcRef = useRef<HTMLDivElement>(null);
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     const el = containerRef.current;
     const target = calcRef.current;
     if (!el || !target) return;
