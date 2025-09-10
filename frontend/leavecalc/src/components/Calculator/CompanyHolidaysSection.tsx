@@ -182,7 +182,7 @@ export default function CompanyHolidaysSection() {
               <CustomDatePicker
                 selected={draftDate}
                 onChange={(dt) => setDraftDate(dt)}
-                placeholderText="YYYY-MM-DD"
+                placeholderText="YYYY.MM.DD"
                 className="max-w-[150px]"
                 minDate={hireDateObj ?? undefined}
                 maxDate={refDateObj ?? undefined}

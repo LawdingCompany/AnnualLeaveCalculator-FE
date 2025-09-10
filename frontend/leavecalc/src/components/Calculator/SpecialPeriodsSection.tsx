@@ -185,7 +185,7 @@ export default function SpecialPeriodsSection() {
             <CustomDatePicker
               selected={draftStart}
               onChange={(dt) => setDraftStart(dt)}
-              placeholderText="YYYY-MM-DD"
+              placeholderText="YYYY.MM.DD"
               className="max-w-[150px]"
               minDate={hireDateObj ?? undefined}
               maxDate={draftEnd ?? refDateObj ?? undefined}
@@ -195,7 +195,7 @@ export default function SpecialPeriodsSection() {
             <CustomDatePicker
               selected={draftEnd}
               onChange={(dt) => setDraftEnd(dt)}
-              placeholderText="YYYY-MM-DD"
+              placeholderText="YYYY.MM.DD"
               className="max-w-[150px]"
               minDate={draftStart ?? hireDateObj ?? undefined}
               maxDate={refDateObj ?? undefined}
