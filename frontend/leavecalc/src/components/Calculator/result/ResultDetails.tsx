@@ -44,6 +44,7 @@ export default function ResultDetail({ result }: { result: CalcApiResult | null 
     <div>
       {detailEl}
       {/* ✅ 공통 설명 블록 추가 */}
+      <div className="border-t border-neutral-200 my-5" />
       <ExplanationSection
         explanations={explanations}
         nonWorkingExplanations={nonWorkingExplanations}
