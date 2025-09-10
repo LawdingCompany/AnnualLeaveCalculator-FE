@@ -81,7 +81,7 @@ export default function ResultSummaryLine({ result }: { result: CalcApiResult })
 
   return (
     <section className="rounded-xl border border-neutral-200 p-5 md:p-6">
-      <div className="grid items-center gap-3 md:grid-cols-[1fr_auto]">
+      <div className="grid items-center gap-3 grid-cols-[minmax(0,1fr)_auto]">
         {/* 좌측: 캡션 + 문장 + 보조 정보 */}
         <div>
           {/* 캡션 + 유형 배지 */}
@@ -139,7 +139,7 @@ export default function ResultSummaryLine({ result }: { result: CalcApiResult })
         </div>
 
         {/* 우측: 큰 숫자 강조 */}
-        <div className="text-right">
+        <div className="text-right shrink-0 justify-self-end">
           <div className="mt-1 mb-1 text-xs font-medium text-center text-neutral-500">
             연차 발생 일수
           </div>
