@@ -27,7 +27,7 @@ export default function HireAndReference() {
   const refDateObj = toDate(s.referenceDate);
 
   return (
-    <div className="grid grid-cols-[max-content_198px_max-content_1fr] items-center gap-x-8">
+    <div className="hire-and-ref grid grid-cols-[max-content_198px_max-content_1fr] items-center gap-x-8">
       {/* 입사일 */}
       <label className="text-md font-medium text-neutral-700 whitespace-nowrap">
         입사일 <span className="text-red-500">*</span>

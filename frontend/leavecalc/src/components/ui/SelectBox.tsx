@@ -90,7 +90,7 @@ export default function SelectBox<V extends string | number>({
         className={[
           // ✅ 기본 형태를 "고정 1일 input"과 동일하게 맞춤
           'w-full inline-flex items-center justify-center rounded-md border px-3 text-center',
-          'h-9 text-md font-medium', // 높이/타이포 동일
+          'h-9 text-sm', // 높이/타이포 동일
           disabled
             ? // ✅ 비활성 시: 회색 배경/텍스트, 얕은 테두리, 손모양 금지, 선택 불가
               'border-neutral-200 bg-neutral-100 text-neutral-500 cursor-not-allowed select-none'
