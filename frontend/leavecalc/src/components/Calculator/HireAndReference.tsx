@@ -36,7 +36,7 @@ export default function HireAndReference() {
         selected={hireDateObj}
         onChange={(dt) => d({ type: 'SET_HIRE_DATE', payload: toStr(dt) })}
         dateFormat="YYYY-MM-DD"
-        placeholderText="YYYY-MM-DD"
+        placeholderText="YYYY.MM.DD"
         className={`max-w-[150px] rounded-md border-2 ${
           s.hireDate ? 'border-neutral-300' : 'border-red-400'
         } focus:outline-none focus:ring-0 focus:border-neutral-300`}
@@ -52,7 +52,7 @@ export default function HireAndReference() {
         selected={refDateObj}
         onChange={(dt) => d({ type: 'SET_REFERENCE_DATE', payload: toStr(dt) })}
         dateFormat="YYYY-MM-DD"
-        placeholderText="YYYY-MM-DD"
+        placeholderText="YYYY.MM.DD"
         className={`max-w-[150px] ml-5 rounded-md border-2 ${
           s.referenceDate ? 'border-neutral-300' : 'border-red-400'
         } focus:outline-none focus:ring-0 focus:border-neutral-300`}
