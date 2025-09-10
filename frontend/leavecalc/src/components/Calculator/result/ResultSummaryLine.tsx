@@ -34,8 +34,18 @@ export default function ResultSummaryLine({ result }: { result: CalcApiResult })
       )
     : null;
 
-  const Chip = ({ label, value }: { label: string; value: string }) => (
-    <span className="inline-flex items-center gap-1 rounded-md border border-neutral-200 bg-neutral-50 px-2 py-1 text-xs text-neutral-700">
+  const Chip = ({
+    label,
+    value,
+    className = '',
+  }: {
+    label: string;
+    value: string;
+    className?: string;
+  }) => (
+    <span
+      className={`inline-flex items-center gap-1 rounded-md border border-neutral-200 bg-neutral-50 px-2 py-1 text-xs text-neutral-700 ${className}`}
+    >
       <svg
         aria-hidden
         className="h-3.5 w-3.5 text-neutral-400"
@@ -45,7 +55,7 @@ export default function ResultSummaryLine({ result }: { result: CalcApiResult })
         <path d="M6 2a1 1 0 0 0-1 1v1H4a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2h-1V3a1 1 0 1 0-2 0v1H7V3a1 1 0 0 0-1-1ZM4 8h12v6H4V8Z" />
       </svg>
       <span className="font-normal">{label}</span>
-      <span className="font-normal">{value}</span>
+      <span className="font-normal ml-auto text-right">{value}</span>
     </span>
   );
 
@@ -73,14 +83,30 @@ export default function ResultSummaryLine({ result }: { result: CalcApiResult })
 
           {/* 보조 정보: 사용 가능 기간 (콤보면 두 개, 아니면 하나) */}
           {(isCombo || showUsable || showAccrual) && (
-            <div className="mt-2 flex flex-wrap items-center gap-2">
+            <div
+              className={
+                isCombo
+                  ? 'mt-2 flex flex-col gap-2' // 👉 콤보일 때 세로 배치
+                  : 'mt-2 flex flex-wrap items-center gap-2'
+              }
+            >
               {isCombo ? (
                 <>
-                  <Chip label="월차 사용 가능 기간 :" value={monthlyUsableLabel ?? '-'} />
-                  <Chip label="비례연차 사용 가능 기간 :" value={proratedUsableLabel ?? '-'} />
+                  <Chip
+                    label="월차 사용 가능 기간 :"
+                    value={monthlyUsableLabel ?? '-'}
+                    className="w-[320px]"
+                  />
+                  <Chip
+                    label="비례연차 사용 가능 기간 :"
+                    value={proratedUsableLabel ?? '-'}
+                    className="w-[320px]"
+                  />
                 </>
               ) : (
-                showUsable && <Chip label="사용 가능 기간 :" value={usableLabel!} />
+                showUsable && (
+                  <Chip label="사용 가능 기간 :" value={usableLabel} className="w-[270px]" />
+                )
               )}
             </div>
           )}
