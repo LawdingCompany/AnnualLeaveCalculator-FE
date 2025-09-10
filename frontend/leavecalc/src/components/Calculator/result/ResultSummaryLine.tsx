@@ -37,25 +37,45 @@ export default function ResultSummaryLine({ result }: { result: CalcApiResult })
   const Chip = ({
     label,
     value,
+    width, // 예: 'w-[320px]' 또는 'w-[220px] min-w-[240px]'
+    colonAt = 140, // ← 여기(px)를 바꾸면 ':' 위치가 바뀜
     className = '',
   }: {
     label: string;
     value: string;
+    width?: string;
+    colonAt?: number; // px 단위
     className?: string;
   }) => (
     <span
-      className={`inline-flex items-center gap-1 rounded-md border border-neutral-200 bg-neutral-50 px-2 py-1 text-xs text-neutral-700 ${className}`}
+      className={[
+        'inline-grid items-center rounded-md border border-neutral-200 bg-neutral-50 px-2 py-1 text-xs text-neutral-700',
+        width ?? '',
+        className,
+      ].join(' ')}
+      style={{
+        // 아이콘+라벨 영역 | ':' | 값 영역
+        gridTemplateColumns: `${colonAt}px min-content 1fr`,
+      }}
     >
-      <svg
-        aria-hidden
-        className="h-3.5 w-3.5 text-neutral-400"
-        viewBox="0 0 20 20"
-        fill="currentColor"
-      >
-        <path d="M6 2a1 1 0 0 0-1 1v1H4a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2h-1V3a1 1 0 1 0-2 0v1H7V3a1 1 0 0 0-1-1ZM4 8h12v6H4V8Z" />
-      </svg>
-      <span className="font-normal">{label}</span>
-      <span className="font-normal ml-auto text-right">{value}</span>
+      {/* 아이콘+라벨 */}
+      <span className="inline-flex items-center gap-1">
+        <svg
+          aria-hidden
+          className="h-3.5 w-3.5 text-neutral-400"
+          viewBox="0 0 20 20"
+          fill="currentColor"
+        >
+          <path d="M6 2a1 1 0 0 0-1 1v1H4a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2h-1V3a1 1 0 1 0-2 0v1H7V3a1 1 0 0 0-1-1ZM4 8h12v6H4V8Z" />
+        </svg>
+        <span className="font-normal">{label}</span>
+      </span>
+
+      {/* 콜론(고정 위치) */}
+      <span className="font-normal text-neutral-500">:</span>
+
+      {/* 값(오른쪽 정렬, 줄바꿈 방지) */}
+      <span className="font-normal text-right tabular-nums whitespace-nowrap">{value}</span>
     </span>
   );
 
@@ -85,27 +105,33 @@ export default function ResultSummaryLine({ result }: { result: CalcApiResult })
           {(isCombo || showUsable || showAccrual) && (
             <div
               className={
-                isCombo
-                  ? 'mt-2 flex flex-col gap-2' // 👉 콤보일 때 세로 배치
-                  : 'mt-2 flex flex-wrap items-center gap-2'
+                isCombo ? 'mt-2 flex flex-col gap-2' : 'mt-2 flex flex-wrap items-center gap-2'
               }
             >
               {isCombo ? (
                 <>
+                  {/* 콤보: 넓게, 콜론 140px 지점 */}
                   <Chip
-                    label="월차 사용 가능 기간 :"
+                    label="월차 사용 가능 기간"
                     value={monthlyUsableLabel ?? '-'}
-                    className="w-[320px]"
+                    width="w-[320px]"
+                    colonAt={140}
                   />
                   <Chip
-                    label="비례연차 사용 가능 기간 :"
+                    label="비례연차 사용 가능 기간"
                     value={proratedUsableLabel ?? '-'}
-                    className="w-[320px]"
+                    width="w-[320px]"
+                    colonAt={140}
                   />
                 </>
               ) : (
                 showUsable && (
-                  <Chip label="사용 가능 기간 :" value={usableLabel} className="w-[270px]" />
+                  <Chip
+                    label="사용 가능 기간"
+                    value={usableLabel}
+                    width="w-[270px]" // 내용 길면 자연 확장
+                    colonAt={92} // ← 여기 숫자만 바꿔서 ':' 위치 미세조정
+                  />
                 )
               )}
             </div>
