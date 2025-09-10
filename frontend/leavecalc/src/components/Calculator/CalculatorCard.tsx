@@ -1,4 +1,3 @@
-// src/components/Calculator/CalculatorCard.tsx
 import {
   Header,
   ApplicationMode,
@@ -11,7 +10,7 @@ import {
   FeedbackModal,
 } from './';
 import React, { useEffect, useMemo, useRef, useState } from 'react';
-import { createPortal } from 'react-dom'; // ✅ named import 로 수정
+import { createPortal } from 'react-dom';
 import FooterLinks from '@components/Footer/FooterLinks';
 import { useCalcState, useCalcDispatch } from './context';
 import { uiPayloadSchema, mapSubtypeToCategory } from './types';
@@ -193,7 +192,7 @@ export function CalculatorCard() {
   return (
     <main
       ref={cardRef}
-      className={`relative rounded-xl border border-neutral-200 p-8 ${
+      className={`relative h-full flex flex-col rounded-xl border border-neutral-200 p-8 ${
         calculating ? 'overflow-hidden' : 'overflow-y-auto'
       }`}
       aria-busy={calculating}
