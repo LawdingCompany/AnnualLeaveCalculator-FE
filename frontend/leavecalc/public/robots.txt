@@ -1,6 +1,6 @@
-# 모든 검색엔진이 사이트 전체를 크롤링할 수 있도록 허용
+# Allow all search engines to crawl the entire site
 User-agent: *
 Allow: /
 
-# 사이트맵 위치 (아래 sitemap.xml과 연결)
+# Sitemap location
 Sitemap: https://www.lawding.net/sitemap.xml
