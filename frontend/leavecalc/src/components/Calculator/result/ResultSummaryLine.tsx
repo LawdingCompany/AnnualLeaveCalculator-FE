@@ -8,6 +8,94 @@ function formatRange(a?: string | null, b?: string | null) {
   return `${a} ~ ${b}`;
 }
 
+// -----------------------------
+// Flexible Chip
+// -----------------------------
+type Segment = {
+  /** 화면에 보일 텍스트 */
+  text: string;
+  /** grid 컬럼 폭 (예: 80, '120px', 'min-content', 'max-content', '1fr' 등) */
+  width?: number | string;
+  /** 텍스트 정렬 */
+  align?: 'left' | 'center' | 'right';
+  /** 추가 클래스 */
+  className?: string;
+};
+
+function toCssSize(v?: number | string) {
+  if (v === undefined) return 'auto';
+  return typeof v === 'number' ? `${v}px` : v;
+}
+
+/**
+ * 라벨 | : | 세그먼트1 | 세그먼트2 | ...
+ * - labelWidth: 라벨 영역 폭
+ * - colonWidth: 콜론 영역 폭
+ * - segments: 각 세그먼트(예: '몇일', '·', '기간')의 폭/정렬 개별 제어
+ */
+function Chip({
+  label,
+  segments,
+  labelWidth = 140,
+  colonWidth = 'min-content',
+  className = '',
+}: {
+  label: string;
+  segments: Segment[];
+  labelWidth?: number | string;
+  colonWidth?: number | string;
+  className?: string;
+}) {
+  const cols = [toCssSize(labelWidth), toCssSize(colonWidth)]
+    .concat(segments.map((s) => toCssSize(s.width)))
+    .join(' ');
+
+  return (
+    <span
+      className={[
+        'inline-grid items-center rounded-md border border-neutral-200 bg-neutral-50 px-2 py-1 text-xs text-neutral-700',
+        className,
+      ].join(' ')}
+      style={{ gridTemplateColumns: cols }}
+    >
+      {/* 아이콘+라벨 */}
+      <span className="inline-flex items-center gap-1">
+        <svg
+          aria-hidden
+          className="h-3.5 w-3.5 text-neutral-400"
+          viewBox="0 0 20 20"
+          fill="currentColor"
+        >
+          <path d="M6 2a1 1 0 0 0-1 1v1H4a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2h-1V3a1 1 0 1 0-2 0v1H7V3a1 1 0 0 0-1-1ZM4 8h12v6H4V8Z" />
+        </svg>
+        <span className="font-normal">{label}</span>
+      </span>
+
+      {/* 콜론 */}
+      <span className="font-normal text-neutral-500">:</span>
+
+      {/* 세그먼트들 */}
+      {segments.map((seg, i) => (
+        <span
+          key={i}
+          className={[
+            'font-normal whitespace-nowrap',
+            seg.align === 'right'
+              ? 'text-right'
+              : seg.align === 'center'
+                ? 'text-center'
+                : 'text-left',
+            seg.className ?? '',
+          ].join(' ')}
+          style={{}}
+        >
+          {seg.text}
+        </span>
+      ))}
+    </span>
+  );
+}
+
 export default function ResultSummaryLine({ result }: { result: CalcApiResult }) {
   const total = result.calculationDetail.totalLeaveDays;
   const typeLabel = typeLabelOf(result.leaveType);
@@ -34,50 +122,14 @@ export default function ResultSummaryLine({ result }: { result: CalcApiResult })
       )
     : null;
 
-  const Chip = ({
-    label,
-    value,
-    width, // 예: 'w-[320px]' 또는 'w-[220px] min-w-[240px]'
-    colonAt = 140, // ← 여기(px)를 바꾸면 ':' 위치가 바뀜
-    className = '',
-  }: {
-    label: string;
-    value: string;
-    width?: string;
-    colonAt?: number; // px 단위
-    className?: string;
-  }) => (
-    <span
-      className={[
-        'inline-grid items-center rounded-md border border-neutral-200 bg-neutral-50 px-2 py-1 text-xs text-neutral-700',
-        width ?? '',
-        className,
-      ].join(' ')}
-      style={{
-        // 아이콘+라벨 영역 | ':' | 값 영역
-        gridTemplateColumns: `${colonAt}px min-content 1fr`,
-      }}
-    >
-      {/* 아이콘+라벨 */}
-      <span className="inline-flex items-center gap-1">
-        <svg
-          aria-hidden
-          className="h-3.5 w-3.5 text-neutral-400"
-          viewBox="0 0 20 20"
-          fill="currentColor"
-        >
-          <path d="M6 2a1 1 0 0 0-1 1v1H4a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2h-1V3a1 1 0 1 0-2 0v1H7V3a1 1 0 0 0-1-1ZM4 8h12v6H4V8Z" />
-        </svg>
-        <span className="font-normal">{label}</span>
-      </span>
+  // ✅ 각각의 "개수(일)" 추출
+  const monthlyCount = isCombo
+    ? (result.calculationDetail.monthlyDetail?.totalLeaveDays ?? 0)
+    : null;
 
-      {/* 콜론(고정 위치) */}
-      <span className="font-normal text-neutral-500">:</span>
-
-      {/* 값(오른쪽 정렬, 줄바꿈 방지) */}
-      <span className="font-normal text-right tabular-nums whitespace-nowrap">{value}</span>
-    </span>
-  );
+  const proratedCount = isCombo
+    ? (result.calculationDetail.proratedDetail?.totalLeaveDays ?? 0)
+    : null;
 
   return (
     <section className="rounded-xl border border-neutral-200 p-5 md:p-6">
@@ -87,7 +139,7 @@ export default function ResultSummaryLine({ result }: { result: CalcApiResult })
           {/* 캡션 + 유형 배지 */}
           <div className="flex flex-wrap items-center gap-2">
             <span className="font-medium text-neutral-500">계산 결과 : </span>
-            <span className="inline-flex items-center gap-1 rounded-full border border-blue-200 bg-blue-50 px-2 py-0.5 text-sm text-blue-700">
+            <span className="inline-flex items-center gap-1 rounded-full border border-blue-200 bg-blue-50 px-2 py-0.5 text-sm text-[var(--first)]">
               {typeLabel}
             </span>
           </div>
@@ -95,7 +147,7 @@ export default function ResultSummaryLine({ result }: { result: CalcApiResult })
           {/* 메인 문장 */}
           <p className="mt-1 text-base md:text-xl leading-snug text-neutral-900">
             <span className="text-neutral-600">{dateKR} 기준,</span> 사용할 수 있는 연차는 총{' '}
-            <span className="mx-1 inline-block md:text-2xl font-extrabold tracking-tight leading-none tabular-nums text-blue-700 align-text-bottom -translate-y-[1px] md:-translate-y-[2px]">
+            <span className="mx-1 inline-block md:text-2xl font-extrabold tracking-tight leading-none text-[var(--first)] align-text-bottom -translate-y-[1px] md:-translate-y-[2px]">
               {total}일
             </span>{' '}
             입니다.
@@ -110,27 +162,40 @@ export default function ResultSummaryLine({ result }: { result: CalcApiResult })
             >
               {isCombo ? (
                 <>
-                  {/* 콤보: 넓게, 콜론 140px 지점 */}
+                  {/* ✅ 월차: [몇일] · [기간] — 각 폭/정렬을 개별 제어 */}
                   <Chip
-                    label="월차 사용 가능 기간"
-                    value={monthlyUsableLabel ?? '-'}
-                    width="w-[320px]"
-                    colonAt={140}
+                    label="월차(일수·사용 가능 기간)"
+                    labelWidth={180} // 라벨 폭
+                    colonWidth="12px" // 콜론 폭 (위치 미세 조정)
+                    className="w-[410px]"
+                    segments={[
+                      { text: `${monthlyCount ?? '-'}일`, width: 40, align: 'right' },
+                      { text: '·', width: 15, align: 'center', className: 'text-neutral-400' },
+                      { text: monthlyUsableLabel ?? '-', width: 20, align: 'right' },
+                    ]}
                   />
+
+                  {/* ✅ 비례연차: [몇일] · [기간] — 월차와 별도 세팅 가능 */}
                   <Chip
-                    label="비례연차 사용 가능 기간"
-                    value={proratedUsableLabel ?? '-'}
-                    width="w-[320px]"
-                    colonAt={140}
+                    label="비례연차(일수·사용 가능 기간)"
+                    labelWidth={180}
+                    colonWidth="12px"
+                    className="w-[410px]"
+                    segments={[
+                      { text: `${proratedCount ?? '-'}일`, width: 40, align: 'right' },
+                      { text: '·', width: 15, align: 'center', className: 'text-neutral-400' },
+                      { text: proratedUsableLabel ?? '-', width: 20, align: 'right' },
+                    ]}
                   />
                 </>
               ) : (
                 showUsable && (
                   <Chip
                     label="사용 가능 기간"
-                    value={usableLabel}
-                    width="w-[270px]" // 내용 길면 자연 확장
-                    colonAt={92} // ← 여기 숫자만 바꿔서 ':' 위치 미세조정
+                    labelWidth={110}
+                    colonWidth="10px"
+                    className="w-[300px]"
+                    segments={[{ text: usableLabel!, width: '1fr', align: 'right' }]}
                   />
                 )
               )}
@@ -144,9 +209,11 @@ export default function ResultSummaryLine({ result }: { result: CalcApiResult })
             연차 발생 일수
           </div>
           <div className="inline-block rounded-xl bg-blue-50 px-5 py-3">
-            <div className="leading-none text-3xl md:text-4xl font-extrabold tracking-tight text-blue-700">
+            <div className="leading-none text-3xl md:text-4xl font-extrabold tracking-tight text-[var(--first)]">
               {total}
-              <span className="ml-1 text-base md:text-lg font-semibold text-blue-700/90">일</span>
+              <span className="ml-1 text-base md:text-lg font-semibold text-[var(--first)]/90">
+                일
+              </span>
             </div>
           </div>
         </div>

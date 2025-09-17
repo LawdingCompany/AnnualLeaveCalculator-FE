@@ -7,6 +7,11 @@
   --font-sans: Pretendard, ui-sans-serif, system-ui, sans-serif;
 }
 
+:root {
+  --first: #1c64f2;
+  --second: #768ef3;
+}
+
 body {
   @apply font-sans;
 }

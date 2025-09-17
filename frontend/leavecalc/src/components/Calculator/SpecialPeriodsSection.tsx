@@ -4,6 +4,8 @@ import { useCalcDispatch, useCalcState } from './context';
 import CustomDatePicker from '@components/CustomDatePicker/CustomDatePicker';
 import { PERIOD_LABELS, type NonWorkingSubtype } from './types';
 import ReasonSelect from '@components/ui/ReasonSelect';
+import { HelpCircle } from 'lucide-react';
+import { openGuide } from './guideBus';
 
 const MAX_PERIODS = 3;
 
@@ -49,7 +51,11 @@ export default function SpecialPeriodsSection() {
   const hireDateObj = toDate(s.hireDate);
   const refDateObj = toDate(s.referenceDate);
 
-  // 작성 컴포저 로컬 상태
+  const hire = toDate(s.hireDate);
+  const ref = toDate(s.referenceDate);
+  const canEdit = Boolean(hire && ref);
+
+  // 로컬 상태
   const [draftSubtype, setDraftSubtype] = useState<NonWorkingSubtype | null>(null);
   const [draftStart, setDraftStart] = useState<Date | null>(null);
   const [draftEnd, setDraftEnd] = useState<Date | null>(null);
@@ -71,7 +77,7 @@ export default function SpecialPeriodsSection() {
     if (refDateObj && draftEnd > refDateObj)
       return setError('종료일은 기준일 이전이어야 합니다.'), false;
 
-    // 기존과 겹침 방지 (수정 중이면 자기 자신 제외)
+    // 겹침 방지
     const candidateS = toStr(draftStart);
     const candidateE = toStr(draftEnd);
     for (let i = 0; i < s.nonWorkingPeriods.length; i++) {
@@ -94,7 +100,6 @@ export default function SpecialPeriodsSection() {
   };
 
   const handleAddOrUpdate = () => {
-    // 추가 시에만 개수 제한 검사
     if (editIndex === null && isFull) {
       setError(`최대 ${MAX_PERIODS}개까지만 등록할 수 있습니다.`);
       return;
@@ -107,7 +112,6 @@ export default function SpecialPeriodsSection() {
       endDate: toStr(draftEnd),
     };
 
-    // ✅ 편집 중이었던 원본이 삭제되어 인덱스가 유효하지 않다면 안전하게 "추가"로 처리
     if (editIndex === null) {
       d({ type: 'ADD_PERIOD', payload });
     } else if (editIndex < 0 || editIndex >= s.nonWorkingPeriods.length) {
@@ -119,14 +123,11 @@ export default function SpecialPeriodsSection() {
     clearDraft();
   };
 
-  // ✅ 삭제 시 편집 인덱스 보정/해제
   const handleRemove = (idx: number) => {
     if (editIndex !== null) {
       if (idx === editIndex) {
-        // 편집 중인 항목 자체를 삭제 → 편집 상태 해제
         clearDraft();
       } else if (idx < editIndex) {
-        // 앞쪽 항목이 삭제되어 인덱스가 한 칸 당겨짐 → 보정
         setEditIndex(editIndex - 1);
       }
     }
@@ -150,134 +151,159 @@ export default function SpecialPeriodsSection() {
 
   return (
     <div className="grid gap-2">
-      {/* 토글 + 카운터 */}
+      {/* 헤더: 왼쪽(체크박스+텍스트+?아이콘) / 오른쪽(카운터) */}
       <div className="flex items-center justify-between">
-        <label className="flex items-center gap-2 text-md font-medium text-neutral-700">
-          <input
-            type="checkbox"
-            className="h-4 w-4 rounded border-neutral-300"
-            checked={enabled}
-            onChange={(e) => handleToggle(e.target.checked)}
-          />
-          특이사항이 있는 기간
-        </label>
-        {enabled && (
+        <div className="flex items-center gap-2">
+          <label className="flex items-center gap-2 text-md font-medium text-neutral-700">
+            <input
+              type="checkbox"
+              className="h-4 w-4 rounded border-neutral-300"
+              checked={enabled}
+              onChange={(e) => handleToggle(e.target.checked)}
+            />
+            특이사항이 있는 기간
+          </label>
+
+          {/* ? 아이콘: 텍스트 바로 옆 */}
+          <button
+            type="button"
+            onClick={() => openGuide('q1')}
+            aria-controls="guide-root"
+            title="도움말"
+            className="inline-flex h-6 w-6 items-center justify-center rounded-full border border-neutral-300 text-[var(--first)] hover:border-blue-400 hover:text-blue-700"
+          >
+            <HelpCircle className="h-4 w-4" aria-hidden />
+            <span className="sr-only">이용가이드 열기</span>
+          </button>
+        </div>
+
+        {/* 오른쪽: 카운터 (안내문일 땐 숨김) */}
+        {enabled && canEdit && (
           <span className="text-sm text-neutral-500">
             {count}/{MAX_PERIODS}
           </span>
         )}
       </div>
 
-      {/* 본문: 체크 ON일 때만 */}
-      {enabled && (
-        <div className="rounded-lg border border-neutral-200 p-3 space-y-3">
-          {/* 작성 컴포저 */}
-          <div className="grid grid-cols-[max-content_1fr_max-content_1fr_max-content_1fr_max-content] items-center gap-2">
-            <span className="text-sm text-neutral-600 ml-1 mr-1">사유</span>
-            <ReasonSelect
-              value={draftSubtype ?? null}
-              onChange={(v) => setDraftSubtype(v as NonWorkingSubtype)}
-              options={reasonOptions}
-              disabled={editIndex === null && isFull}
-              className="min-w-[160px]"
-            />
-            <span className="text-sm text-neutral-600 ml-6 mr-1">시작일</span>
-            <CustomDatePicker
-              selected={draftStart}
-              onChange={(dt) => setDraftStart(dt)}
-              placeholderText="YYYY.MM.DD"
-              className="max-w-[150px]"
-              minDate={hireDateObj ?? undefined}
-              maxDate={draftEnd ?? refDateObj ?? undefined}
-            />
+      {/* 본문 */}
+      {enabled &&
+        (canEdit ? (
+          <div className="rounded-lg border border-neutral-200 p-3 space-y-3">
+            {/* 작성 폼 */}
+            <div className="grid grid-cols-[max-content_1fr_max-content_1fr_max-content_1fr_max-content] items-center gap-2">
+              <span className="text-sm text-neutral-600 ml-1 mr-1">사유</span>
+              <ReasonSelect
+                value={draftSubtype ?? null}
+                onChange={(v) => setDraftSubtype(v as NonWorkingSubtype)}
+                options={reasonOptions}
+                disabled={editIndex === null && isFull}
+                className="min-w-[160px]"
+              />
+              <span className="text-sm text-neutral-600 ml-6 mr-1">시작일</span>
+              <CustomDatePicker
+                selected={draftStart}
+                onChange={(dt) => setDraftStart(dt)}
+                placeholderText="YYYY.MM.DD"
+                className="max-w-[150px]"
+                minDate={hireDateObj ?? undefined}
+                maxDate={draftEnd ?? refDateObj ?? undefined}
+              />
+              <span className="text-sm text-neutral-600 mr-1">종료일</span>
+              <CustomDatePicker
+                selected={draftEnd}
+                onChange={(dt) => setDraftEnd(dt)}
+                placeholderText="YYYY.MM.DD"
+                className="max-w-[150px]"
+                minDate={draftStart ?? hireDateObj ?? undefined}
+                maxDate={refDateObj ?? undefined}
+              />
+              <button
+                type="button"
+                onClick={handleAddOrUpdate}
+                className="ml-2 rounded-md bg-[var(--first)] px-3 py-2 text-sm font-semibold text-white hover:bg-[var(--first)] disabled:bg-neutral-300"
+                disabled={
+                  !draftSubtype || !draftStart || !draftEnd || (editIndex === null && isFull)
+                }
+                title={
+                  editIndex === null && isFull ? `최대 ${MAX_PERIODS}개까지 추가 가능합니다.` : ''
+                }
+              >
+                {editIndex === null ? '추가하기' : '수정하기'}
+              </button>
+            </div>
 
-            <span className="text-sm text-neutral-600 mr-1">종료일</span>
-            <CustomDatePicker
-              selected={draftEnd}
-              onChange={(dt) => setDraftEnd(dt)}
-              placeholderText="YYYY.MM.DD"
-              className="max-w-[150px]"
-              minDate={draftStart ?? hireDateObj ?? undefined}
-              maxDate={refDateObj ?? undefined}
-            />
-
-            <button
-              type="button"
-              onClick={handleAddOrUpdate}
-              className="ml-2 rounded-md bg-blue-600 px-3 py-2 text-sm font-semibold text-white hover:bg-blue-700 disabled:bg-neutral-300"
-              disabled={!draftSubtype || !draftStart || !draftEnd || (editIndex === null && isFull)}
-              title={
-                editIndex === null && isFull ? `최대 ${MAX_PERIODS}개까지 추가 가능합니다.` : ''
-              }
-            >
-              {editIndex === null ? '추가하기' : '수정하기'}
-            </button>
-          </div>
-
-          {/* 에러 메시지 / 안내 */}
-          {error ? (
-            <div className="text-xs text-red-600">{error}</div>
-          ) : (
-            isFull && (
-              <div className="text-xs text-neutral-500">
-                * 최대 {MAX_PERIODS}개까지 등록 가능합니다. 기존 항목을 삭제하거나 수정하세요.
-              </div>
-            )
-          )}
-
-          {/* 목록 */}
-          <div className="grid gap-2">
-            {s.nonWorkingPeriods.length === 0 ? (
-              <div className="text-xs text-neutral-500">
-                * 아직 등록된 특이기간이 없습니다. 위에서 입력 후 ‘추가하기’를 눌러주세요.
-              </div>
+            {/* 에러 메시지 / 안내 */}
+            {error ? (
+              <div className="text-xs text-red-600">{error}</div>
             ) : (
-              s.nonWorkingPeriods.map((p, idx) => (
-                <div
-                  key={idx}
-                  className="grid grid-cols-[1fr_max-content_max-content_max-content] items-center gap-2 rounded-md border text-sm border-neutral-200 px-3 py-2"
-                >
-                  <div className="min-w-0">
-                    <div className=" text-neutral-800 truncate">{PERIOD_LABELS[p.subtype]}</div>
-                    <div className="text-xs text-neutral-500">
-                      {p.startDate} ~ {p.endDate} · {daysInclusive(p.startDate, p.endDate)}일
-                    </div>
-                  </div>
-                  <button
-                    type="button"
-                    className="text-xs underline"
-                    onClick={() => {
-                      setDraftSubtype(p.subtype);
-                      setDraftStart(toDate(p.startDate));
-                      setDraftEnd(toDate(p.endDate));
-                      setEditIndex(idx);
-                      setError(null);
-                    }}
-                  >
-                    편집
-                  </button>
-                  <span className="text-neutral-300">|</span>
-                  <button
-                    type="button"
-                    className="text-xs text-red-600 underline"
-                    onClick={() => handleRemove(idx)} // ✅ 안전 삭제 핸들러 사용
-                  >
-                    삭제
-                  </button>
+              isFull && (
+                <div className="text-xs text-neutral-500">
+                  * 최대 {MAX_PERIODS}개까지 등록 가능합니다. 기존 항목을 삭제하거나 수정하세요.
                 </div>
-              ))
+              )
             )}
-          </div>
 
-          {/* 하단 안내 */}
-          <div className="flex justify-between">
-            <small className="text-xs text-neutral-500">
-              * 겹치는 기간은 등록할 수 없습니다. 예시) 2025-01-12 ~ 2025-06-11 : 육아휴직,
-              2025-05-15 ~ 2025-05-21 : 가족돌봄휴가
-            </small>
+            {/* 목록 */}
+            <div className="grid gap-2">
+              {s.nonWorkingPeriods.length === 0 ? (
+                <div className="text-xs text-neutral-500">
+                  * 아직 등록된 특이기간이 없습니다. 위에서 입력 후 ‘추가하기’를 눌러주세요.
+                </div>
+              ) : (
+                s.nonWorkingPeriods.map((p, idx) => (
+                  <div
+                    key={idx}
+                    className="grid grid-cols-[1fr_max-content_max-content_max-content] items-center gap-2 rounded-md border text-sm border-neutral-200 px-3 py-2"
+                  >
+                    <div className="min-w-0">
+                      <div className=" text-neutral-800 truncate">{PERIOD_LABELS[p.subtype]}</div>
+                      <div className="text-xs text-neutral-500">
+                        {p.startDate} ~ {p.endDate} · {daysInclusive(p.startDate, p.endDate)}일
+                      </div>
+                    </div>
+                    <button
+                      type="button"
+                      className="text-xs underline"
+                      onClick={() => {
+                        setDraftSubtype(p.subtype);
+                        setDraftStart(toDate(p.startDate));
+                        setDraftEnd(toDate(p.endDate));
+                        setEditIndex(idx);
+                        setError(null);
+                      }}
+                    >
+                      편집
+                    </button>
+                    <span className="text-neutral-300">|</span>
+                    <button
+                      type="button"
+                      className="text-xs text-red-600 underline"
+                      onClick={() => handleRemove(idx)}
+                    >
+                      삭제
+                    </button>
+                  </div>
+                ))
+              )}
+            </div>
+
+            {/* 하단 안내 */}
+            <div className="flex justify-between">
+              <small className="text-xs text-neutral-500">
+                * 겹치는 기간은 등록할 수 없습니다. 예시) 2025-01-12 ~ 2025-06-11 : 육아휴직,
+                2025-05-15 ~ 2025-05-21 : 가족돌봄휴가
+              </small>
+            </div>
           </div>
-        </div>
-      )}
+        ) : (
+          // ✅ 입사일/기준일이 없을 때 안내만
+          <div className="rounded-md border border-amber-300 bg-amber-50 p-3 text-sm text-amber-800">
+            먼저 <b>입사일</b>과 <b>계산 기준일</b>을 입력해주세요.
+            <div className="mt-2 text-xs text-amber-700">
+              설정이 완료되면 이 영역에 <b>사유 · 시작일 · 종료일</b> 입력창이 나타납니다.
+            </div>
+          </div>
+        ))}
     </div>
   );
 }

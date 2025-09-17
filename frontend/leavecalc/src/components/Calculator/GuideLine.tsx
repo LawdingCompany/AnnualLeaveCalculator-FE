@@ -1,6 +1,7 @@
 // src/components/Calculator/FAQ.tsx
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import HelpDrawer from './HelpDrawer';
+import { onGuideOpen } from './guideBus';
 import { Info, ChevronDown, BookOpen } from 'lucide-react';
 
 type FAQItem = { title: string; body: React.ReactNode };
@@ -30,20 +31,30 @@ function Highlight({ children }: { children: React.ReactNode }) {
 export default function GuideLine() {
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [initialSection, setInitialSection] = useState<
-    'accuracy' | 'types' | 'disclaimer' | undefined
+    'accuracy' | 'glossary' | 'disclaimer' | 'types' | undefined
   >(undefined);
+
+  // 🔗 Special/Company 섹션의 ?아이콘 → 아래 가이드 Q1/Q2 열기
+  useEffect(() => {
+    return onGuideOpen((key) => {
+      const root = document.getElementById('guide-root');
+      const target = document.querySelector(
+        `[data-guide-key="${key}"]`,
+      ) as HTMLDetailsElement | null;
+      if (target && !target.open) target.open = true; // 네이티브 details 열기
+      (target ?? root)?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    });
+  }, []);
 
   const openDrawerToTypes = () => {
     setInitialSection('types');
     setDrawerOpen(true);
   };
-
   const onCloseDrawer = () => {
     setDrawerOpen(false);
-    setInitialSection(undefined); // 다음 열림 시 기본 섹션으로
+    setInitialSection(undefined);
   };
 
-  // ✅ 질문/답변 데이터 (번호는 자동으로 붙일 거라 title에 Qn.은 넣지 않음)
   const items: FAQItem[] = [
     {
       title: '특이사항이 있는 기간은 무엇인가요?',
@@ -70,23 +81,23 @@ export default function GuideLine() {
       ),
     },
     {
-      title: '회사 지정 휴일은 무엇인가요?',
+      title: '공휴일 외 회사휴일은 무엇인가요?',
       body: (
         <div className="space-y-2 text-neutral-700">
           <p className="mt-1">
-            회사 휴일은 <Highlight>회사가 별도로 지정·공지한 쉬는 날(예: 창립기념일)</Highlight>을
+            회사창립기념일, 단체협약상 유·무급휴일, 노조 창립기념일 등
+            <Highlight>법정공휴일을 제외하고 회사 내부 규정에 따라 부여되는 휴일</Highlight>을
+            <br />
             의미합니다.
           </p>
-          <ul className="list-disc pl-5 space-y-1 text-neutral-800">
-            <li>입력 방식 : 날짜 한 건씩 등록 (최대 3일)</li>
-          </ul>
         </div>
       ),
     },
+    // ... 기존 다른 Q들 그대로 유지
   ];
 
   return (
-    <section>
+    <section id="guide-root">
       {/* 헤더: 이용 가이드 + 아이콘 배지 */}
       <div className="mb-3 flex items-center gap-2">
         <div className="inline-flex h-6 w-6 items-center justify-center rounded-md bg-blue-50 text-blue-600">
@@ -95,16 +106,19 @@ export default function GuideLine() {
         <h3 className="font-medium text-neutral-900">이용 가이드</h3>
       </div>
 
-      {/* 아코디언 리스트: Q 배지 + Chevron 아이콘 회전 */}
+      {/* 아코디언 리스트 */}
       <ul className="space-y-2">
         {items.map((item, idx) => {
           const qLabel = `Q${idx + 1}.`;
           return (
             <li key={item.title} className="rounded-lg border border-neutral-200">
-              <details className="group rounded-lg">
-                <summary className="flex cursor-pointer select-none items-center gap-3 rounded-lg px-3 py-2 text-neutral-900 hover:bg-neutral-50 focus-visible:outline focus-visible:outline-blue-500/30">
+              <details
+                className="group rounded-lg"
+                data-guide-key={idx === 0 ? 'q1' : idx === 1 ? 'q2' : undefined}
+              >
+                <summary className="flex cursor-pointer select-none items-center gap-2 rounded-lg px-3 py-2 focus-visible:outline focus-visible:outline-blue-500/30">
                   {/* Q 배지 */}
-                  <span className="inline-flex shrink-0 items-center justify-center rounded-md bg-blue-50 px-2 py-[2px] text-[11px] font-semibold text-blue-700">
+                  <span className="inline-flex shrink-0 items-center rounded-md border border-blue-200 bg-blue-50 px-2 py-[2px] text-[11px] font-semibold text-blue-700">
                     {qLabel}
                   </span>
                   <span className="font-medium">{item.title}</span>

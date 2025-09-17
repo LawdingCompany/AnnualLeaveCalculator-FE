@@ -62,7 +62,7 @@ export default function ResultView() {
           <button
             type="button"
             onClick={() => setDetailOpen(true)}
-            className="rounded-md border border-blue-200 px-4 py-2 text-sm font-medium text-blue-700
+            className="rounded-md border border-blue-200 px-4 py-2 text-sm font-medium text-[var(--first)]
                  hover:bg-blue-50 focus:outline-none focus:ring-2 focus:ring-blue-500/30"
           >
             상세보기
@@ -152,7 +152,7 @@ function DetailModal({
         {/* Header */}
         <header className="flex items-center justify-between border-b border-neutral-200 px-5 py-3">
           <div className="flex items-center gap-2">
-            <div className="inline-flex h-8 w-8 items-center justify-center rounded-lg bg-blue-50 text-blue-600">
+            <div className="inline-flex h-8 w-8 items-center justify-center rounded-lg bg-blue-50 text-[var(--first)]">
               <Eye className="h-4 w-4" aria-hidden />
             </div>
             <h3 id="detail-modal-title" className="text font-semibold text-neutral-900">
