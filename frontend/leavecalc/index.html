@@ -1,13 +1,59 @@
 <!doctype html>
-<html lang="en">
+<html lang="ko">
   <head>
     <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/logo.png" />
+    <link rel="icon" type="image/png" href="/lawdingLogo.png" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Lawding - 연차계산기</title>
+
+    <!-- ✅ 기본 SEO -->
+    <title>연차 계산기 | Lawding</title>
+    <meta
+      name="description"
+      content="입사일, 회계연도, 특이사항까지 반영한 진짜 연차 계산기. 근로기준법 기준으로 연차 일수를 계산하세요."
+    />
+    <meta
+      name="keywords"
+      content="연차계산기, 연차, 연차일수, 휴가계산기, 근로기준법, 월차, 비례연차"
+    />
+    <meta name="author" content="Lawding" />
+
+    <!-- ✅ Open Graph (카톡, 페북 공유 미리보기) -->
+    <meta property="og:title" content="연차 계산기 | Lawding" />
+    <meta
+      property="og:description"
+      content="입사일/회계연도/특이사항까지 고려한 연차 일수 계산 서비스"
+    />
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://www.lawding.net" />
+    <meta property="og:image" content="https://www.lawding.net/lawdingLogo.png" />
+
+    <!-- ✅ Twitter Card -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="연차 계산기 | Lawding" />
+    <meta name="twitter:description" content="입사일, 회계연도, 특이사항까지 반영한 연차 계산기" />
+    <meta name="twitter:image" content="https://www.lawding.net/lawdingLogo.png" />
+
+    <!-- ✅ Schema.org 구조화 데이터 -->
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "WebApplication",
+        "name": "연차 계산기",
+        "url": "https://www.lawding.net",
+        "description": "입사일, 회계연도, 특이사항까지 반영한 연차 계산기",
+        "applicationCategory": "BusinessApplication",
+        "operatingSystem": "All"
+      }
+    </script>
   </head>
   <body>
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
+
+    <!-- ✅ JS 없는 경우 fallback 설명 (크롤러용) -->
+    <noscript>
+      <h1>연차 계산기</h1>
+      <p>근로기준법 기준, 입사일/회계연도/특이사항을 반영한 연차 일수 계산기입니다.</p>
+    </noscript>
   </body>
 </html>
