@@ -6,8 +6,8 @@ const SEG_BTN = [
   'h-10 px-3 rounded-md border text-md',
   'bg-white text-neutral-700 border-[#e2e8f0]', // 회색 테두리
   'hover:bg-neutral-50', // 호버
-  'focus:outline-none focus:border-blue-600', // 포커스 테두리
-  'data-[active=true]:border-blue-600 data-[active=true]:bg-blue-50 data-[active=true]:text-blue-700',
+  'focus:outline-none focus:border-[var(--first)]', // 포커스 테두리
+  'data-[active=true]:border-[var(--first)] data-[active=true]:bg-blue-50 data-[active=true]:text-[var(--first)]',
 ].join(' ');
 
 function monthFromFiscalYear(fy: string): string {
@@ -77,7 +77,7 @@ export default function ApplicationMode() {
           value="1"
           disabled
           aria-label="회계연도 시작일(일)"
-          className="w-[44px] h-9 rounded-md border px-3 py-2 text-md font-medium text-center
+          className="w-[44px] h-9 rounded-md border px-3 py-2 text-sm text-center
                      border-neutral-200 bg-neutral-100 text-neutral-500 cursor-not-allowed select-none"
         />
         <span className="text-md font-medium text-neutral-600">일</span>

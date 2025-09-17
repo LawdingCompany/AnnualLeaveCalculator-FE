@@ -11,7 +11,7 @@ export default function Header() {
       <header className="space-y-2">
         <h2 className="text-3xl font-bold">연차 계산기</h2>
         <p className="text-md font-medium leading-5 text-neutral-500">
-          당신의 진짜 연차 일수는 얼마일까요? 특이사항까지 고려한 연차 일수를 지금 바로 확인하세요!
+          육아휴직·휴직·징계 등 다양한 상황을 고려한 정확한 연차휴가 발생일을 확인하세요!
         </p>
       </header>
     );
@@ -21,7 +21,7 @@ export default function Header() {
     <header className="space-y-2">
       <h2 className="text-3xl font-bold">연차 계산 결과</h2>
       <p className="text-sm text-neutral-400">
-        ※ 계산 결과는 참고용이며, 실제 회사 규정과 다를 수 있습니다.
+        ※ 본 계산기는 참고용이며, 실제 발생일수는 회사 규정 및 관계 법령에 따라 상이할 수 있습니다.
       </p>
     </header>
   );

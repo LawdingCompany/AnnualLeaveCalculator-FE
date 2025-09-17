@@ -7,7 +7,7 @@ export default function SelectBox<V extends string | number>({
   onChange,
   options,
   disabled,
-  placeholder = '선택',
+  placeholder = '사유 선택',
   className = '',
   buttonClassName = '',
 }: {

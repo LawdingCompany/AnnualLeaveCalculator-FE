@@ -19,12 +19,28 @@ function toStr(date: Date | null): string {
   return `${date.getFullYear()}-${pad2(date.getMonth() + 1)}-${pad2(date.getDate())}`;
 }
 
+// 고정 경계
+const HIRE_MIN = new Date(1980, 0, 1); // 1980-01-01
+const LAW_MIN_REF = new Date(2017, 4, 31); // 2017-05-31
+const REF_MAX = new Date(2035, 11, 31); // 2035-12-31
+
 export default function HireAndReference() {
   const s = useCalcState();
   const d = useCalcDispatch();
 
   const hireDateObj = toDate(s.hireDate);
   const refDateObj = toDate(s.referenceDate);
+
+  // 오늘 00:00 (미래 선택 방지)
+  const now = new Date();
+  const TODAY = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+
+  // ✅ 입사일: 최대 오늘, 단 기준일이 오늘보다 더 이르면 기준일까지로 자동 제한
+  const hireMax = refDateObj ? (refDateObj < TODAY ? refDateObj : TODAY) : TODAY;
+
+  // ✅ 기준일: 최소 (입사일이 2017-05-31 이후면 입사일, 아니면 2017-05-31), 최대 2035-12-31
+  const refMin =
+    hireDateObj && hireDateObj.getTime() > LAW_MIN_REF.getTime() ? hireDateObj : LAW_MIN_REF;
 
   return (
     <div className="hire-and-ref grid grid-cols-[max-content_198px_max-content_1fr] items-center gap-x-8">
@@ -40,8 +56,8 @@ export default function HireAndReference() {
         className={`max-w-[150px] rounded-md border-2 ${
           s.hireDate ? 'border-neutral-300' : 'border-red-400'
         } focus:outline-none focus:ring-0 focus:border-neutral-300`}
-        // 선택적으로 기준일 이후 선택 제한
-        maxDate={refDateObj ?? undefined}
+        minDate={HIRE_MIN} // ✅ 1980-01-01부터
+        maxDate={hireMax} // ✅ 항상 오늘 이전, 기준일 선택 시 그 이전
       />
 
       {/* 기준일 */}
@@ -56,8 +72,8 @@ export default function HireAndReference() {
         className={`max-w-[150px] ml-5 rounded-md border-2 ${
           s.referenceDate ? 'border-neutral-300' : 'border-red-400'
         } focus:outline-none focus:ring-0 focus:border-neutral-300`}
-        // 선택적으로 입사일 이전 선택 제한
-        minDate={hireDateObj ?? undefined}
+        minDate={refMin} // ✅ 2017-05-31 또는 입사일(입사일이 더 늦으면)
+        maxDate={REF_MAX} // ✅ 2035년까지
       />
     </div>
   );

@@ -232,11 +232,11 @@ export function CalculatorCard() {
 
       {/* 피드백 버튼 + 모달 */}
       <button
-        className="fixed bottom-6 right-6 rounded-full bg-blue-600 px-4 py-3 text-white shadow-lg hover:bg-blue-700 disabled:opacity-60"
+        className="fixed bottom-6 right-6 rounded-full bg-[var(--first)] px-4 py-3 text-white shadow-lg hover:bg-blue-700 disabled:opacity-60"
         onClick={() => setFeedbackOpen(true)}
         disabled={calculating}
       >
-        이용 문의
+        피드백
       </button>
       <FeedbackModal open={feedbackOpen} onClose={() => setFeedbackOpen(false)} />
 

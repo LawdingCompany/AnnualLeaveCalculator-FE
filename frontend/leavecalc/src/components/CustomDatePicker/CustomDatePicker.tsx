@@ -1,4 +1,4 @@
-// CustomDatePicker.tsx (전체 교체)
+// CustomDatePicker.tsx
 import React, { useState, useEffect, useRef } from 'react';
 import { createPortal } from 'react-dom';
 import { ChevronLeft, ChevronRight, Calendar } from 'lucide-react';
@@ -16,7 +16,6 @@ interface CustomDatePickerProps {
   maxDate?: Date | null;
 }
 
-// 요일/월 라벨
 const DAYS_OF_WEEK = ['일', '월', '화', '수', '목', '금', '토'];
 const MONTHS = [
   '1월',
@@ -33,10 +32,15 @@ const MONTHS = [
   '12월',
 ];
 
-// ✅ 법개정 최소 선택일
-const LAW_MIN_DATE = new Date(2017, 4, 30); // 2017-05-30 (0=1월)
+// ✅ 고정 연도 범위 (뷰 전용)
+const YEAR_MIN = 1980;
+const YEAR_MAX = 2035;
+const YEAR_BLOCK = 12;
 
-// 스크롤 부모들 찾기 (overflow: auto|scroll)
+// ✅ 법개정 최소 선택일 (2017-05-31)
+const LAW_MIN_DATE = new Date(2017, 4, 31);
+
+// 스크롤 부모들 찾기
 function getScrollParents(el: HTMLElement | null): (HTMLElement | Window)[] {
   const res: (HTMLElement | Window)[] = [window];
   let p = el?.parentElement || null;
@@ -49,6 +53,14 @@ function getScrollParents(el: HTMLElement | null): (HTMLElement | Window)[] {
   return res;
 }
 
+function getYearBlock(targetYear: number): [number, number] {
+  const clamped = Math.min(Math.max(targetYear, YEAR_MIN), YEAR_MAX);
+  const offset = Math.floor((clamped - YEAR_MIN) / YEAR_BLOCK);
+  const start = YEAR_MIN + offset * YEAR_BLOCK;
+  const end = Math.min(start + YEAR_BLOCK - 1, YEAR_MAX); // ✅ 끝만 잘라냄
+  return [start, end];
+}
+
 export default function CustomDatePicker({
   selected,
   onChange,
@@ -57,9 +69,15 @@ export default function CustomDatePicker({
   minDate = null,
   maxDate = null,
 }: CustomDatePickerProps) {
-  const currentYear = new Date().getFullYear();
+  const now = new Date();
+  const TODAY = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+  const currentYear = TODAY.getFullYear();
 
-  const [currentDate, setCurrentDate] = useState<Date>(selected || new Date());
+  // ✅ 선택 가능 범위는 필드별 min/max로 제한
+  const effectiveMinDate: Date | null = minDate ?? LAW_MIN_DATE;
+  const effectiveMaxDate: Date | null = maxDate ?? null;
+
+  const [currentDate, setCurrentDate] = useState<Date>(selected || TODAY);
   const [selectedDate, setSelectedDate] = useState<Date | null>(selected);
   const [view, setView] = useState<CalendarView>('day');
   const [inputValue, setInputValue] = useState<string>('');
@@ -69,32 +87,31 @@ export default function CustomDatePicker({
   const [position, setPosition] = useState({ top: 0, left: 0 });
   const [dropdownWidth, setDropdownWidth] = useState<number | undefined>(undefined);
 
-  const [yearRange, setYearRange] = useState<[number, number]>([2017, currentYear + 5]);
+  // ✅ 연도 뷰 가시 블록 (항상 12칸)
+  const initialYear = selected?.getFullYear() ?? currentYear;
+  const [yearRange, setYearRange] = useState<[number, number]>(() => getYearBlock(initialYear));
 
   const inputRef = useRef<HTMLInputElement>(null);
   const calendarRef = useRef<HTMLDivElement>(null);
   const inputContainerRef = useRef<HTMLDivElement>(null);
 
-  // ✅ props.minDate와 법개정일 중 더 큰 값
-  const effectiveMinDate: Date | null = minDate
-    ? minDate < LAW_MIN_DATE
-      ? LAW_MIN_DATE
-      : minDate
-    : LAW_MIN_DATE;
-  const effectiveMaxDate: Date | null = maxDate ?? null;
-
+  // ✅ selected prop 동기화
   useEffect(() => {
     if (selected !== selectedDate) {
       setSelectedDate(selected);
       if (selected) {
         setCurrentDate(selected);
         formatAndSetInputValue(selected);
+        // 값이 바뀌면 연도뷰 블록도 맞춰둠
+        setYearRange(getYearBlock(selected.getFullYear()));
       } else {
         setInputValue('');
       }
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selected]);
 
+  // ✅ 마운트 시 인풋값 초기화
   useEffect(() => {
     if (selectedDate) formatAndSetInputValue(selectedDate);
     else setInputValue('');
@@ -105,14 +122,11 @@ export default function CustomDatePicker({
   const updatePosition = () => {
     if (!inputContainerRef.current) return;
     const rect = inputContainerRef.current.getBoundingClientRect();
-    setPosition({
-      top: rect.bottom + 5, // fixed 기준이므로 scrollY 더하지 않음
-      left: rect.left,
-    });
+    setPosition({ top: rect.bottom + 5, left: rect.left });
     setDropdownWidth(rect.width);
   };
 
-  // 열려 있을 때 스크롤/리사이즈/리사이즈옵저버로 따라붙기
+  // 열려 있을 때 스크롤/리사이즈에 반응
   useEffect(() => {
     if (!isOpen) return;
     updatePosition();
@@ -220,7 +234,6 @@ export default function CustomDatePicker({
       let month = parts.length > 1 && parts[1] ? parseInt(parts[1].trim(), 10) - 1 : 0;
       let day = parts.length > 2 && parts[2] ? parseInt(parts[2].trim(), 10) : 1;
 
-      if (year < 2017 || year > currentYear + 5) year = currentYear;
       if (month < 0 || month > 11) month = 0;
       const lastDay = new Date(year, month + 1, 0).getDate();
       if (day < 1 || day > lastDay) day = 1;
@@ -276,39 +289,45 @@ export default function CustomDatePicker({
   };
 
   const handleYearSelect = (year: number) => {
-    const nowY = new Date().getFullYear();
-    if (year >= 2017 && year <= nowY + 5) {
-      const newDate = new Date(currentDate);
-      newDate.setFullYear(year);
-      setCurrentDate(newDate);
-      setView('month');
-    }
+    // 선택 제한은 month/day 단계에서 처리되므로, 여기서는 연도 이동만
+    const newDate = new Date(currentDate);
+    newDate.setFullYear(year);
+    setCurrentDate(newDate);
+    setView('month');
   };
 
   const handleNavigation = (direction: 'prev' | 'next') => {
     const newDate = new Date(currentDate);
-    const nowY = new Date().getFullYear();
-    if (view === 'day') newDate.setMonth(newDate.getMonth() + (direction === 'next' ? 1 : -1));
-    else if (view === 'month')
+
+    if (view === 'day') {
+      newDate.setMonth(newDate.getMonth() + (direction === 'next' ? 1 : -1));
+      setCurrentDate(newDate);
+      return;
+    }
+
+    if (view === 'month') {
       newDate.setFullYear(newDate.getFullYear() + (direction === 'next' ? 1 : -1));
-    else if (view === 'year') {
-      const [start, end] = yearRange;
-      const size = end - start + 1;
-      let ns = start + (direction === 'next' ? size : -size);
-      let ne = end + (direction === 'next' ? size : -size);
-      if (ns < 2017) {
-        ns = 2017;
-        ne = ns + size - 1;
-      }
-      if (ne > nowY + 5) {
-        ne = nowY + 5;
-        ns = ne - size + 1;
-        if (ns < 2017) ns = 2017;
-      }
+      setCurrentDate(newDate);
+      return;
+    }
+
+    // ✅ year 뷰: 12년 단위 이동, 마지막 블록은 2028~2035처럼 짧아도 그대로
+    if (view === 'year') {
+      const delta = direction === 'next' ? YEAR_BLOCK : -YEAR_BLOCK;
+
+      // 현재 블록 시작 연도만 12씩 이동
+      let [s] = yearRange;
+      let ns = s + delta;
+
+      // 블록 경계 클램프
+      const lastBlockStart = YEAR_MIN + Math.floor((YEAR_MAX - YEAR_MIN) / YEAR_BLOCK) * YEAR_BLOCK; // 2028
+      if (ns < YEAR_MIN) ns = YEAR_MIN;
+      if (ns > lastBlockStart) ns = lastBlockStart;
+
+      const ne = Math.min(ns + YEAR_BLOCK - 1, YEAR_MAX); // 끝은 잘려도 OK(예: 2028~2035)
       setYearRange([ns, ne]);
       return;
     }
-    setCurrentDate(newDate);
   };
 
   const getTitleText = () => {
@@ -366,7 +385,7 @@ export default function CustomDatePicker({
         </div>
         <div className="days-grid">
           {days.map((day, idx) => {
-            const today = isSameDay(day.date, new Date());
+            const today = isSameDay(day.date, TODAY);
             const sel = isSameDay(day.date, selectedDate);
             const dow = day.date.getDay();
             const disabled = isDateDisabled(day.date);
@@ -414,7 +433,7 @@ export default function CustomDatePicker({
           const monthFirstTs = new Date(currentDate.getFullYear(), i, 1).getTime();
           const monthLastTs = new Date(currentDate.getFullYear(), i + 1, 0).getTime();
 
-          const disabled = monthLastTs < min || monthFirstTs > max; // ✅ 모두 number
+          const disabled = monthLastTs < min || monthFirstTs > max;
           return (
             <div
               key={i}
@@ -444,29 +463,26 @@ export default function CustomDatePicker({
     );
   };
 
+  // ✅ 연도 뷰: 항상 12칸, 1980~2035 고정 / 선택만 비활성화
   const renderYearView = () => {
-    const nowY = new Date().getFullYear();
     const [startYear, endYear] = yearRange;
 
     const min = effectiveMinDate ? effectiveMinDate.getTime() : Number.NEGATIVE_INFINITY;
     const max = effectiveMaxDate ? effectiveMaxDate.getTime() : Number.POSITIVE_INFINITY;
 
     const years: { year: number; disabled: boolean }[] = [];
-    const actualStart = Math.max(2017, startYear);
-    const actualEnd = Math.min(nowY + 5, endYear);
-
-    for (let y = actualStart; y <= actualEnd; y++) {
+    for (let y = startYear; y <= endYear; y++) {
       const yearFirstTs = new Date(y, 0, 1).getTime();
       const yearLastTs = new Date(y, 11, 31).getTime();
-      const disabled = yearLastTs < min || yearFirstTs > max; // ✅ 모두 number
+      const disabled = yearLastTs < min || yearFirstTs > max;
       years.push({ year: y, disabled });
     }
 
     return (
       <div className="years-grid">
-        {years.map((y, i) => (
+        {years.map((y) => (
           <div
-            key={i}
+            key={y.year}
             className={[
               'year',
               currentDate.getFullYear() === y.year && 'selected',
@@ -477,11 +493,11 @@ export default function CustomDatePicker({
             onMouseDown={(e) => {
               if (y.disabled) {
                 e.preventDefault();
-                e.stopPropagation();
+                e.stopPropagation(); // ✅ 추가
                 return;
               }
               e.preventDefault();
-              e.stopPropagation();
+              e.stopPropagation(); // ✅ 추가
               handleYearSelect(y.year);
             }}
           >
@@ -519,10 +535,8 @@ export default function CustomDatePicker({
           <div
             className="calendar-header"
             onMouseDown={(e) => {
-              if (e.target === e.currentTarget) {
-                e.preventDefault();
-                e.stopPropagation();
-              }
+              e.preventDefault();
+              e.stopPropagation();
             }}
           >
             <button
@@ -541,7 +555,17 @@ export default function CustomDatePicker({
               onMouseDown={(e) => {
                 e.preventDefault();
                 e.stopPropagation();
-                setView((v) => (v === 'day' ? 'month' : v === 'month' ? 'year' : 'day'));
+                setView((v) => {
+                  if (v === 'day') return 'month';
+                  if (v === 'month') {
+                    // ⬇️ 연도뷰로 올라갈 때 블록 위치 결정
+                    const targetYear = selectedDate?.getFullYear() ?? currentDate.getFullYear();
+                    setYearRange(getYearBlock(targetYear));
+                    return 'year';
+                  }
+                  // year -> day 로 내릴 때는 현재 연도 유지
+                  return 'day';
+                });
               }}
             >
               {getTitleText()}
@@ -582,6 +606,9 @@ export default function CustomDatePicker({
           type="button"
           className="calendar-icon-button"
           onClick={() => {
+            // 열 때 연도뷰로 직접 들어올 수도 있으니, 현재 선택/오늘 기준으로 블록 정렬만 미리 맞춰둠
+            const baseYear = selectedDate?.getFullYear() ?? TODAY.getFullYear();
+            setYearRange(getYearBlock(baseYear));
             setIsOpen((v) => !v);
           }}
           aria-label="달력 열기"

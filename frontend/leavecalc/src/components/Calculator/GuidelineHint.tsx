@@ -7,7 +7,7 @@ export default function GuidelineHint() {
     <>
       {/* <div className="w-130 rounded-md border border-neutral-200 bg-neutral-50 px-3 py-2 text-sm text-neutral-600"> */}
       <div className="rounded-md border border-neutral-200 bg-neutral-50 px-3 py-2 text-sm text-neutral-600">
-        ※ 본 계산기는 참고용이며, 실제 적용은 회사 규정 및 관계 법령에 따릅니다.{' '}
+        ※ 본 계산기는 참고용이며, 실제 발생일수는 회사 규정 및 관계 법령에 따라 상이할 수 있습니다.
         <button className="ml-1 underline" onClick={() => setOpen(true)}>
           자세히 보기
         </button>
