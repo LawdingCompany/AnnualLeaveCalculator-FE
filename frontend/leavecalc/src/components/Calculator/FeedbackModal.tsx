@@ -20,7 +20,7 @@ const API_BASE = import.meta.env.VITE_API_BASE;
 async function postFeedback(payload: {
   type: string; // ✅ API에 보내는 건 Enum 문자열
   content: string;
-  requestId?: string;
+  calculationId?: string;
   email?: string;
   rating?: number; // 1~5
 }) {
@@ -230,7 +230,7 @@ export default function FeedbackModal({
       await postFeedback({
         type: FeedbackTypeMap[type], // ✅ 매핑된 Enum 전송
         content: content.trim(),
-        requestId: includeReqId && calculationId ? calculationId : undefined,
+        calculationId: includeReqId && calculationId ? calculationId : undefined,
         email: email.trim() ? email.trim() : undefined,
         rating: rating > 0 ? rating : undefined,
       });
