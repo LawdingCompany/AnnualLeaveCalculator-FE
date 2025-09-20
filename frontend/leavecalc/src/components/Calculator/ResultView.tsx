@@ -88,7 +88,7 @@ export default function ResultView() {
       <FeedbackModal
         open={feedbackOpen}
         onClose={() => setFeedbackOpen(false)}
-        requestId={(r as any)?.requestId ?? undefined}
+        calculationId={r.calculationId}
       />
 
       {/* ✅ prop 이름을 initialSection으로 변경, key로 탭 초기화 보장 */}

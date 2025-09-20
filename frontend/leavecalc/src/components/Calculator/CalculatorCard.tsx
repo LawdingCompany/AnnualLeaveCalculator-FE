@@ -29,7 +29,11 @@ async function postCalculate(payload: ApiPayload) {
 
   const res = await fetch(url, {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
+    headers: {
+      'Content-Type': 'application/json',
+      Accept: 'application/json',
+      'X-Platform': 'web',
+    },
     body: JSON.stringify(payload),
   });
   if (!res.ok) {

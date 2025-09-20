@@ -70,6 +70,17 @@ export interface ApiPayload {
   companyHolidays?: string[]; // 🔹 선택: 빈 배열이면 생략
 }
 
+// src/components/Calculator/feedbackTypes.ts
+export type FeedbackTypeUI = '오류제보' | '개선요청' | '문의' | '기타';
+export type FeedbackTypeApi = 'ERROR_REPORT' | 'IMPROVEMENT' | 'QUESTION' | 'OTHER';
+
+export const FeedbackTypeMap: Record<FeedbackTypeUI, FeedbackTypeApi> = {
+  오류제보: 'ERROR_REPORT',
+  개선요청: 'IMPROVEMENT',
+  문의: 'QUESTION',
+  기타: 'OTHER',
+};
+
 /** UI용 스키마 검증 */
 export const uiPayloadSchema = z.object({
   calculationType: z.union([z.literal(1), z.literal(2)]),
