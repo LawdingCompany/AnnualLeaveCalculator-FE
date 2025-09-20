@@ -61,6 +61,10 @@ function getYearBlock(targetYear: number): [number, number] {
   return [start, end];
 }
 
+function isMobileDevice() {
+  return /Mobi|Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+}
+
 export default function CustomDatePicker({
   selected,
   onChange,
@@ -94,6 +98,7 @@ export default function CustomDatePicker({
   const inputRef = useRef<HTMLInputElement>(null);
   const calendarRef = useRef<HTMLDivElement>(null);
   const inputContainerRef = useRef<HTMLDivElement>(null);
+  const isMobile = isMobileDevice();
 
   // ✅ selected prop 동기화
   useEffect(() => {
@@ -211,7 +216,10 @@ export default function CustomDatePicker({
     setInputValue(formattedValue);
   };
 
-  const handleInputClick = () => setIsOpen(true);
+  const handleInputClick = () => {
+    if (isMobile) return; // ✅ 모바일이면 커스텀 달력 안 열림
+    setIsOpen(true);
+  };
 
   const isDateInRange = (date: Date): boolean => {
     const t = date.getTime();
