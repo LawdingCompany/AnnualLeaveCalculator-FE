@@ -323,7 +323,7 @@ export default function FeedbackModal({
 
                 {/* 만족도 */}
                 <section className="grid gap-1.5">
-                  <label className="text-sm font-medium text-neutral-800">만족도 (선택)</label>
+                  <label className="text-sm font-medium text-neutral-800">만족도(선택)</label>
                   <RatingBar value={rating} onChange={setRating} disabled={pending} />
                 </section>
 
