@@ -20,6 +20,7 @@ export interface NonWorkingPeriod {
 
 /** 공통 응답 필드 */
 export interface BaseResult {
+  calculationId: string;
   calculationType: 'HIRE_DATE' | 'FISCAL_YEAR';
   /** 'MM-DD' (FISCAL_YEAR일 때만 존재) */
   fiscalYear?: string;

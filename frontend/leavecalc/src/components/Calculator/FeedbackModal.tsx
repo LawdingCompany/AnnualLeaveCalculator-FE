@@ -1,32 +1,33 @@
-// FeedbackModal.tsx
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { CheckCircle2, Loader2, X, Sparkles, Star } from 'lucide-react';
+import { FeedbackTypeUI, FeedbackTypeMap } from './types';
 
 export interface FeedbackModalProps {
   open: boolean;
   onClose: () => void;
   onSubmitted?: () => void;
   /** 백엔드가 내려주는 현재 계산 요청의 식별자 (UUID 등) */
-  requestId?: string;
+  calculationId?: string;
 }
-
-type FeedbackType = '오류제보' | '개선요청' | '문의' | '기타';
 
 const FIELD_CLS =
   'w-full rounded-lg border px-3 py-2.5 text-sm outline-none ' +
   'border-neutral-200 focus:border-blue-600 ' +
   'focus:shadow-[0_0_0_3px_rgba(59,130,246,0.12)] bg-white';
 
+const API_BASE = import.meta.env.VITE_API_BASE;
+
 async function postFeedback(payload: {
-  type: FeedbackType;
+  type: string; // ✅ API에 보내는 건 Enum 문자열
   content: string;
   requestId?: string;
   email?: string;
   rating?: number; // 1~5
 }) {
-  const res = await fetch('/api/feedback', {
+  const url = `${API_BASE}/annual-leaves/feedback`;
+  const res = await fetch(url, {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+    headers: { 'Content-Type': 'application/json', 'X-Platform': 'web' },
     body: JSON.stringify(payload),
   });
   if (!res.ok) throw new Error('Failed to send feedback');
@@ -45,7 +46,7 @@ function Segmented({
   value: string;
   onChange: (v: string) => void;
   disabled?: boolean;
-  options: { value: FeedbackType; label: string }[];
+  options: { value: FeedbackTypeUI; label: string }[];
 }) {
   return (
     <div
@@ -80,7 +81,7 @@ function Segmented({
 }
 
 /** ───────────────────────────────────────────────────────────
- *  만족도 바(5단계) : 키보드/마우스 지원
+ *  만족도 바(5단계)
  *  ─────────────────────────────────────────────────────────── */
 function RatingBar({
   value,
@@ -149,6 +150,7 @@ function RatingBar({
     </div>
   );
 }
+
 /** ───────────────────────────────────────────────────────────
  *  본문 길이 프로그레스바
  *  ─────────────────────────────────────────────────────────── */
@@ -173,18 +175,19 @@ export default function FeedbackModal({
   open,
   onClose,
   onSubmitted,
-  requestId,
+  calculationId,
 }: FeedbackModalProps) {
   if (!open) return null;
 
-  const [type, setType] = useState<FeedbackType>('오류제보');
+  // ✅ 훅은 컴포넌트 안에서 선언
+  const [type, setType] = useState<FeedbackTypeUI>('오류제보');
   const [content, setContent] = useState('');
   const [email, setEmail] = useState('');
   const [rating, setRating] = useState<number>(0);
   const [pending, setPending] = useState(false);
   const [done, setDone] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [includeReqId, setIncludeReqId] = useState<boolean>(!!requestId);
+  const [includeReqId, setIncludeReqId] = useState<boolean>(!!calculationId);
 
   const invalidEmail = useMemo(() => {
     if (!email.trim()) return false;
@@ -199,20 +202,19 @@ export default function FeedbackModal({
 
   const firstFocusRef = useRef<HTMLButtonElement | null>(null);
 
-  // ✅ 모달이 열릴 때마다(= mount 될 때마다) 초기화
+  // 모달 초기화
   useEffect(() => {
     setPending(false);
     setDone(false);
     setError(null);
-    setIncludeReqId(!!requestId);
+    setIncludeReqId(!!calculationId);
     setRating(0);
-    setType('오류제보'); // ✅ 항상 오류제보로 시작
+    setType('오류제보');
     const t = setTimeout(() => firstFocusRef.current?.focus(), 0);
     return () => clearTimeout(t);
-    // 의존성 없음: 닫히면 언마운트되고, 다시 열릴 때 새로 mount됨
-  }, []);
+  }, [calculationId]);
 
-  // ✅ ESC 닫기 (열린 동안만 존재; 닫히면 언마운트되어 자동 해제)
+  // ESC 닫기
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => e.key === 'Escape' && onClose();
     window.addEventListener('keydown', onKey);
@@ -226,9 +228,9 @@ export default function FeedbackModal({
     setError(null);
     try {
       await postFeedback({
-        type,
+        type: FeedbackTypeMap[type], // ✅ 매핑된 Enum 전송
         content: content.trim(),
-        requestId: includeReqId && requestId ? requestId : undefined,
+        requestId: includeReqId && calculationId ? calculationId : undefined,
         email: email.trim() ? email.trim() : undefined,
         rating: rating > 0 ? rating : undefined,
       });
@@ -241,25 +243,9 @@ export default function FeedbackModal({
     }
   };
 
-  const shortId =
-    requestId && requestId.length > 12
-      ? `${requestId.slice(0, 8)}…${requestId.slice(-4)}`
-      : (requestId ?? '');
-
-  const copyId = async () => {
-    if (!requestId) return;
-    try {
-      await navigator.clipboard.writeText(requestId);
-    } catch {
-      /* ignore */
-    }
-  };
-
-  if (!open) return null;
-
   return (
     <div className="fixed inset-0 z-[60]">
-      {/* Backdrop with blur */}
+      {/* Backdrop */}
       <div className="absolute inset-0 bg-black/40 backdrop-blur-[1px]" onClick={onClose} />
 
       {/* Modal */}
@@ -310,7 +296,7 @@ export default function FeedbackModal({
                   <label className="text-sm font-medium text-neutral-800">유형</label>
                   <Segmented
                     value={type}
-                    onChange={(v) => setType(v as FeedbackType)}
+                    onChange={(v) => setType(v as FeedbackTypeUI)}
                     disabled={pending}
                     options={[
                       { value: '오류제보', label: '오류 제보' },
@@ -335,15 +321,13 @@ export default function FeedbackModal({
                   <LengthGauge length={content.length} max={1000} />
                 </section>
 
-                {/* 만족도 (선택) */}
+                {/* 만족도 */}
                 <section className="grid gap-1.5">
-                  <div className="flex items-center justify-between">
-                    <label className="text-sm font-medium text-neutral-800">만족도 (선택)</label>
-                  </div>
+                  <label className="text-sm font-medium text-neutral-800">만족도 (선택)</label>
                   <RatingBar value={rating} onChange={setRating} disabled={pending} />
                 </section>
 
-                {/* 이메일 (선택) */}
+                {/* 이메일 */}
                 <section className="grid gap-1.5">
                   <label className="text-sm font-medium text-neutral-800">
                     답변 받을 이메일(선택)
@@ -369,48 +353,29 @@ export default function FeedbackModal({
                   )}
                 </section>
 
-                {/* 현재 계산 정보(요청 ID) */}
-                <section className="flex items-center gap-2">
-                  <input
-                    id="include-reqid"
-                    type="checkbox"
-                    className="h-4 w-4 rounded border-neutral-300"
-                    checked={!!requestId && includeReqId}
-                    disabled={!requestId || pending}
-                    onChange={(e) => setIncludeReqId(e.target.checked)}
-                  />
-                  <label htmlFor="include-reqid" className="text-sm text-neutral-800">
-                    현재 계산 정보와 함께 문의 보내기
-                  </label>
-
-                  <div className="ml-auto flex items-center gap-2">
-                    {requestId ? (
-                      <>
-                        <code className="rounded-md bg-neutral-50 px-2 py-[3px] text-xs text-neutral-700 border border-neutral-200">
-                          {shortId}
-                        </code>
-                        <button
-                          type="button"
-                          onClick={copyId}
-                          className="rounded-md border border-neutral-300 px-2 py-1 text-xs hover:bg-neutral-50"
-                          title="요청 ID 복사"
-                          disabled={pending}
-                        >
-                          복사
-                        </button>
-                      </>
-                    ) : (
-                      <small className="text-xs text-neutral-500">요청 ID가 없습니다</small>
-                    )}
-                  </div>
-                </section>
+                {/* 계산 정보 체크 */}
+                {calculationId && (
+                  <section className="flex items-center gap-2">
+                    <input
+                      id="include-reqid"
+                      type="checkbox"
+                      className="h-4 w-4 rounded border-neutral-300"
+                      checked={includeReqId}
+                      disabled={pending}
+                      onChange={(e) => setIncludeReqId(e.target.checked)}
+                    />
+                    <label htmlFor="include-reqid" className="text-sm text-neutral-800">
+                      현재 계산 정보와 함께 문의 보내기
+                    </label>
+                  </section>
+                )}
 
                 {error && <div className="text-sm text-red-600">{error}</div>}
               </div>
             )}
           </div>
 
-          {/* Sticky Footer */}
+          {/* Footer */}
           <footer className="sticky bottom-0 flex items-center justify-end gap-2 border-t border-neutral-200 bg-white/95 px-5 py-4 backdrop-blur">
             {done ? (
               <button
