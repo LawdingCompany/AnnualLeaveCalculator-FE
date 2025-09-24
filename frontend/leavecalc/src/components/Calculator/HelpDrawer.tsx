@@ -129,7 +129,7 @@ export default function HelpDrawer({
           </nav>
 
           {/* Content */}
-          <div className="space-y-8 p-4">
+          <div className="space-y-8 p-4 break-keep">
             {/* 1) 서비스 설명 */}
             <section ref={secAccuracyRef} aria-labelledby="sec-accuracy">
               <div className="flex items-center gap-2">
@@ -146,15 +146,11 @@ export default function HelpDrawer({
                   <ul className="list-disc pl-5 mt-1 text-neutral-800">
                     <li>
                       입사일 기준 / 회계연도 기준을 선택하면,{' '}
-                      <b>
-                        입사일부터 <br />
-                        산정 기준일까지의 기간을 자동 계산
-                      </b>
+                      <b>입사일부터 산정 기준일까지의 기간을 자동 계산</b>
                       합니다.
                     </li>
                     <li>
                       근로기준법 제60조에 따른 산정 방식을 충실히 반영하여,
-                      <br />
                       <b> 법적 기준에 맞는 정확한 연차 산정</b>을 도와드립니다.
                     </li>
                   </ul>
@@ -166,11 +162,11 @@ export default function HelpDrawer({
                       연차 계산의 핵심은 단순히 365일이 아니라, <b>소정근로일수</b>입니다.
                     </li>
                     <li>
-                      본 계산기는 실제 근무의무가 없는 날(예: 법정공휴일, 토요일, <br />
-                      회사 창립기념일, 노동조합 창립기념일 등)을 <b>자동으로 제외</b>합니다.
+                      본 계산기는 실제 근무의무가 없는 날(예: 법정공휴일, 토요일, 회사 창립기념일,
+                      노동조합 창립기념일 등)을 <b>자동으로 제외</b>합니다.
                     </li>
                     <li>
-                      이를 통해 <b>출근율·연차일수 모두 현실과 일치하는 정밀한 결과</b>를 <br />
+                      이를 통해 <b>출근율·연차일수 모두 현실과 일치하는 정밀한 결과</b>를
                       제공합니다.
                     </li>
                   </ul>
@@ -179,14 +175,11 @@ export default function HelpDrawer({
                   <b>최신 법령·행정해석 반영</b>
                   <ul className="list-disc pl-5 mt-1 text-neutral-800">
                     <li>
-                      최근 개정된 법령과 <b>고용노동부 행정해석, 법제처 유권해석</b>을
-                      <br />
-                      반영했습니다.
+                      최근 개정된 법령과 <b>고용노동부 행정해석, 법제처 유권해석</b>을 반영했습니다.
                     </li>
                     <li>
                       판례와 행정해석이 바뀌어도 업데이트를 통해 즉시 반영하여,
-                      <br />
-                      <b>최신 기준에 맞는 연차 산정</b>을 보장합니다.
+                      <b> 최신 기준에 맞는 연차 산정</b>을 보장합니다.
                     </li>
                   </ul>
                 </li>
@@ -194,8 +187,8 @@ export default function HelpDrawer({
 
               <Note>
                 본 서비스는 법령·행정해석을 기술적으로 구현해{' '}
-                <span className="underline">연차휴가를 정확하게 산정합니다</span>.<br /> 다만, 개별
-                회사 규정에 따라 <span className="underline">부여되는 연차휴가</span>가 달라질 수
+                <span className="underline">연차휴가를 정확하게 산정합니다</span>. 다만, 개별 회사
+                규정에 따라 <span className="underline">부여되는 연차휴가</span>가 달라질 수
                 있으므로 결과 비교 시 기준 차이를 확인하세요
               </Note>
             </section>
@@ -214,8 +207,8 @@ export default function HelpDrawer({
               </div>
               <ul className="list-disc space-y-1 pl-5 text-sm text-neutral-800">
                 <li>
-                  특이기간은 <b>출근처리 / 결근처리 / 소정근로제외</b> 세 범주로 나뉘며, <br />각
-                  범주에 따라 출근율/연차 산정에 다르게 반영됩니다.
+                  특이기간은 <b>출근처리 / 결근처리 / 소정근로제외</b> 세 범주로 나뉘며, 각 범주에
+                  따라 출근율/연차 산정에 다르게 반영됩니다.
                 </li>
               </ul>
               <LeaveTypeTable />
@@ -235,42 +228,41 @@ export default function HelpDrawer({
               </div>
               <div className="space-y-3 text-sm leading-6 text-neutral-800">
                 <GlossaryItem term="월차">
-                  근로기준법 제60조 제1항에 따라 <b>근무기간이 1년 미만</b>이거나 <br />
+                  근로기준법 제60조 제1항에 따라 <b>근무기간이 1년 미만</b>이거나{' '}
                   <b>출근율이 80% 미만</b>인 근로자에게 발생하는 연차를 의미합니다.
                 </GlossaryItem>
 
                 <GlossaryItem term="연차">
-                  근로기준법 제60조 제2항에 따라 <b>근무기간 1년 이상</b>이고 <br />
-                  전년도 연차산정기간 동안 <b>출근율 80% 이상</b>인 경우 지급되는 연차를 <br />
-                  말합니다.
+                  근로기준법 제60조 제2항에 따라 <b>근무기간 1년 이상</b>이고 전년도 연차산정기간
+                  동안 <b>출근율 80% 이상</b>인 경우 지급되는 연차를 말합니다.
                 </GlossaryItem>
 
                 <GlossaryItem term="비례연차">
                   <b>회계연도 기준</b>으로 연차를 운영하는 회사에서, 입사연도에 대해
                   <br />
-                  <b>회계연도 시작일에 입사연도 출근일수(혹은 재직일수)에 비례</b>하여 <br />
-                  부여되는 연차입니다.
+                  <b>회계연도 시작일에 입사연도 출근일수(혹은 재직일수)에 비례</b>하여 부여되는
+                  연차입니다.
                 </GlossaryItem>
 
                 <GlossaryItem term="소정근로일">
-                  <b>근로를 제공하기로 정한 날(근무일)</b>을 의미합니다.
-                  <br /> 휴일·휴직기간·휴업기간 등은 소정근로일에서 제외합니다.
+                  <b>근로를 제공하기로 정한 날(근무일)</b>을 의미합니다. 휴일·휴직기간·휴업기간 등은
+                  소정근로일에서 제외합니다.
                 </GlossaryItem>
 
                 <GlossaryItem term="출근율">
-                  소정근로일 중 실제로 <b>출근한 비율</b>을 의미합니다. <br />
-                  소정근로 제외기간이 있다면 그 기간은 출근율 산정에서 제외됩니다.
+                  소정근로일 중 실제로 <b>출근한 비율</b>을 의미합니다. 소정근로 제외기간이 있다면
+                  그 기간은 출근율 산정에서 제외됩니다.
                   <div className="mt-2 rounded-md bg-neutral-50 px-3 py-2 text-[12px] text-neutral-600">
-                    예) 2025.01.01 ~ 2025.12.31 결근 없이 근무, <br />
-                    다만 2025.03.01 ~ 2025.04.30 이 소정근로제외기간이라면 <br />
-                    해당 기간을 제외하고 계산하므로 <b>출근율은 100%</b>로 산정됩니다.
+                    예) 2025.01.01 ~ 2025.12.31 결근 없이 근무, 다만 2025.03.01 ~ 2025.04.30 이
+                    소정근로제외기간이라면 해당 기간을 제외하고 계산하므로 <b>출근율은 100%</b>로
+                    산정됩니다.
                   </div>
                 </GlossaryItem>
 
                 <GlossaryItem term="비례율">
-                  비례연차를 산정할 때 적용하는 <b>비율</b>을 의미합니다.
-                  <br /> 입사연도 동안의 <b>실제 재직일수 ÷ 회계연도 전체 일수</b>로 계산하며,{' '}
-                  <br />이 비례율을 곱해 연차일수를 산출합니다.
+                  비례연차를 산정할 때 적용하는 <b>비율</b>을 의미합니다. 입사연도 동안의{' '}
+                  <b>실제 재직일수 ÷ 회계연도 전체 일수</b>로 계산하며, 이 비례율을 곱해 연차일수를
+                  산출합니다.
                   <div className="mt-2 rounded-md bg-neutral-50 px-3 py-2 text-[12px] text-neutral-600">
                     예) 회계연도 365일 중 100일 재직 → 비례율 = 100 ÷ 365 ≈ 0.27 <br />→ 해당
                     비율만큼 연차가 부여됨
@@ -296,8 +288,7 @@ export default function HelpDrawer({
                 <p className="font-medium">사장님·인사담당자님들을 위한 유의사항</p>
                 <ul className="list-disc space-y-1 pl-5">
                   <li>
-                    소수점 단위 연차유급휴가는 <b>“반올림”</b>하는 경우 <b>법 위반</b>이 될 수{' '}
-                    <br />
+                    소수점 단위 연차유급휴가는 <b>“반올림”</b>하는 경우 <b>법 위반</b>이 될 수
                     있어요.
                   </li>
                 </ul>
@@ -313,12 +304,9 @@ export default function HelpDrawer({
 
                 <p className="text-[13px] text-neutral-700">
                   법 기준 이상으로 주는 건 괜찮지만, 법 기준 이하로 연차를 지급할 경우
-                  <br />
                   <b>2년 이하의 징역 또는 2천만원 이하의 벌금</b>(<b>근로기준법 제110조</b>)이
-                  부과될 수 <br />
-                  있으며 적법한 연차유급휴가 수당 청구를 거부할 경우 <b>
-                    임금체불로 형사상 책임
-                  </b>을 <br />질 수 있습니다.
+                  부과될 수 있으며 적법한 연차유급휴가 수당 청구를 거부할 경우{' '}
+                  <b>임금체불로 형사상 책임</b>을 질 수 있습니다.
                 </p>
               </div>
             </section>
@@ -337,18 +325,14 @@ export default function HelpDrawer({
               </div>
               <div className="space-y-2 text-[13px] leading-6 text-neutral-700">
                 <p>
-                  이 웹사이트에서 산출된 내역은 연차유급휴가 산정에 <b>참고 목적으로 제공</b>된{' '}
-                  <br />
-                  것입니다. 법률적 자문이나 해석을 위한 자료가 아니며, 제작자는 그 결과에 대해{' '}
-                  <br />
+                  이 웹사이트에서 산출된 내역은 연차유급휴가 산정에 <b>참고 목적으로 제공</b>된
+                  것입니다. 법률적 자문이나 해석을 위한 자료가 아니며, 제작자는 그 결과에 대해
                   어떠한 책임도 지지 않습니다.
                 </p>
                 <p>
                   구체적인 사안이나 사건과 관련해서는 본 사이트 내용을 근거로 어떠한 행위(작위 또는
                   부작위)도 하지 마시기 바랍니다. 어떠한 행위라도{' '}
-                  <b>
-                    본 제작자는 민·형사상 <br /> 책임을 지지 않습니다.
-                  </b>
+                  <b>본 제작자는 민·형사상 책임을 지지 않습니다.</b>
                 </p>
                 <div className="rounded-md bg-neutral-50 p-3 text-[12px] text-neutral-600">
                   * 최종 해석 및 적용은 회사 규정과 관계 법령에 따릅니다.
