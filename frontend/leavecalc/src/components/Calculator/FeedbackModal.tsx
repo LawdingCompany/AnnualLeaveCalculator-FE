@@ -337,7 +337,7 @@ export default function FeedbackModal({
                     inputMode="email"
                     autoComplete="email"
                     className={FIELD_CLS}
-                    placeholder="example@company.com"
+                    placeholder="example@email.com"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     disabled={pending}
