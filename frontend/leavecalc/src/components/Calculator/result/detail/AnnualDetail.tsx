@@ -31,7 +31,7 @@ export default function AnnualDetail({ detail }: { detail: AnnualDetailModel }) 
             {
               kind: 'row',
               label: '근속연수',
-              value: detail.serviceYears != null ? `${detail.serviceYears} 년` : '-',
+              value: detail.serviceYears != null ? `${detail.serviceYears} 년차` : '-',
             },
             {
               kind: 'row',

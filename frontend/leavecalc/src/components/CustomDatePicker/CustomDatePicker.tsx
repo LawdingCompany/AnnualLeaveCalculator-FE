@@ -171,49 +171,97 @@ export default function CustomDatePicker({
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, [isOpen]);
 
-  const formatDate = (date: Date): string => {
+  // 날짜 → 문자열 포맷 후 inputValue 갱신
+  const formatAndSetInputValue = (date: Date) => {
     const y = date.getFullYear();
     const m = String(date.getMonth() + 1).padStart(2, '0');
     const d = String(date.getDate()).padStart(2, '0');
-    return `${y}.${m}.${d}`;
-  };
-  const formatAndSetInputValue = (date: Date) => {
-    setInputValue(formatDate(date));
+    setInputValue(`${y}.${m}.${d}`);
   };
 
-  const formatDateString = (input: string): string => {
-    const digitsOnly = input.replace(/[^\d.]/g, '');
-    const numbers = digitsOnly.replace(/\./g, '');
-    if (numbers.length === 0) return '';
-    let formatted = '';
-    if (numbers.length > 0) {
-      const yearPart = numbers.substring(0, Math.min(4, numbers.length));
-      formatted = yearPart;
-      if (numbers.length > 4) {
-        formatted += '.';
-        const monthPart = numbers.substring(4, Math.min(6, numbers.length));
-        let monthNum = parseInt(monthPart, 10);
-        if (monthPart.length === 2 && monthNum > 12) monthNum = 12;
-        formatted += monthNum.toString().padStart(monthPart.length, '0');
-        if (numbers.length > 6) {
-          formatted += '.';
-          const dayPart = numbers.substring(6, Math.min(8, numbers.length));
-          let dayNum = parseInt(dayPart, 10);
-          const yearNum = parseInt(formatted.split('.')[0], 10);
-          const monthIndex = parseInt(formatted.split('.')[1], 10) - 1;
-          const lastDayOfMonth = new Date(yearNum, monthIndex + 1, 0).getDate();
-          if (dayPart.length === 2 && dayNum > lastDayOfMonth) dayNum = lastDayOfMonth;
-          else if (dayNum === 0 && dayPart.length > 0) dayNum = 1;
-          formatted += dayNum.toString().padStart(dayPart.length, '0');
-        }
-      }
-    }
-    return formatted;
-  };
+  // ✅ 숫자 → YYYY.MM.DD 로 변환 (문자열 그대로, 0 보존)
+  function splitDigitsToYMD(digits: string): { y?: string; m?: string; d?: string } {
+    const n = digits.length;
+    if (n < 4) return {};
+    const y = digits.slice(0, 4);
 
+    if (n >= 8) return { y, m: digits.slice(4, 6), d: digits.slice(6, 8) };
+    if (n === 7) return { y, m: digits.slice(4, 5), d: digits.slice(5, 7) };
+    if (n === 6) return { y, m: digits.slice(4, 5), d: digits.slice(5, 6) };
+    if (n === 5) return { y, m: digits.slice(4, 5) };
+    return { y };
+  }
+
+  function clampYMD(y?: string, m?: string, d?: string) {
+    if (!y) return {};
+    // 👇 여기서 문자열 → 숫자 변환
+    const yy = Number(y);
+    let mm = m ? Number(m) : 1;
+    let dd = d ? Number(d) : 1;
+
+    if (mm < 1) mm = 1;
+    if (mm > 12) mm = 12;
+    const last = new Date(yy, mm, 0).getDate();
+    if (dd < 1) dd = 1;
+    if (dd > last) dd = last;
+    return { y: yy, m: mm, d: dd };
+  }
+
+  // ✅ 입력 중 포맷팅 (앞자리 0 유지, 불완전 입력시 padStart 안함)
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const formattedValue = formatDateString(e.target.value);
-    setInputValue(formattedValue);
+    const raw = e.target.value;
+    const digits = raw.replace(/\D/g, '');
+
+    if (digits.length < 4) {
+      setInputValue(digits);
+      return;
+    }
+
+    const { y, m, d } = splitDigitsToYMD(digits);
+    if (!y) {
+      setInputValue(digits);
+      return;
+    }
+
+    let view = `${y}`;
+
+    // ⚙️ 월 처리
+    if (m) {
+      // 한 자리면 아직 입력 중이니까 그대로 두고
+      // 두 자리면 padStart로 고정
+      const mm = m.length === 1 ? m : m.padStart(2, '0');
+      view += `.${mm}`;
+    }
+
+    // ⚙️ 일 처리
+    if (d) {
+      const dd = d.length === 1 ? d : d.padStart(2, '0');
+      view += `.${dd}`;
+    }
+
+    setInputValue(view);
+  };
+
+  // ✅ blur 시 확정 + 보정(월/일/윤년)
+  const handleInputBlur = () => {
+    const digits = inputValue.replace(/\D/g, '');
+    if (digits.length < 6) return; // 불완전 입력은 확정 안 함
+
+    const spl = splitDigitsToYMD(digits);
+    if (!spl.y) return;
+    const { y, m, d } = clampYMD(spl.y, spl.m, spl.d);
+    if (!y || !m || !d) return;
+
+    let newDate = new Date(y, m - 1, d);
+    if (!isDateInRange(newDate)) {
+      if (effectiveMinDate && newDate < effectiveMinDate) newDate = effectiveMinDate;
+      if (effectiveMaxDate && newDate > effectiveMaxDate) newDate = effectiveMaxDate;
+    }
+
+    const padded = `${y}.${String(m).padStart(2, '0')}.${String(d).padStart(2, '0')}`;
+    setInputValue(padded);
+    setSelectedDate(newDate);
+    onChange?.(newDate);
   };
 
   const handleInputClick = () => {
@@ -229,56 +277,6 @@ export default function CustomDatePicker({
   };
 
   const isDateDisabled = (date: Date): boolean => !isDateInRange(date);
-
-  const handleInputBlur = () => {
-    try {
-      if (inputValue.trim() === '') {
-        setSelectedDate(null);
-        onChange?.(null);
-        return;
-      }
-      const parts = inputValue.split('.');
-      let year = parts[0] ? parseInt(parts[0].trim(), 10) : currentYear;
-      let month = parts.length > 1 && parts[1] ? parseInt(parts[1].trim(), 10) - 1 : 0;
-      let day = parts.length > 2 && parts[2] ? parseInt(parts[2].trim(), 10) : 1;
-
-      if (month < 0 || month > 11) month = 0;
-      const lastDay = new Date(year, month + 1, 0).getDate();
-      if (day < 1 || day > lastDay) day = 1;
-
-      const newDate = new Date(year, month, day);
-      if (!isNaN(newDate.getTime())) {
-        if (isDateInRange(newDate)) {
-          setSelectedDate(newDate);
-          setCurrentDate(newDate);
-          onChange?.(newDate);
-          formatAndSetInputValue(newDate);
-        } else {
-          if (effectiveMinDate && newDate < effectiveMinDate) {
-            setSelectedDate(effectiveMinDate);
-            setCurrentDate(effectiveMinDate);
-            onChange?.(effectiveMinDate);
-            formatAndSetInputValue(effectiveMinDate);
-          } else if (effectiveMaxDate && newDate > effectiveMaxDate) {
-            setSelectedDate(effectiveMaxDate);
-            setCurrentDate(effectiveMaxDate);
-            onChange?.(effectiveMaxDate);
-            formatAndSetInputValue(effectiveMaxDate);
-          } else if (selectedDate) {
-            formatAndSetInputValue(selectedDate);
-          } else {
-            setInputValue('');
-          }
-        }
-      } else {
-        if (selectedDate) formatAndSetInputValue(selectedDate);
-        else setInputValue('');
-      }
-    } catch {
-      if (selectedDate) formatAndSetInputValue(selectedDate);
-      else setInputValue('');
-    }
-  };
 
   const handleDateSelect = (date: Date) => {
     if (isDateDisabled(date)) return;
