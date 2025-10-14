@@ -71,13 +71,19 @@ export interface ApiPayload {
 }
 
 // src/components/Calculator/feedbackTypes.ts
-export type FeedbackTypeUI = '오류제보' | '개선요청' | '문의' | '기타';
-export type FeedbackTypeApi = 'ERROR_REPORT' | 'IMPROVEMENT' | 'QUESTION' | 'OTHER';
+export type FeedbackTypeUI = '오류제보' | '개선요청' | '문의' | '이용 후기' | '기타';
+export type FeedbackTypeApi =
+  | 'ERROR_REPORT'
+  | 'IMPROVEMENT'
+  | 'QUESTION'
+  | 'SATISFACTION'
+  | 'OTHER';
 
 export const FeedbackTypeMap: Record<FeedbackTypeUI, FeedbackTypeApi> = {
   오류제보: 'ERROR_REPORT',
   개선요청: 'IMPROVEMENT',
   문의: 'QUESTION',
+  '이용 후기': 'SATISFACTION',
   기타: 'OTHER',
 };
 

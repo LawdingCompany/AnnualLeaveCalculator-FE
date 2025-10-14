@@ -196,10 +196,14 @@ export default function FeedbackModal({
   }, [email]);
 
   const canSubmit = useMemo(
-    () => !pending && content.trim().length >= 5 && !invalidEmail,
-    [pending, content, invalidEmail],
+    () =>
+      !pending &&
+      type.trim().length > 0 && // ✅ 유형 선택됨
+      rating > 0 && // ✅ 만족도 선택됨
+      content.trim().length >= 5 && // ✅ 내용 5자 이상
+      !invalidEmail,
+    [pending, type, rating, content, invalidEmail],
   );
-
   const firstFocusRef = useRef<HTMLButtonElement | null>(null);
 
   // 모달 초기화
@@ -302,9 +306,16 @@ export default function FeedbackModal({
                       { value: '오류제보', label: '오류 제보' },
                       { value: '문의', label: '서비스 문의' },
                       { value: '개선요청', label: '개선 요청' },
+                      { value: '이용 후기', label: '이용 후기' },
                       { value: '기타', label: '기타' },
                     ]}
                   />
+                </section>
+
+                {/* 만족도 */}
+                <section className="grid gap-1.5">
+                  <label className="text-sm font-medium text-neutral-800">만족도</label>
+                  <RatingBar value={rating} onChange={setRating} disabled={pending} />
                 </section>
 
                 {/* 내용 */}
@@ -319,12 +330,6 @@ export default function FeedbackModal({
                     disabled={pending}
                   />
                   <LengthGauge length={content.length} max={1000} />
-                </section>
-
-                {/* 만족도 */}
-                <section className="grid gap-1.5">
-                  <label className="text-sm font-medium text-neutral-800">만족도(선택)</label>
-                  <RatingBar value={rating} onChange={setRating} disabled={pending} />
                 </section>
 
                 {/* 이메일 */}

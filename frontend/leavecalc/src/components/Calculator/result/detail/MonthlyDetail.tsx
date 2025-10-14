@@ -55,7 +55,7 @@ export default function MonthlyDetail({ detail }: { detail: MonthlyDetailModel }
             {
               kind: 'row',
               label: '근속연수',
-              value: typeof detail?.serviceYears === 'number' ? `${detail.serviceYears} 년` : '-',
+              value: typeof detail?.serviceYears === 'number' ? `${detail.serviceYears} 년차` : '-',
             },
             {
               kind: 'row',
