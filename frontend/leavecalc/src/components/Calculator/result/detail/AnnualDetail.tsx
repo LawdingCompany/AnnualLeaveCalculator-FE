@@ -38,7 +38,7 @@ export default function AnnualDetail({ detail }: { detail: AnnualDetailModel }) 
               label: '출근율',
               value:
                 detail.attendanceRate != null
-                  ? `${(detail.attendanceRate * 100).toFixed(1)}%`
+                  ? `${(detail.attendanceRate.rate * 100).toFixed(1)}% (${detail.attendanceRate.numerator}/${detail.attendanceRate.denominator})`
                   : '-',
             },
             {
@@ -46,7 +46,7 @@ export default function AnnualDetail({ detail }: { detail: AnnualDetailModel }) 
               label: '소정근로비율',
               value:
                 detail.prescribedWorkingRatio != null
-                  ? `${(detail.prescribedWorkingRatio * 100).toFixed(1)}%`
+                  ? `${(detail.prescribedWorkingRatio.rate * 100).toFixed(1)}% (${detail.prescribedWorkingRatio.numerator}/${detail.prescribedWorkingRatio.denominator})`
                   : '-',
             },
 
