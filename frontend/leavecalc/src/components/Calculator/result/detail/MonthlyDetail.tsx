@@ -62,7 +62,7 @@ export default function MonthlyDetail({ detail }: { detail: MonthlyDetailModel }
               label: '출근율',
               value:
                 detail?.attendanceRate != null
-                  ? `${(detail.attendanceRate.rate * 100).toFixed(1)}% (${detail.attendanceRate.numerator}/${detail.attendanceRate.denominator})`
+                  ? `${(detail.attendanceRate.rate * 100).toFixed(1)}% (${detail.attendanceRate.numerator}일 / ${detail.attendanceRate.denominator}일)`
                   : '-',
             },
             {
@@ -70,7 +70,7 @@ export default function MonthlyDetail({ detail }: { detail: MonthlyDetailModel }
               label: '소정근로비율',
               value:
                 detail?.prescribedWorkingRatio != null
-                  ? `${(detail.prescribedWorkingRatio.rate * 100).toFixed(1)}% (${detail.prescribedWorkingRatio.numerator}/${detail.prescribedWorkingRatio.denominator})`
+                  ? `${(detail.prescribedWorkingRatio.rate * 100).toFixed(1)}% (${detail.prescribedWorkingRatio.numerator}일 / ${detail.prescribedWorkingRatio.denominator}일)`
                   : '-',
             },
             { kind: 'divider' },
