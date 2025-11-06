@@ -7,6 +7,13 @@ export interface Period {
   endDate: Ymd;
 }
 
+/** 비율 객체 (0~1) */
+export interface Ratio {
+  numerator: number; // 분자
+  denominator: number; // 분모
+  rate: number; // numerator / denominator
+}
+
 /** 결과 유형 */
 export type LeaveType = 'MONTHLY' | 'PRORATED' | 'ANNUAL' | 'MONTHLY_AND_PRORATED';
 
@@ -48,9 +55,9 @@ export interface MonthlyDetail {
   accrualPeriod: Period;
   availablePeriod: Period;
   /** 0~1 */
-  attendanceRate?: number;
+  attendanceRate?: Ratio;
   /** 0~1 */
-  prescribedWorkingRatio?: number;
+  prescribedWorkingRatio?: Ratio;
   serviceYears: number;
   totalLeaveDays: number;
   records: MonthlyRecord[];
@@ -61,9 +68,9 @@ export interface ProratedDetail {
   accrualPeriod: Period;
   availablePeriod: Period;
   /** 0~1 */
-  attendanceRate?: number;
+  attendanceRate?: Ratio;
   /** 0~1 */
-  prescribedWorkingRatio?: number;
+  prescribedWorkingRatio?: Ratio;
   prescribedWorkingRatioForProrated?: number;
   serviceYears: number;
   totalLeaveDays: number;
@@ -79,9 +86,9 @@ export interface AnnualDetail {
   accrualPeriod: Period;
   availablePeriod: Period;
   /** 0~1 */
-  attendanceRate?: number;
+  attendanceRate?: Ratio;
   /** 0~1 */
-  prescribedWorkingRatio?: number;
+  prescribedWorkingRatio?: Ratio;
   serviceYears: number;
   /** 최종 연차(= baseAnnualLeave + additionalLeave) */
   totalLeaveDays: number;
