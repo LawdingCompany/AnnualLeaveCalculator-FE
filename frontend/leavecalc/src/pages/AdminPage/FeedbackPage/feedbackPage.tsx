@@ -23,7 +23,7 @@ type ApiResponse = {
   timestamp: string;
 };
 
-const FEEDBACK_API = `${import.meta.env.VITE_API_BASE}/feedback`;
+const FEEDBACK_API = `${import.meta.env.VITE_API_BASE}/annual-leaves/feedback`;
 
 const PLATFORM_LABEL: Record<'ios' | 'web', string> = {
   ios: 'iOS',
