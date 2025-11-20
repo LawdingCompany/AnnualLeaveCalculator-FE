@@ -234,12 +234,12 @@ export default function AdminStatsPage() {
                 subLabel="2025.09.29 ~"
               />
               <StatCard
-                label="일일 평균 요청"
+                label="일일 평균 요청 수"
                 value={
                   <div className="flex items-baseline gap-1">
                     {/* 메인 평균 */}
                     <span className="text-2xl font-semibold tracking-tight text-neutral-900">
-                      {metrics.avgPerDay.toFixed(1)}({metrics.avgWebPerDay.toFixed(1)} +{' '}
+                      {metrics.avgPerDay.toFixed(1)}({metrics.avgWebPerDay.toFixed(1)}+
                       {metrics.avgIosPerDay.toFixed(1)})
                     </span>
                     <span className="text-[11px] text-neutral-400">번</span>
