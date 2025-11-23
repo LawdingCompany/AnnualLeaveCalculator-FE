@@ -197,7 +197,7 @@ export default function AdminStatsPage() {
           </p>
           {metrics.latestDate && (
             <p className="text-xs text-neutral-400">
-              조회일 : {formatKR(metrics.latestDate)} (데이터 조회일 기준)
+              조회일 : {formatKR(new Date().toISOString().split('T')[0])} (현재 날짜)
             </p>
           )}
         </header>
