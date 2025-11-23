@@ -31,6 +31,14 @@ function formatKR(dateStr: string) {
   return `${yyyy}.${mm}.${dd}`;
 }
 
+function todayKR() {
+  const d = new Date();
+  const yyyy = d.getFullYear();
+  const mm = String(d.getMonth() + 1).padStart(2, '0');
+  const dd = String(d.getDate()).padStart(2, '0');
+  return `${yyyy}-${mm}-${dd}`;
+}
+
 function StatCard({
   label,
   value,
@@ -196,9 +204,7 @@ export default function AdminStatsPage() {
             LAWDING 연차 계산 요청량을 한눈에 확인할 수 있는 관리자 전용 페이지입니다.
           </p>
           {metrics.latestDate && (
-            <p className="text-xs text-neutral-400">
-              조회일 : {formatKR(new Date().toISOString().split('T')[0])} (현재 날짜)
-            </p>
+            <p className="text-xs text-neutral-400">조회일 : {formatKR(todayKR())} (현재 날짜)</p>
           )}
         </header>
 
