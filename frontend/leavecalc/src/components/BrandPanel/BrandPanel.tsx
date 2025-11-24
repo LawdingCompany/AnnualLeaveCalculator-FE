@@ -1,4 +1,4 @@
-import Logo from '../../../public/LawdingLogo_v2.svg';
+import Logo from '../../../public/LawdingLogo_v2.png';
 
 export default function BrandPanel() {
   return (
