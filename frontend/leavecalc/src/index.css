@@ -8,8 +8,11 @@
 }
 
 :root {
-  --first: #1c64f2;
-  --second: #768ef3;
+  --first: #0057b8;
+  --second: #0081e5;
+  --third: #cfe6ff;
+  /* --first: #1c64f2;
+  --second: #768ef3; */
 }
 
 body {
