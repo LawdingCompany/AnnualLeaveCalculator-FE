@@ -8,7 +8,7 @@ export default function BrandPanel() {
         <img src={Logo} alt="Lawding Logo" className="w-[110px] h-auto mb-2" />
 
         {/* 타이틀 */}
-        <h1 className="text-5xl font-extrabold tracking-tight">LAWDING</h1>
+        <h1 className="text-5xl font-extrabold tracking-tight normal-case">LawDing</h1>
         <p className="text-xl font-extrabold opacity-90">연차계산기</p>
 
         {/* 소개 문구 */}
