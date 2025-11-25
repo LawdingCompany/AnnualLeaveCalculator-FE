@@ -59,9 +59,7 @@ function StatCard({
       <div className="mt-1">
         {isPrimitive ? (
           <div className="flex items-baseline gap-1">
-            <span className="text-2xl font-semibold tracking-tight tabular-nums text-neutral-900">
-              {value}
-            </span>
+            <span className="text-2xl font-semibold tracking-tight text-neutral-900">{value}</span>
             <span className="text-[11px] text-neutral-400">{unit}</span>
           </div>
         ) : (
@@ -270,9 +268,9 @@ export default function AdminStatsPage() {
                     합계 기준
                   </span>
                 </div>
-                <div className="mt-1 text-2xl font-semibold tabular-nums text-neutral-900">
+                <div className="mt-1 text-2xl font-semibold text-neutral-900">
                   {metrics.last30Total.toLocaleString()}
-                  <span className="text-[11px] text-neutral-400">개</span>
+                  <span className="text-[11px] text-neutral-400"> 개</span>
                 </div>
                 <p className="mt-1 text-[11px] text-neutral-400">
                   최신 기록일을 포함한 30일 이내의 총 요청 수입니다. (데이터가 30일 미만이면 전체를
@@ -285,23 +283,23 @@ export default function AdminStatsPage() {
                 <ul className="mt-2 space-y-1 text-xs text-neutral-600">
                   <li className="flex justify-between">
                     <span>기록 일수</span>
-                    <span className="tabular-nums">{data.length}일</span>
+                    <span>{data.length} 일</span>
                   </li>
                   <li className="flex justify-between">
                     <span>Web 비율</span>
-                    <span className="tabular-nums">
+                    <span>
                       {metrics.totalAll
                         ? ((metrics.totalWeb / metrics.totalAll) * 100).toFixed(1)
-                        : '0.0'}
+                        : '0.0'}{' '}
                       %
                     </span>
                   </li>
                   <li className="flex justify-between">
                     <span>iOS 비율</span>
-                    <span className="tabular-nums">
+                    <span>
                       {metrics.totalAll
                         ? ((metrics.totalIos / metrics.totalAll) * 100).toFixed(1)
-                        : '0.0'}
+                        : '0.0'}{' '}
                       %
                     </span>
                   </li>
@@ -352,16 +350,16 @@ export default function AdminStatsPage() {
                             key={row.recordDate}
                             className="border-t border-neutral-100 hover:bg-neutral-50/60"
                           >
-                            <td className="px-3 py-2 text-xs text-neutral-700 tabular-nums">
+                            <td className="px-3 py-2 text-xs text-neutral-700">
                               {formatKR(row.recordDate)}
                             </td>
-                            <td className="px-3 py-2 text-right tabular-nums text-neutral-800">
+                            <td className="px-3 py-2 text-right text-neutral-800">
                               {row.web.toLocaleString()}
                             </td>
-                            <td className="px-3 py-2 text-right tabular-nums text-neutral-800">
+                            <td className="px-3 py-2 text-right text-neutral-800">
                               {row.ios.toLocaleString()}
                             </td>
-                            <td className="px-3 py-2 text-right tabular-nums font-semibold text-neutral-900">
+                            <td className="px-3 py-2 text-right font-semibold text-neutral-900">
                               {total.toLocaleString()}
                             </td>
                             <td className="px-3 py-2 text-xs space-x-1 text-center">

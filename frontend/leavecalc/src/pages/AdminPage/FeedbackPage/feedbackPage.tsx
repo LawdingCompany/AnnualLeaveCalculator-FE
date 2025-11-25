@@ -269,7 +269,7 @@ function SummaryCard({ label, value }: { label: string; value: string | number }
 
       <div className="mt-1 flex items-baseline gap-1">
         {/* 메인 값 */}
-        <span className="text-xl font-semibold text-neutral-900 tabular-nums">{value}</span>
+        <span className="text-xl font-semibold text-neutral-900">{value}</span>
 
         {/* 숫자일 때만 '개' 표시 */}
         {isNumeric && <span className="text-[11px] text-neutral-400">개</span>}
