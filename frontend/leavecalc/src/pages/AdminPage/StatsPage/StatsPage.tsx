@@ -15,7 +15,7 @@ type ApiResponse = {
 };
 
 const API_BASE = import.meta.env.VITE_API_BASE;
-const API_URL = `${API_BASE}/stats`;
+const API_URL = `${API_BASE}/v1/stats`;
 
 function parseDate(dateStr: string): Date {
   // 'YYYY-MM-DD' 기준
