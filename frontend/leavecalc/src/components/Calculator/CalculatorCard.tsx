@@ -19,7 +19,7 @@ import FAQModal from './FAQModal';
 import HelpDrawer from './HelpDrawer';
 import ResultView from './ResultView';
 
-const API_BASE = import.meta.env.VITE_API_BASE;
+const API_BASE = import.meta.env.VITE_CALCULATE_API_BASE;
 
 const nextFrame = () => new Promise<void>((res) => requestAnimationFrame(() => res()));
 
