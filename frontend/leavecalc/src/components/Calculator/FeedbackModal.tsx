@@ -24,7 +24,7 @@ async function postFeedback(payload: {
   email?: string;
   rating?: number; // 1~5
 }) {
-  const url = `${API_BASE}/annual-leaves/feedback`;
+  const url = `${API_BASE}/v1/feedback`;
   const res = await fetch(url, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json', 'X-Platform': 'web' },
