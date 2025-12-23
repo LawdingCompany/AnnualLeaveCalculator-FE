@@ -145,7 +145,10 @@ export default function AdminDictionaryPage() {
 
     setEditingId(null);
     setNameInput('');
-    await loadCategories();
+    await Promise.all([
+      loadCategories(),
+      loadDictionaries(), // ⭐ 추가
+    ]);
   }
 
   function confirmDeleteCategory(c: Category) {
