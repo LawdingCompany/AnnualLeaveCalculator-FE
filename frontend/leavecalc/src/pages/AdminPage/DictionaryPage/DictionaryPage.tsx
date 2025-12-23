@@ -306,7 +306,11 @@ export default function AdminDictionaryPage() {
               + 카테고리 추가
             </button>
           </div>
-
+          {/* ✅ 설명 문구 */}
+          <p className="mb-3 text-xs text-neutral-500">
+            카테고리 개수는 최대 10개, 이름은 최대 20자입니다. 이와 관련된 사항은 관리자에게
+            문의해주세요.
+          </p>
           <div className="max-h-[360px] overflow-auto rounded-lg border border-neutral-100">
             <table className="min-w-full border-collapse text-sm">
               <thead className="bg-neutral-50">
@@ -434,6 +438,12 @@ export default function AdminDictionaryPage() {
             </button>
           </div>
 
+          {/* ✅ 설명 문구 */}
+          <p className="mb-3 text-xs text-neutral-500">
+            질문은 최대 200자, 답변은 최대 300자까지 입력할 수 있습니다. 카테고리를 삭제할 경우,
+            해당 사전 항목은 <span className="font-medium text-neutral-700">기타</span>로 자동
+            분류됩니다.
+          </p>
           <div className="max-h-[520px] overflow-auto rounded-lg border border-neutral-100">
             <table className="min-w-full border-collapse text-sm">
               <thead className="bg-neutral-50">
