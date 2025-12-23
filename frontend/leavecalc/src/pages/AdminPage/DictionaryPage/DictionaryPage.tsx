@@ -439,11 +439,15 @@ export default function AdminDictionaryPage() {
           </div>
 
           {/* ✅ 설명 문구 */}
-          <p className="mb-3 text-xs text-neutral-500">
-            질문은 최대 200자, 답변은 최대 300자까지 입력할 수 있습니다. 카테고리를 삭제할 경우,
-            해당 사전 항목은 <span className="font-medium text-neutral-700">기타</span>로 자동
-            분류됩니다.
-          </p>
+          <div className="mb-3 space-y-1 text-xs text-neutral-500">
+            <p>
+              질문은 최대 200자, 답변은 최대 300자까지 입력할 수 있습니다. 카테고리를 삭제할 경우,
+              해당 사전 항목은 <span className="font-medium text-neutral-700">기타</span>로 자동
+              분류됩니다.
+            </p>
+            <p>또한, 비활성화된 사전 항목은 사용자 화면에 노출되지 않습니다.</p>
+          </div>
+
           <div className="max-h-[520px] overflow-auto rounded-lg border border-neutral-100">
             <table className="min-w-full border-collapse text-sm">
               <thead className="bg-neutral-50">
