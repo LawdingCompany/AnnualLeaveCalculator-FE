@@ -9,11 +9,10 @@ export default defineConfig({
   server: {
     port: 3000,
     proxy: {
-      '/api': {
-        target: 'https://api.lawding.net/v1',
+      '/v1': {
+        target: 'https://api.lawding.net',
         changeOrigin: true,
-        rewrite: (path) => path.replace(/^\/api/, ''),
-        secure: true, // 인증서 신뢰
+        secure: true,
       },
     },
   },
