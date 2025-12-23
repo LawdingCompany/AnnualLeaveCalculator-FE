@@ -22,11 +22,11 @@ import ResultView from './ResultView';
 const API_BASE = import.meta.env.VITE_API_BASE;
 
 const nextFrame = () => new Promise<void>((res) => requestAnimationFrame(() => res()));
-
+console.log(import.meta.env.VITE_API_BASE);
 // ---------- API ----------
 async function postCalculate(payload: ApiPayload) {
   const url = `${API_BASE}/annual-leaves/calculate`;
-
+  console.log(import.meta.env.VITE_API_BASE);
   const res = await fetch(url, {
     method: 'POST',
     headers: {
