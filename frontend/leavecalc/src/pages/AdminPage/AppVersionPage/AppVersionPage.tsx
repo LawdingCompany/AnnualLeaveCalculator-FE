@@ -60,7 +60,6 @@ function compareVersion(a: string, b: string) {
 
 export default function AdminAppVersionPage() {
   const [data, setData] = useState<AppVersionItem[]>([]);
-  const [loading, setLoading] = useState(true);
   const [adding, setAdding] = useState(false);
 
   const [addForm, setAddForm] = useState<AppVersionItem>({
