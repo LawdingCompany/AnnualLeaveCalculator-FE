@@ -441,7 +441,7 @@ export default function AdminDictionaryPage() {
           {/* ✅ 설명 문구 */}
           <div className="mb-3 space-y-1 text-xs text-neutral-500">
             <p>
-              질문은 최대 200자, 답변은 최대 300자까지 입력할 수 있습니다. 카테고리를 삭제할 경우,
+              질문은 최대 200자, 답변은 최대 500자까지 입력할 수 있습니다. 카테고리를 삭제할 경우,
               해당 사전 항목은 <span className="font-medium text-neutral-700">기타</span>로 자동
               분류됩니다.
             </p>

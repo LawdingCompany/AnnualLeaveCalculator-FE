@@ -13,7 +13,7 @@ type Props = {
 };
 
 const QUESTION_MAX = 200;
-const CONTENT_MAX = 300;
+const CONTENT_MAX = 500;
 
 export default function DictionaryFormModal({
   open,
@@ -31,10 +31,7 @@ export default function DictionaryFormModal({
   if (!open) return null;
 
   return (
-    <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/40"
-      onClick={onClose}
-    >
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
       <div
         className="w-full max-w-lg rounded-xl bg-neutral-50 p-5 shadow-lg"
         onClick={(e) => e.stopPropagation()}
