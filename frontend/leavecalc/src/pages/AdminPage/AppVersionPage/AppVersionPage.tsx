@@ -90,7 +90,7 @@ export default function AdminAppVersionPage() {
   }
 
   useEffect(() => {
-    load().finally(() => setLoading(false));
+    load();
   }, []);
 
   /* ==============================
