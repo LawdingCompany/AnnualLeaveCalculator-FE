@@ -258,7 +258,6 @@ export default function AdminDictionaryPage() {
     setModalOpen(true);
   }
 
-  /* ---------- Sort ---------- */
   const sortedCategories = [...categories].sort((a, b) => b.id - a.id);
   const sortedDictionaries = [...dictionaries].sort((a, b) => b.id - a.id);
 
