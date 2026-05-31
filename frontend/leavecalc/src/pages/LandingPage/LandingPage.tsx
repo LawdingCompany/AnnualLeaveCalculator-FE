@@ -51,12 +51,12 @@ export default function LandingPage() {
           <div className="grid gap-6 grid-cols-[300px_1fr] h-full min-h-0">
             {/* LEFT */}
             <BrandPanel />
-            <a
+            {/* <a
               href="https://api.lawding.net/v1/oauth2/authorization/apple"
               className="inline-block px-4 py-2 bg-black text-white rounded-md"
             >
               애플 로그인
-            </a>
+            </a> */}
             {/* RIGHT: 여기를 초기 뷰로 보이게 */}
             <div ref={calcRef} className="min-h-0 min-w-0 flex flex-col">
               <CalculatorProvider>
