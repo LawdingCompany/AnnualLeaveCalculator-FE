@@ -51,26 +51,6 @@ export default function LandingPage() {
           <div className="grid gap-6 grid-cols-[300px_1fr] h-full min-h-0">
             {/* LEFT */}
             <BrandPanel />
-            <a
-              href="https://api.lawding.net/v1/oauth2/authorization/apple"
-              className="inline-block px-4 py-2 bg-black text-white rounded-md text-center"
-            >
-              애플 로그인
-            </a>
-
-            <a
-              href="https://api.lawding.net/v1/oauth2/authorization/google"
-              className="inline-block px-4 py-2 bg-white border rounded-md text-center"
-            >
-              구글 로그인
-            </a>
-
-            <a
-              href="https://api.lawding.net/v1/oauth2/authorization/kakao"
-              className="inline-block px-4 py-2 bg-yellow-300 rounded-md text-center"
-            >
-              카카오 로그인
-            </a>
             {/* RIGHT: 여기를 초기 뷰로 보이게 */}
             <div ref={calcRef} className="min-h-0 min-w-0 flex flex-col">
               <CalculatorProvider>
