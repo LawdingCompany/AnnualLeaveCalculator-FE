@@ -5,6 +5,7 @@ import FeedbackPage from '@pages/AdminPage/FeedbackPage/feedbackPage';
 import NotFoundPage from '@pages/ErrorPage/ErrorPage';
 import DictionariesPage from '@pages/AdminPage/DictionaryPage/DictionaryPage';
 import AppVersionPage from '@pages/AdminPage/AppVersionPage/AppVersionPage';
+import RecommendedSchedulePage from '@pages/AdminPage/RecommendedSchedulePage/RecommendedSchedulePage';
 
 export default function AppRoutes() {
   return (
@@ -15,6 +16,7 @@ export default function AppRoutes() {
         <Route path="/admin/feedback" element={<FeedbackPage />} />
         <Route path="/admin/dictionaries" element={<DictionariesPage />} />
         <Route path="/admin/app-versions" element={<AppVersionPage />} />
+        <Route path="/admin/recommended-schedules" element={<RecommendedSchedulePage />} />
         <Route path="*" element={<NotFoundPage />} />
       </Routes>
     </BrowserRouter>
