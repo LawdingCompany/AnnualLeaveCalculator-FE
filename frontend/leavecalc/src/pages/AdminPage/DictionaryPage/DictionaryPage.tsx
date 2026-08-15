@@ -72,13 +72,17 @@ export default function AdminDictionaryPage() {
 
   /* ---------- Load ---------- */
   async function loadCategories() {
-    const res = await fetch(CATEGORY_API);
+    const res = await fetch(CATEGORY_API, {
+      headers: { 'X-Platform': 'web' },
+    });
     const json = (await res.json()) as ApiResponse<Category[]>;
     setCategories(json.data ?? []);
   }
 
   async function loadDictionaries() {
-    const res = await fetch(DICTIONARY_API);
+    const res = await fetch(DICTIONARY_API, {
+      headers: { 'X-Platform': 'web' },
+    });
     const json = (await res.json()) as ApiResponse<DictionaryItem[]>;
     setDictionaries(json.data ?? []);
   }
@@ -121,7 +125,7 @@ export default function AdminDictionaryPage() {
 
     await fetch(CATEGORY_API, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: { 'Content-Type': 'application/json', 'X-Platform': 'web' },
       body: JSON.stringify({ name }),
     });
 
@@ -139,7 +143,7 @@ export default function AdminDictionaryPage() {
 
     await fetch(`${CATEGORY_API}/${id}`, {
       method: 'PUT',
-      headers: { 'Content-Type': 'application/json' },
+      headers: { 'Content-Type': 'application/json', 'X-Platform': 'web' },
       body: JSON.stringify({ name }),
     });
 
@@ -161,7 +165,10 @@ export default function AdminDictionaryPage() {
       confirmText: '삭제',
       confirmColor: 'red',
       onConfirm: async () => {
-        await fetch(`${CATEGORY_API}/${c.id}`, { method: 'DELETE' });
+        await fetch(`${CATEGORY_API}/${c.id}`, {
+          method: 'DELETE',
+          headers: { 'X-Platform': 'web' },
+        });
         setModalOpen(false);
         await Promise.all([
           loadCategories(),
@@ -214,14 +221,14 @@ export default function AdminDictionaryPage() {
         if (dictionaryMode === 'create') {
           await fetch(DICTIONARY_API, {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
+            headers: { 'Content-Type': 'application/json', 'X-Platform': 'web' },
             body: JSON.stringify(body),
           });
         } else {
           // ✅ 백엔드가 PATCH 업데이트라서 PATCH로 맞춤 (UI/UX 변화 없음)
           await fetch(`${DICTIONARY_API}/${editingDictionaryId}`, {
             method: 'PATCH',
-            headers: { 'Content-Type': 'application/json' },
+            headers: { 'Content-Type': 'application/json', 'X-Platform': 'web' },
             body: JSON.stringify(body),
           });
         }
@@ -250,6 +257,7 @@ export default function AdminDictionaryPage() {
       onConfirm: async () => {
         await fetch(`${DICTIONARY_API}/${d.id}/${isDisable ? 'disable' : 'enable'}`, {
           method: 'PATCH',
+          headers: { 'X-Platform': 'web' },
         });
         setModalOpen(false);
         await loadDictionaries();

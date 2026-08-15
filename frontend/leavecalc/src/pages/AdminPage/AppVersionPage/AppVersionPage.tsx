@@ -84,7 +84,9 @@ export default function AdminAppVersionPage() {
   }
 
   async function load() {
-    const res = await fetch(BASE_URL);
+    const res = await fetch(BASE_URL, {
+      headers: { 'X-Platform': 'web' },
+    });
     const json = (await res.json()) as ApiResponse;
     setData(json.data ?? []);
   }
@@ -102,7 +104,7 @@ export default function AdminAppVersionPage() {
 
     const res = await fetch(`${BASE_URL}/${platform}/${path}`, {
       method: 'PATCH',
-      headers: { 'Content-Type': 'application/json' },
+      headers: { 'Content-Type': 'application/json', 'X-Platform': 'web' },
       body: JSON.stringify(body),
     });
     const json = await res.json();
@@ -139,7 +141,10 @@ export default function AdminAppVersionPage() {
       variant: 'confirm',
       confirmColor: 'red',
       onConfirm: async () => {
-        const res = await fetch(`${BASE_URL}/${platform}`, { method: 'DELETE' });
+        const res = await fetch(`${BASE_URL}/${platform}`, {
+          method: 'DELETE',
+          headers: { 'X-Platform': 'web' },
+        });
         const json = await res.json();
 
         if (!res.ok) {
@@ -181,7 +186,7 @@ export default function AdminAppVersionPage() {
 
     const res = await fetch(BASE_URL, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: { 'Content-Type': 'application/json', 'X-Platform': 'web' },
       body: JSON.stringify({
         ...addForm,
         platform: addForm.platform.toLowerCase(),

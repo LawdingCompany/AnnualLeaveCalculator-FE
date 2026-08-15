@@ -81,7 +81,9 @@ export default function AdminStatsPage() {
       try {
         setLoading(true);
         setError(null);
-        const res = await fetch(API_URL);
+        const res = await fetch(API_URL, {
+          headers: { 'X-Platform': 'web' },
+        });
         if (!res.ok) throw new Error('Failed to load stats');
         const json = (await res.json()) as ApiResponse;
         setData(json.data ?? []);

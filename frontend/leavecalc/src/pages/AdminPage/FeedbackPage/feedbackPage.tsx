@@ -55,7 +55,9 @@ export default function AdminFeedbackPage() {
   useEffect(() => {
     async function load() {
       try {
-        const res = await fetch(FEEDBACK_API);
+        const res = await fetch(FEEDBACK_API, {
+          headers: { 'X-Platform': 'web' },
+        });
         const json = (await res.json()) as ApiResponse;
         setData(json.data ?? []);
       } finally {
