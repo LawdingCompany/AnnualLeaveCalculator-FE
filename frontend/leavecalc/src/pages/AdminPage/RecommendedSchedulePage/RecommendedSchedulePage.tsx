@@ -3,33 +3,36 @@ import ConfirmModal from '@components/ConfirmModal/ConfirmModal';
 
 type RecommendedSchedule = {
   id: number;
-  title: string;
+  name: string;
   startDate: string;
   endDate: string;
+  createdAt: string;
+  updatedAt: string;
 };
 
-type ScheduleForm = Omit<RecommendedSchedule, 'id'>;
+type ScheduleForm = Pick<RecommendedSchedule, 'name' | 'startDate' | 'endDate'>;
 
-const INITIAL_SCHEDULES: RecommendedSchedule[] = [
-  { id: 1, title: '광복절 연휴', startDate: '2026-08-15', endDate: '2026-08-17' },
-  { id: 2, title: '추석 연휴', startDate: '2026-09-24', endDate: '2026-09-27' },
-  { id: 3, title: '개천절 연휴', startDate: '2026-10-03', endDate: '2026-10-05' },
-  { id: 4, title: '한글날 연휴', startDate: '2026-10-09', endDate: '2026-10-11' },
-  { id: 5, title: '성탄절 연휴', startDate: '2026-12-25', endDate: '2026-12-27' },
-  { id: 6, title: '신정 연휴', startDate: '2027-01-01', endDate: '2027-01-03' },
-  { id: 7, title: '설 연휴', startDate: '2027-02-06', endDate: '2027-02-09' },
-  { id: 8, title: '삼일절 연휴', startDate: '2027-02-27', endDate: '2027-03-01' },
-  { id: 9, title: '노동절 연휴', startDate: '2027-05-01', endDate: '2027-05-03' },
-  { id: 10, title: '제헌절 연휴', startDate: '2027-07-17', endDate: '2027-07-19' },
-  { id: 11, title: '광복절 연휴', startDate: '2027-08-14', endDate: '2027-08-16' },
-  { id: 12, title: '추석 연휴', startDate: '2027-09-14', endDate: '2027-09-16' },
-  { id: 13, title: '개천절 연휴', startDate: '2027-10-02', endDate: '2027-10-04' },
-  { id: 14, title: '한글날 연휴', startDate: '2027-10-09', endDate: '2027-10-11' },
-  { id: 15, title: '성탄절 연휴', startDate: '2027-12-25', endDate: '2027-12-27' },
-];
+type ApiResponse<T> = {
+  status: string;
+  message: string;
+  data: T;
+  timestamp: string;
+};
 
-const EMPTY_FORM: ScheduleForm = { title: '', startDate: '', endDate: '' };
+const API_BASE = import.meta.env.VITE_API_BASE;
+const BASE_URL = `${API_BASE}/v1/admin/recommended-schedules`;
+const EMPTY_FORM: ScheduleForm = { name: '', startDate: '', endDate: '' };
 const WEEKDAYS = ['일', '월', '화', '수', '목', '금', '토'];
+
+async function requestApi<T>(url: string, options: RequestInit = {}) {
+  const headers = new Headers(options.headers);
+  headers.set('X-Platform', 'web');
+
+  const response = await fetch(url, { ...options, headers });
+  const json = (await response.json()) as ApiResponse<T>;
+  if (!response.ok) throw new Error(json.message || '요청을 처리하지 못했습니다.');
+  return json;
+}
 
 function parseYmd(value: string) {
   const [year, month, day] = value.split('-').map(Number);
@@ -49,13 +52,35 @@ function inclusiveDays(startDate: string, endDate: string) {
 }
 
 export default function AdminRecommendedSchedulePage() {
-  const [schedules, setSchedules] = useState(INITIAL_SCHEDULES);
+  const [schedules, setSchedules] = useState<RecommendedSchedule[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
+  const [requestError, setRequestError] = useState('');
   const [selectedYear, setSelectedYear] = useState('all');
   const [formOpen, setFormOpen] = useState(false);
   const [editingId, setEditingId] = useState<number | null>(null);
   const [form, setForm] = useState<ScheduleForm>(EMPTY_FORM);
   const [error, setError] = useState('');
   const [deleteTarget, setDeleteTarget] = useState<RecommendedSchedule | null>(null);
+
+  async function loadSchedules() {
+    setLoading(true);
+    setRequestError('');
+    try {
+      const response = await requestApi<RecommendedSchedule[]>(BASE_URL);
+      setSchedules(response.data ?? []);
+    } catch (loadError) {
+      setRequestError(
+        loadError instanceof Error ? loadError.message : '추천일정을 불러오지 못했습니다.',
+      );
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  useEffect(() => {
+    void loadSchedules();
+  }, []);
 
   const yearOptions = useMemo(
     () => [...new Set(schedules.map((schedule) => schedule.startDate.slice(0, 4)))].sort(),
@@ -87,7 +112,7 @@ export default function AdminRecommendedSchedulePage() {
 
   function openEdit(schedule: RecommendedSchedule) {
     setEditingId(schedule.id);
-    setForm({ title: schedule.title, startDate: schedule.startDate, endDate: schedule.endDate });
+    setForm({ name: schedule.name, startDate: schedule.startDate, endDate: schedule.endDate });
     setError('');
     setFormOpen(true);
   }
@@ -98,27 +123,48 @@ export default function AdminRecommendedSchedulePage() {
     setError('');
   }
 
-  function saveSchedule() {
-    const title = form.title.trim();
-    if (!title) return setError('일정 이름을 입력해 주세요.');
+  async function saveSchedule() {
+    const name = form.name.trim();
+    if (!name) return setError('일정 이름을 입력해 주세요.');
     if (!form.startDate || !form.endDate) return setError('시작일과 종료일을 모두 선택해 주세요.');
     if (form.startDate > form.endDate) return setError('종료일은 시작일보다 빠를 수 없습니다.');
 
-    if (editingId === null) {
-      const nextId = schedules.length ? Math.max(...schedules.map((item) => item.id)) + 1 : 1;
-      setSchedules((current) => [...current, { id: nextId, ...form, title }]);
-    } else {
-      setSchedules((current) =>
-        current.map((item) => (item.id === editingId ? { ...item, ...form, title } : item)),
+    setSaving(true);
+    setError('');
+    try {
+      await requestApi<RecommendedSchedule>(
+        editingId === null ? BASE_URL : `${BASE_URL}/${editingId}`,
+        {
+          method: editingId === null ? 'POST' : 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ name, startDate: form.startDate, endDate: form.endDate }),
+        },
       );
+      await loadSchedules();
+      closeForm();
+    } catch (saveError) {
+      setError(saveError instanceof Error ? saveError.message : '추천일정을 저장하지 못했습니다.');
+    } finally {
+      setSaving(false);
     }
-    closeForm();
   }
 
-  function deleteSchedule() {
+  async function deleteSchedule() {
     if (!deleteTarget) return;
-    setSchedules((current) => current.filter((item) => item.id !== deleteTarget.id));
-    setDeleteTarget(null);
+    setSaving(true);
+    setRequestError('');
+    try {
+      await requestApi<void>(`${BASE_URL}/${deleteTarget.id}`, { method: 'DELETE' });
+      setDeleteTarget(null);
+      await loadSchedules();
+    } catch (deleteError) {
+      setDeleteTarget(null);
+      setRequestError(
+        deleteError instanceof Error ? deleteError.message : '추천일정을 삭제하지 못했습니다.',
+      );
+    } finally {
+      setSaving(false);
+    }
   }
 
   return (
@@ -145,7 +191,8 @@ export default function AdminRecommendedSchedulePage() {
           <button
             type="button"
             onClick={openCreate}
-            className="rounded-md bg-blue-600 px-3 py-1.5 text-xs font-medium text-white hover:bg-blue-700"
+            disabled={loading || saving}
+            className="rounded-md bg-blue-600 px-3 py-1.5 text-xs font-medium text-white hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-50"
           >
             + 추천일정 추가
           </button>
@@ -158,10 +205,19 @@ export default function AdminRecommendedSchedulePage() {
             <ul className="mt-2 space-y-1 text-xs leading-relaxed text-neutral-600">
               <li>• 일정 이름과 시작일, 종료일을 입력해 추천일정을 등록합니다.</li>
               <li>• 시작일이 빠른 일정부터 자동으로 정렬되어 표시됩니다.</li>
-              <li>• 현재 데이터는 API 연결 전 확인을 위한 화면용 목업 데이터입니다.</li>
+              <li>• 저장된 일정은 사용자 연차 추천 화면에 활용됩니다.</li>
             </ul>
           </div>
         </div>
+
+        {requestError && (
+          <div className="mb-5 flex items-center justify-between gap-3 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-xs text-red-600">
+            <span>{requestError}</span>
+            <button type="button" onClick={() => void loadSchedules()} className="font-medium hover:underline">
+              다시 시도
+            </button>
+          </div>
+        )}
 
         <section className="overflow-hidden rounded-xl border border-neutral-200 bg-white shadow-sm">
           <div className="flex items-center justify-between gap-3 border-b border-neutral-100 px-4 py-3">
@@ -199,11 +255,11 @@ export default function AdminRecommendedSchedulePage() {
                 </tr>
               </thead>
               <tbody>
-                {sortedSchedules.map((schedule, index) => (
+                {!loading && sortedSchedules.map((schedule, index) => (
                   <tr key={schedule.id} className="border-t border-neutral-100 hover:bg-neutral-50/70">
                     <Td className="text-neutral-400">{index + 1}</Td>
                     <Td>
-                      <span className="font-medium text-neutral-800">{schedule.title}</span>
+                      <span className="font-medium text-neutral-800">{schedule.name}</span>
                     </Td>
                     <Td>{formatDate(schedule.startDate)}</Td>
                     <Td>{formatDate(schedule.endDate)}</Td>
@@ -220,7 +276,14 @@ export default function AdminRecommendedSchedulePage() {
                     </Td>
                   </tr>
                 ))}
-                {sortedSchedules.length === 0 && (
+                {loading && (
+                  <tr className="border-t border-neutral-100">
+                    <td colSpan={6} className="px-4 py-12 text-center text-sm text-neutral-400">
+                      추천일정을 불러오는 중입니다.
+                    </td>
+                  </tr>
+                )}
+                {!loading && sortedSchedules.length === 0 && (
                   <tr className="border-t border-neutral-100">
                     <td colSpan={6} className="px-4 py-12 text-center text-sm text-neutral-400">
                       {selectedYear === 'all'
@@ -249,9 +312,9 @@ export default function AdminRecommendedSchedulePage() {
               <label className="block">
                 <span className="mb-1.5 block font-medium text-neutral-700">일정 이름</span>
                 <input
-                  value={form.title}
-                  onChange={(event) => setForm((current) => ({ ...current, title: event.target.value }))}
-                  maxLength={50}
+                  value={form.name}
+                  onChange={(event) => setForm((current) => ({ ...current, name: event.target.value }))}
+                  maxLength={100}
                   placeholder="예: 광복절 연휴"
                   className="w-full rounded-md border border-neutral-300 px-3 py-2 focus:border-blue-500 focus:outline-none"
                 />
@@ -283,11 +346,11 @@ export default function AdminRecommendedSchedulePage() {
             </div>
 
             <div className="flex justify-end gap-2 border-t border-neutral-100 px-5 py-4">
-              <button type="button" onClick={closeForm} className="rounded-md border border-blue-200 px-3 py-1.5 text-xs text-blue-600 hover:bg-blue-50">
+              <button type="button" onClick={closeForm} disabled={saving} className="rounded-md border border-blue-200 px-3 py-1.5 text-xs text-blue-600 hover:bg-blue-50 disabled:opacity-50">
                 취소
               </button>
-              <button type="button" onClick={saveSchedule} className="rounded-md bg-blue-600 px-3 py-1.5 text-xs text-white hover:bg-blue-700">
-                {editingId === null ? '추가' : '저장'}
+              <button type="button" onClick={() => void saveSchedule()} disabled={saving} className="rounded-md bg-blue-600 px-3 py-1.5 text-xs text-white hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-50">
+                {saving ? '저장 중...' : editingId === null ? '추가' : '저장'}
               </button>
             </div>
           </section>
@@ -297,10 +360,10 @@ export default function AdminRecommendedSchedulePage() {
       <ConfirmModal
         open={deleteTarget !== null}
         title="추천일정 삭제"
-        message={deleteTarget ? `‘${deleteTarget.title}’ 일정을 삭제하시겠습니까?` : ''}
+        message={deleteTarget ? `‘${deleteTarget.name}’ 일정을 삭제하시겠습니까?` : ''}
         confirmText="삭제"
         confirmColor="red"
-        onConfirm={deleteSchedule}
+        onConfirm={() => void deleteSchedule()}
         onCancel={() => setDeleteTarget(null)}
       />
     </div>
