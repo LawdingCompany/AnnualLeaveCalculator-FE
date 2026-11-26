@@ -6,6 +6,7 @@ import NotFoundPage from '@pages/ErrorPage/ErrorPage';
 import DictionariesPage from '@pages/AdminPage/DictionaryPage/DictionaryPage';
 import AppVersionPage from '@pages/AdminPage/AppVersionPage/AppVersionPage';
 import RecommendedSchedulePage from '@pages/AdminPage/RecommendedSchedulePage/RecommendedSchedulePage';
+import UserStatsPage from '@pages/AdminPage/UserStatsPage/UserStatsPage';
 
 export default function AppRoutes() {
   return (
@@ -13,6 +14,7 @@ export default function AppRoutes() {
       <Routes>
         <Route path="/" element={<LandingPage />} />
         <Route path="/admin/stats" element={<StatsPage />} />
+        <Route path="/admin/users" element={<UserStatsPage />} />
         <Route path="/admin/feedback" element={<FeedbackPage />} />
         <Route path="/admin/dictionaries" element={<DictionariesPage />} />
         <Route path="/admin/app-versions" element={<AppVersionPage />} />
