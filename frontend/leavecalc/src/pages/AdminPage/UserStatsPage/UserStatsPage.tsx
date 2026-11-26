@@ -114,17 +114,18 @@ export default function UserStatsPage() {
                 <div className="rounded-lg bg-neutral-50 px-4 py-10 text-center text-sm text-neutral-500">조회된 사용자가 없습니다.</div>
               ) : (
                 <div className="max-h-[620px] overflow-auto rounded-lg border border-neutral-100">
-                  <table className="min-w-[760px] w-full border-collapse text-sm">
+                  <table className="min-w-[820px] w-full border-collapse text-sm">
                     <thead className="bg-neutral-50">
                       <tr>
-                        {['Username', 'Email', 'Provider', 'Nickname', '마지막 로그인'].map((label) => (
+                        {['번호', '사용자명', '이메일', '소셜 구분', '닉네임', '마지막 로그인'].map((label) => (
                           <th key={label} className="sticky top-0 bg-neutral-50 px-3 py-2 text-left text-xs font-medium text-neutral-500">{label}</th>
                         ))}
                       </tr>
                     </thead>
                     <tbody>
-                      {data.map((user) => (
+                      {data.map((user, index) => (
                         <tr key={user.id} className="border-t border-neutral-100 hover:bg-neutral-50/60">
+                          <td className="px-3 py-2 text-center text-xs text-neutral-500">{index + 1}</td>
                           <td className="px-3 py-2 text-xs text-neutral-700">{user.username || '-'}</td>
                           <td className="px-3 py-2 text-xs text-neutral-700">{user.email || '-'}</td>
                           <td className="px-3 py-2 text-xs text-neutral-700">{user.provider || '-'}</td>
