@@ -52,7 +52,9 @@ export default function UserStatsPage() {
   useEffect(() => {
     async function load() {
       try {
-        const response = await fetch(API_URL);
+        const response = await fetch(API_URL, {
+          headers: { 'X-Platform': 'web' },
+        });
         if (!response.ok) throw new Error('Failed to load users');
         const json = (await response.json()) as ApiResponse;
         setData(json.data ?? []);
